@@ -1,0 +1,198 @@
+{
+  "main": {
+    "id": "5ad15768ae58b38b",
+    "type": "split",
+    "children": [
+      {
+        "id": "39362ef1860716e5",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "dca59777de3c238c",
+            "type": "leaf",
+            "state": {
+              "type": "image",
+              "state": {
+                "file": "assets/Pasted image 20251008215555.png"
+              },
+              "icon": "lucide-image",
+              "title": "Pasted image 20251008215555"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "9dbc71b8bda0ae79",
+    "type": "split",
+    "children": [
+      {
+        "id": "444f3b1096f05775",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "9907a137ea75bef3",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Files"
+            }
+          },
+          {
+            "id": "0b6df1bd85b72540",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Search"
+            }
+          },
+          {
+            "id": "8668befc8ac3cc94",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "Bookmarks"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "f9ed3059f5d31bd9",
+    "type": "split",
+    "children": [
+      {
+        "id": "730d5423a20faffa",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "28a0ed18f8106d49",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "assets/Pasted image 20251008215555.png",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Backlinks for Pasted image 20251008215555"
+            }
+          },
+          {
+            "id": "8fdff0630ee5890a",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "assets/Pasted image 20251008215555.png",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Outgoing links from Pasted image 20251008215555"
+            }
+          },
+          {
+            "id": "25ec7d544c987f39",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "Tags"
+            }
+          },
+          {
+            "id": "151698441562f963",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "assets/Pasted image 20251008215555.png",
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Outline of Pasted image 20251008215555"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Open quick switcher": false,
+      "graph:Open graph view": false,
+      "canvas:Create new canvas": false,
+      "daily-notes:Open today's daily note": false,
+      "templates:Insert template": false,
+      "command-palette:Open command palette": false,
+      "bases:Create new base": false
+    }
+  },
+  "active": "9907a137ea75bef3",
+  "lastOpenFiles": [
+    "README.md",
+    "Data Engineering Professional Certificate Program.md",
+    "C1/W2/C1_W2_class-notes.md",
+    "assets/Pasted image 20251008220741.png",
+    "assets/Pasted image 20251008220303.png",
+    "assets/Pasted image 20251008215925.png",
+    "assets/Pasted image 20251008215908.png",
+    "assets/Pasted image 20251008215848.png",
+    "assets/Pasted image 20251008215555.png",
+    "assets/Pasted image 20251007224634.png",
+    "assets/Pasted image 20251008213209.png",
+    "assets/Pasted image 20251008212541.png",
+    "assets/Pasted image 20251008212356.png",
+    "C1/W1/C1_W1_class-notes.md",
+    "C1/W1/C1_W1_quiz.md",
+    "C1/W4/C1_W4_slides.pdf",
+    "C1/W4/Unconfirmed 87128.crdownload",
+    "C1/W3/C1_W3_slides.pdf",
+    "C1/W3/Unconfirmed 787702.crdownload",
+    "C1/W2/C1_W2_slides.pdf",
+    "C1/W2/Unconfirmed 359830.crdownload",
+    "C1/W4",
+    "C1/W3",
+    "C1/W2",
+    "C1/W1/C1_W1_slides.pdf"
+  ]
+}
