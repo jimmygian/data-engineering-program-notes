@@ -4,19 +4,33 @@
     "type": "split",
     "children": [
       {
-        "id": "39362ef1860716e5",
+        "id": "6046ab081a0b3074",
         "type": "tabs",
         "children": [
           {
-            "id": "dca59777de3c238c",
+            "id": "86455335ecd31439",
             "type": "leaf",
             "state": {
-              "type": "image",
+              "type": "markdown",
               "state": {
-                "file": "assets/Pasted image 20251008215555.png"
+                "file": "C1/W2/C1_W2_class-notes.md",
+                "mode": "source",
+                "source": false
               },
-              "icon": "lucide-image",
-              "title": "Pasted image 20251008215555"
+              "icon": "lucide-file",
+              "title": "C1_W2_class-notes"
+            }
+          },
+          {
+            "id": "6be19bafdccc7d45",
+            "type": "leaf",
+            "state": {
+              "type": "pdf",
+              "state": {
+                "file": "C1/W2/C1_W2_slides.pdf"
+              },
+              "icon": "lucide-file-text",
+              "title": "C1_W2_slides"
             }
           }
         ]
@@ -92,7 +106,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "assets/Pasted image 20251008215555.png",
+                "file": "C1/W2/C1_W2_class-notes.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -102,7 +116,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks for Pasted image 20251008215555"
+              "title": "Backlinks for C1_W2_class-notes"
             }
           },
           {
@@ -111,12 +125,12 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "assets/Pasted image 20251008215555.png",
+                "file": "C1/W2/C1_W2_class-notes.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
               "icon": "links-going-out",
-              "title": "Outgoing links from Pasted image 20251008215555"
+              "title": "Outgoing links from C1_W2_class-notes"
             }
           },
           {
@@ -140,13 +154,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "assets/Pasted image 20251008215555.png",
+                "file": "C1/W2/C1_W2_class-notes.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of Pasted image 20251008215555"
+              "title": "Outline of C1_W2_class-notes"
             }
           }
         ]
@@ -169,30 +183,31 @@
   },
   "active": "9907a137ea75bef3",
   "lastOpenFiles": [
-    "README.md",
-    "Data Engineering Professional Certificate Program.md",
+    "assets/Pasted image 20251010234414.png",
+    "assets/Pasted image 20251010224847.png",
+    "C1/W2/C1_W2_slides.pdf",
     "C1/W2/C1_W2_class-notes.md",
-    "assets/Pasted image 20251008220741.png",
-    "assets/Pasted image 20251008220303.png",
-    "assets/Pasted image 20251008215925.png",
-    "assets/Pasted image 20251008215908.png",
-    "assets/Pasted image 20251008215848.png",
-    "assets/Pasted image 20251008215555.png",
-    "assets/Pasted image 20251007224634.png",
-    "assets/Pasted image 20251008213209.png",
-    "assets/Pasted image 20251008212541.png",
-    "assets/Pasted image 20251008212356.png",
+    "assets/Pasted image 20251010224607.png",
+    "assets/Pasted image 20251010203643.png",
+    "assets/Pasted image 20251010224306.png",
+    "assets/Pasted image 20251010204850.png",
+    "assets/Pasted image 20251010193142.png",
+    "assets/Pasted image 20251010203308.png",
+    "assets/Pasted image 20251010202623.png",
+    "assets/Pasted image 20251010201525 1.png",
+    "assets/Pasted image 20251010201525.png",
+    "C1/W1/C1_W1_slides.pdf",
+    "Data Engineering Professional Certificate Program.md",
+    "README.md",
     "C1/W1/C1_W1_class-notes.md",
     "C1/W1/C1_W1_quiz.md",
     "C1/W4/C1_W4_slides.pdf",
     "C1/W4/Unconfirmed 87128.crdownload",
     "C1/W3/C1_W3_slides.pdf",
     "C1/W3/Unconfirmed 787702.crdownload",
-    "C1/W2/C1_W2_slides.pdf",
     "C1/W2/Unconfirmed 359830.crdownload",
     "C1/W4",
     "C1/W3",
-    "C1/W2",
-    "C1/W1/C1_W1_slides.pdf"
+    "C1/W2"
   ]
 }
