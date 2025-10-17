@@ -689,3 +689,8 @@ The Auto Scaling Group needs to be associated with an Application Load Balancer 
 - You'll simulate traffic to the web application to assess its scalability, then monitor computing resources and network activity on the application using Amazon CloudWatch. 
 
 - You will configure the EC2 instances to enable performance efficiency and cost optimization and adjust the security options of the Load Balancer to control the inbound traffic to the application. 
+
+
+
+---
+test push from mac
