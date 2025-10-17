@@ -3,16 +3,16 @@ This week, we'll focus on creating good Data Architecture:
 
 - We'll first take a look at how data architecture fits within the broader context of **enterprise architecture**, which is to say, the architecture for your entire organization. 
 - After that, we'll look at some specific architecture examples and how you can start to think about **translating stakeholder needs into technology choices for your data systems**. 
-- I'll also share with you some guiding principles you can keep in mind as you're learning to think like an architect. 
+- I'll also share with you some **guiding principles** you can keep in mind as you're learning to think like an architect. 
 - In the lab this week, you'll be evaluating the trade-offs when it comes to things like cost, performance, scalability and security for an actual data architecture on the AWS cloud. 
 - You'll also get a chance to explore the **AWS Well-Architected framework**, which is a complimentary set of principles that can help you design robust and effective data systems.
 
 
 ## What is Data Architecture?
 
-**Definition of "Enterprise Architecture":** Enterprise Architecture is the design of systems to support change in an enterprise, achieved by flexible and reversible decisions reached through a careful evaluation of trade-offs.
+**Definition of "Enterprise Architecture":** *Enterprise Architecture is the design of systems to support change in an enterprise, achieved by flexible and reversible decisions reached through a careful evaluation of trade-offs.*
 
-**Definition of "Data Architecture":** Data Architecture is the design of systems to support the evolving data needs of an enterprise, achieved by flexible and reversible decisions reached through a careful evaluation of trade-offs.
+**Definition of "Data Architecture":** *Data Architecture is the design of systems to support the evolving data needs of an enterprise, achieved by flexible and reversible decisions reached through a careful evaluation of trade-offs.*
 
 Enterprise Architecture is the architecture of the whole enterprise, and encompasses various domains:
 
@@ -160,15 +160,15 @@ System metrics include: 
 - durability of your data systems. 
 
 **Availability**
-Availability, often called **uptime**, is the percentage of time a service or component is expected to be **in an operable state**.
+*Availability, often called **uptime**, is the percentage of time a service or component is expected to be **in an operable state**.*
 
 E.g. If you take a look at the different storage classes in **Amazon S3** object storage, you'll see that they range in availability from 99.5% up to 99.99% over the course of the year. Now, 99.5% and 99.99% might sound like high availability and even very similar numbers, but keep in mind that a 99.5% annual availability means that you can expect your storage system to be unavailable for around 44 total hours each year. While 99.99% availability means you can expect just about one hour of downtime per year.
 
 **Reliability**
-Similar to availability, "reliability" is the probability of a particular service or component performing its intended function during a particular time interval.
+*Similar to availability, "reliability" is the probability of a particular service or component performing its intended function during a particular time interval.*
 
 **Durability**
-Durability is the ability of a storage system to **withstand** data loss due to hardware failure, software errors, or natural disasters.
+*Durability is the ability of a storage system to **withstand** data loss due to hardware failure, software errors, or natural disasters.*
 
 In the Cloud, durability is crucial as businesses rely on Cloud services to store and access to critical data. Example, Amazon S3 boasts very high durability at 99.99999999%.
 
@@ -210,7 +210,9 @@ access is granted as needed and when it's needed.
 
 
 #### Unforeseen Costs
-Your system can also fail when you do things like incur large unforeseen costs or miss opportunities for revenue. 
+Your system can also fail when you do things like 
+- incur large unforeseen costs, or 
+- miss opportunities for revenue. 
 
 For example, when it comes to unforeseen costs, I'm talking about things like accidentally running expensive Cloud services such that your entire annual budget is consumed in a month or less. Believe it or not, I've seen this happen a lot. 
 
@@ -691,6 +693,19 @@ The Auto Scaling Group needs to be associated with an Application Load Balancer 
 - You will configure the EC2 instances to enable performance efficiency and cost optimization and adjust the security options of the Load Balancer to control the inbound traffic to the application. 
 
 
+# Week 3 Resources
 
----
-test push from mac
+**Optional reading and reference material:**
+
+- Chapters 3 and 4 of [Fundamentals of Data Engineering](https://go.redpanda.com/fundamentals-of-data-engineering)
+    
+- [AWS Well-Architected Framework](https://aws.amazon.com/architecture/well-architected/).
+    - [Documentation](https://docs.aws.amazon.com/wellarchitected/latest/framework/welcome.html)    
+    - [AWS Well-Architected Labs](https://www.wellarchitectedlabs.com/)
+        
+- Jay Kreps, [“Questioning the Lambda Architecture,”](https://www.oreilly.com/radar/questioning-the-lambda-architecture/) O’Reilly Radar, July 2, 2014.
+    
+- [“A Brief Introduction to Two Data Processing Architectures — Lambda and Kappa for Big Data”](https://towardsdatascience.com/a-brief-introduction-to-two-data-processing-architectures-lambda-and-kappa-for-big-data-4f35c28005bb) by Iman Samizadeh
+    
+- An article about [Amazon's API Mandate](https://medium.com/api-university/the-api-mandate-install-api-thinking-at-your-company-4335433b7d0b)
+
