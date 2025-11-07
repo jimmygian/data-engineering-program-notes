@@ -11,26 +11,12 @@
             "id": "9dd7e3980a50095a",
             "type": "leaf",
             "state": {
-              "type": "markdown",
-              "state": {
-                "file": "C1/W4/C1_W4_class-notes.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "C1_W4_class-notes"
-            }
-          },
-          {
-            "id": "e9d4076e99381836",
-            "type": "leaf",
-            "state": {
               "type": "pdf",
               "state": {
-                "file": "C1/W4/C1_W4_slides.pdf"
+                "file": "C1/Coursera A25I8TW0YTAN.pdf"
               },
               "icon": "lucide-file-text",
-              "title": "C1_W4_slides"
+              "title": "Coursera A25I8TW0YTAN"
             }
           }
         ]
@@ -183,22 +169,23 @@
   },
   "active": "9dd7e3980a50095a",
   "lastOpenFiles": [
-    "Screenshot 2025-11-04 at 22.20.55.png",
-    "Screenshot 2025-11-04 at 22.16.11.png",
-    "Screenshot 2025-11-04 at 22.15.45.png",
-    "Screenshot 2025-11-04 at 22.08.29.png",
-    "assets/Screenshot 2025-11-04 at 21.44.40.png",
-    "assets/Screenshot 2025-10-17 at 19.38.33.png",
-    "C1/W4/C1_W4_slides.pdf",
-    "C1/W4/C1_W4_class-notes.md",
-    "assets/Screenshot 2025-10-17 at 19.28.41.png",
-    "assets/Screenshot 2025-10-17 at 19.29.07.png",
-    "assets/Screenshot 2025-10-17 at 19.28.04.png",
-    "assets/Screenshot 2025-10-17 at 19.27.24.png",
-    "C1/W3/C1_W3_class-notes.md",
-    "assets/Pasted image 20251014221941.png",
-    "C1/W3/C1_W3_slides.pdf",
     "Data Engineering Professional Certificate Program.md",
+    "C1/Coursera A25I8TW0YTAN.pdf",
+    "C1/W4/C1_W4_slides.pdf",
+    "assets/Screenshot 2025-11-07 at 12.26.57.png",
+    "C1/W4/C1_W4_class-notes.md",
+    "assets/Screenshot 2025-11-04 at 22.08.29.png",
+    "C1/W4/W4_PROJECT.md",
+    "assets/Screenshot 2025-11-07 at 17.49.04.png",
+    "assets/Screenshot 2025-11-07 at 16.40.02.png",
+    "assets/Pasted image 20251107134621.png",
+    "assets/Screenshot 2025-11-07 at 13.31.00.png",
+    "assets/Screenshot 2025-11-07 at 13.26.33.png",
+    "assets/Screenshot 2025-11-07 at 13.24.59.png",
+    "assets/Screenshot 2025-11-07 at 13.21.26.png",
+    "assets/Screenshot 2025-11-07 at 13.20.55.png",
+    "C1/W3/C1_W3_class-notes.md",
+    "C1/W3/C1_W3_slides.pdf",
     "2025-10-12.md",
     "C1/W2/C1_W2_class-notes.md",
     "C1/W2/C1_W2_slides.pdf",
@@ -210,7 +197,6 @@
     "C1/W3/Unconfirmed 787702.crdownload",
     "C1/W2/Unconfirmed 359830.crdownload",
     "C1/W4",
-    "C1/W3",
-    "C1/W2"
+    "C1/W3"
   ]
 }

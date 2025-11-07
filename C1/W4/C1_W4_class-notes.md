@@ -217,3 +217,5 @@ In reality, every company wants projects done well, and they typically want them
 ![[Screenshot 2025-11-04 at 22.20.55.png]]
 
 The way to break the iron triangle is through the application of **principles and processes** like those we've been talking about throughout this course, things like building loosely coupled systems, optimizing for two way door decisions and deeply understanding the needs of stakeholders. By applying these principles and processes, you'll be better able to build and maintain high quality data systems on a predictable timeline and budget. 
+
+
