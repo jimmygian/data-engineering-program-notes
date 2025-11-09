@@ -41,5 +41,103 @@ so that you can build robust data pipelines with these upstream systems as your
 
 ## Different Types of Source Systems
 
-The specific source systems you'll work with as a data engineer will often vary depending on what kind of data you're ingesting from those systems. The most common type of data you'll work with is structured data, which is to say, data organized as tables of rows and columns. Chances are you've worked with structured data in the past, whether that was in a spreadsheet or a relational database, or maybe even using Python to read a CSV file. The other types of data you'll encounter as a data engineer are semi-structured and unstructured data. Semi-structured data is data that is not in tabular form, so it's not made up of rows and columns, but it still has some structure. A common semi-structured data format you'll run into is what's known as JavaScript object notation, or JSON. A JSON file contains a series of key-value pairs.
+The specific source systems you'll work with as a data engineer will often vary depending on what kind of data you're ingesting from those systems. 
 
+**Structured Data**
+The most common type of data you'll work with is structured data
+
+![[Screenshot 2025-11-07 at 19.32.47.png]]
+which is to Structured data are data organized as tables of rows and columns. Chances are you've worked with structured data in the past, whether that was in a **spreadsheet** or a **relational database**, or maybe even using Python to read a **CSV** file. 
+
+
+**Semi-Structured Data**
+Semi-structured data is data that is **not in tabular form**, so it's not made up of rows and columns, but it still has some structure. A common semi-structured data format you'll run into is what's known as **JavaScript object notation, or JSON**. A JSON file contains a series of **key-value pairs**.
+
+**Unstructured Data**
+Unstructured data, on the other hand, has no predefined structure. For example, text, video, audio, and images are all examples of unstructured data. 
+
+But you'll note that things like video, audio, and images do have an inherent structure behind the scenes, in the sense that there are dimensions of pixels as well as colors such as red, blue, and green. We'll dive more into unstructured data throughout this course. 
+
+
+### Source System Types
+When it comes to ingesting these different types of data, I'd like to classify the relevant **source systems** you could encounter into three general **types**: 
+1. **Databases**
+2. **Files**
+3. **Streaming systems**
+
+
+
+
+While these three types of source systems don't necessarily correspond one-to-one with the three types of data, you could say that:
+- From databases, you'll most often be ingesting **structured** and **semi-structured** data. 
+- From streaming systems, you will often be ingesting **semi-structured messages** as a data format. 
+- And files, well, files could be anything from text to image, audio, video, or even regular old rows and columns of tabular data. 
+
+
+### Source System type: Databases
+Databases **store information in an organized way** that allows you to find, retrieve, update, and delete data. The way this works is through a transactional pattern known as **CRUD**, which stands for **create, read, update, and delete**. The C comes first because, of course, data has to be created before it can be read, updated, or deleted. 
+
+**DBMS**
+There's typically a **software interface** called the **database management system**, or **DBMS**, that sits between the physical database storage and the person or application interacting with the database. The DBMS is what allows you to access and manipulate the data stored in the database. 
+
+There are two types of databases that we'll look at this week. 
+- Relational databases, that store information in **tables** with rows and columns, and 
+- Non-Relational, also known as **NoSQL** or not only SQL, which are databases that store **non-tabular** data. 
+
+
+### Source System type: Files
+You no doubt already have lots of experience working with files of various types. These might be **documents** you store on your computer, or **images**, or **videos** you record with your phone, or maybe even a **CSV file** you receive in an email from a coworker. It might seem strange to think of regular old files as a source system for data engineering, but at its core, **a file is just a sequence of bytes that represent information**. 
+
+Applications of all types write data to files, and so files are a universal medium of data exchange. And believe it or not, they're one of the most common source systems you'll work with as a data engineer. 
+
+Files, just like data, can be structured like a spreadsheet, semi-structured like a JSON or XML file, or unstructured like a text, image, video, or audio file. You might be receiving or accessing these files from a file system like Google Drive or an object storage system like Amazon S3, or simply as an attachment to an email. 
+
+
+### Source System type: Streaming Systems
+The third type of source system you're likely to be ingesting data from is **streaming systems**. And you can think of streaming systems as providing a **continuous flow of data**, recorded as messages that contain information about events. And those events include something that happened in the world or a change to the state of a system. In practice, you might be interacting with a stream of events via **message queues** or other streaming platforms. 
+
+For example, an IoT device like a smart thermostat might record an event that contains the latest temperature reading and publish that event as a message to a streaming platform like **Kinesis** or **Kafka**. Then, as a data engineer, you could set up another service to ingest this message and send an update to an embedded analytics dashboard. In this case, you can think of the streaming platform as a source system from which you are extracting raw data. 
+
+In later weeks of this course, you will see how these streaming systems can also cut across the data engineering lifecycle and be used in the ingestion and transformation stages to process data for various downstream use cases. In fact, you can see the same of all types of source systems, whether you're talking about databases, files or streaming systems. These could be systems from which you're ingesting raw data, or they could be systems you build into your data pipelines at another stage of the lifecycle. 
+
+
+![[Screenshot 2025-11-07 at 19.59.29.png]]
+So, to recap, as a data engineer, you will extract raw data from different source systems. This raw data may be structured, semi-structured or unstructured, and the source systems may be databases, files or streaming systems. 
+
+
+## Relational Databases
+
+As a data engineer, the most common type of source system you'll interact with is a **relational database**, and this is because relational databases are everywhere. 
+
+Many web and mobile applications use relational databases on the backend, and you will find them as well in many corporate systems like customer relationship management, human resource, and enterprise resource planning systems. 
+
+They are also commonly used for what are called **online transaction processing**  (OLTP) systems where you need to execute a high volume of transactions concurrently, like for banking or online bookings. 
+
+The name "relational" database comes from the fact that this type of database is most often used to store data across different tables that are related to one another through a set of keys or common attributes. These tables are typically organized based on how information is structured in the business. 
+
+So, as a data engineer working at an e-commerce company, for example, you might be working with a relational database where one table captures customer information, another table captures product information, and a third table captures order information. 
+
+![[Screenshot 2025-11-08 at 00.17.05.png]]
+Structuring a database in this way **reduces redundancy** and makes the data easier to manage by not having the same piece of information duplicated across multiple rows or tables in the database. 
+
+**The way** in which a database is organized into related table is called the **database schema**. Relational databases represent these relationships across tables through the **use of keys**. 
+
+- A **primary key** is a special column or a collection of columns that **uniquely** identify each row in a table. 
+
+![[Screenshot 2025-11-08 at 00.22.01.png]]
+
+- A **foreign key** references the **primary key** or the **id** column of another table. 
+
+Beyond the row structure in a relational database, each **column** has a 
+- unique name, and a
+- specified data type. 
+
+For example, in the customers table you might have columns like id, first name and last name that contain strings, and another column called age that contains an integer. Each new row in a table then has to follow the same column structure, meaning the same sequence of columns and data types. This is part of the database schema as well. Now, in a database with schema like this one, to record information about a new order from an existing customer, you could create a new record in the orders table and indicate the customer's id from the customer's table and the product id from the products table and the details of the order, like date, time, and payment, and so on. And again, if that customer changes their address or the SKU number of the product they ordered changes, those changes would only affect a single row in the customers or product table, and the information would stay consistent. 
+
+As you can imagine, there are many different ways you could potentially establish relationships between tables, and this is where the concept of data normalization comes into play. Data normalization is an approach that was developed in the 1970s to minimize redundancy and ensure data integrity by storing data across tables in a logical way. But now I think it's worth pausing for a minute to ask, why worry so much about redundancy or duplicated information in the first place? Like it might seem logical and orderly to structure your data like I've been describing. But is there any downside? Well, it turns out while a normalized relational database structure provides a high degree of integrity and minimize redundancy, it can actually be slow when it comes to querying the data. Nowadays, storage is relatively cheap and speed is often of the essence. 
+
+Data integrity is so critical, of course, but the answer to exactly how you just store your tabular data could depend on what you're trying to optimize for. As a data engineer, you might be ingesting normalized data from a relational database system, but depending on the end use case you're serving, you might decide to organize the data according to a different model in your own storage systems. Today, there are even some use cases where data engineers are electing to take a so called one big table or OBT approach, where all the data is recorded in a single table for faster processing than will be possible if joining multiple tables in a traditional relational database. We'll get more into the details of data modeling in Course 4, specialization. When it comes to interacting with the database, you'll use a relational database management system, or RDBMS. That's a software layer that sits on top of a relational database. There are many popular RDBMs out there, including MySQL, PostgreSQL, Oracle, and SQL Server. 
+
+Most RDBMS support the structured query language, also known as sequel or SQL for short. Some people say SQL, some say SQL. You can go with whatever you prefer. I sometimes say both myself. The important thing to know is that SQL provides a set of commands for performing various operations on the relational databases. And as a data engineer, SQL will be part of your everyday work. In the next video, I'll walk you through some of the SQL commands that you'll need for the lab. 
+
+Then in the lab, you'll get a chance to practice querying data in a relational database using SQL queries. After that, join me in the next video, take a look at NoSQL databases.
