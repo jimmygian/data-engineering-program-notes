@@ -178,7 +178,7 @@ SELECT [column] FROM [table] LIMIT [no_of_rows]
 SELECT * FROM ..
 ```
 
-> 	*You'll learn how quarries are executed behind the scenes in the next course. But for now, just know that it can take a lot of processing resources to retrieve all data from all the columns, especially if your dataset is very large.* 
+> 	*You'll learn how queries are executed behind the scenes in the next course. But for now, just know that it can take a lot of processing resources to retrieve all data from all the columns, especially if your dataset is very large.* 
 
 
 I recommend **only** using `SELECT *` to retrieve all the data in a table, where you can filter the results with some Boolean condition. For example, let's say you're only interested in exploring films that are less than 60 minutes long. You can add a `WHERE` clause after the `FROM` clause to filter the results based on the length column. 
@@ -246,3 +246,126 @@ ORDER BY film_count DESC
 
 The lab also covers some **data manipulation operations**, including **CREATE**, **INSERT INTO**, **UPDATE**, and **DELETE**. Make sure you read the instructions carefully when trying each of the exercises. 
 ![[Screenshot 2025-11-10 at 23.16.28.png]]
+
+
+## NoSQL Databases
+
+In the early 2000s, tech giants like Google and Amazon began outgrowing their relational databases. They needed to process large volumes of data from disparate sources that didn't fit neatly into the relational database model. Enforcing tabular structures would lead to **data redundancy and performance issues at scale**, and so these companies led the way in developing new distributed non-relational databases to scale their web platforms. 
+
+In this way, **NoSQL databases** were developed to overcome the limitations of relational databases, trading certain RDBMS characteristics like strong consistency, joins, and a fixed schema for more schema flexibility, scalability and improved performance. 
+
+Before we go any further, let's get one thing straight, NoSQL doesn't stand for No SQL, it means **not only SQL**. It's a category of databases that break away from the relational framework we saw in the previous video. But **some non-relational databases still support SQL or SQL like query languages.** 
+
+
+Let's go over the basics of NoSQL databases. 
+
+NoSQL databases have **non-tabular structures**. They can support various data formats including: 
+-  key-value, 
+- document wide-column, 
+- graph, 
+- and others.
+
+![[Pasted image 20251123160754.png]]
+
+- Unlike relational databases, NoSQL databases **don't require predefined schemas**, so this means you have more flexibility when deciding how you want to store your data. 
+- NoSQL databases excel in **horizontal scaling**, which means automatically distributing data and workloads across multiple servers to meet increased traffic demands. 
+  When a user writes data to a NoSQL database that is distributed across multiple servers - or nodes - that write operation is first performed on a single node in this distributed system, which is a location where one version of the database is running.  ![[Pasted image 20251123161139.png]]
+  
+  Then, there might be a slight delay before those changes are propagated to all other nodes in the system. ![[Pasted image 20251123161249.png]]
+  
+  Unlike relational databases, NoSQL databases operate under the **principle of "eventual consistency"** rather than strong consistency, meaning that the database will allow you to read from a node that has not received the latest write update and you may not get the most up to date data.  ![[Pasted image 20251123161406.png]]
+  
+  But given enough time, the database will be consistent and reading data from any node will give you the same data. 
+
+With a relational database that provides strong consistency, you would *not* be able to read data until all the nodes in the system have been updated. In this way, eventual consistency allows no single databases to **prioritize speed** which is perfect for applications where system availability and scalability is more important than real time consistency, such as social media platforms or content distribution networks. 
+
+#### Data Integrity
+In terms of **data integrity**, **not all** NoSQL databases **guarantee** the principles of atomicity, consistency, isolation and durability, also known as **ACID compliance**, but some do, for example, MongoDB. This means that if you're sourcing data from a NoSQL database, then you may need to take extra steps to ensure data integrity. 
+
+#### Querying NoSQL databases
+Finally, NoSQL databases use **specialized query languages** tailored to their **data model**, which are often, but not always, different from SQL. Let's take a closer look at two common types of NoSQL databases, **key-value databases** and **document databases**.
+
+**Key-Value database**
+A **key-value** database stores data as a collection of key-value pairs, similar to what you might find in a **JSON file** or a **Python dictionary** structure. The key serves as **unique identifier** to retrieve the corresponding value. **Both** the keys and the values can be anything from **simple to complex objects**. This type of NoSQL database is perfect for scenarios where fast data lookup is needed, such as caching user session data in a web or mobile application. 
+
+For example, when a user logs into an ecommerce application, actions like viewing different products, adding items to the shopping cart, and checking out can all be stored in a key-value database with the user session id as a unique identifier. 
+
+![[Pasted image 20251123162044.png]]
+
+**Document Stores**
+Document stores are a special type of key-value database that store data in JSON like documents. Each document has a **unique key** that identifies a document and allows you to retrieve that document's data. Documents are **organized into collections**, so you can think of a collection sort of like a table in a relational database and a document like a row. 
+
+In this example, data is stored in a collection called users. Each document represents a single user and the id is the key that uniquely identifies each user. This locality makes it easier to retrieve all the information about a particular user compared to a relational database, where the user information may be spread across multiple tables. 
+
+![[Pasted image 20251123162255.png]]
+
+However, document stores **don't support joins**, so it's harder and less efficient to combine information from multiple documents as compared to combining information across multiple tables in a relational database. The advantage, however, is this notion of a **flexible schema**. As you saw with relational databases, all records need to conform to a fixed schema, but with key-value databases and document stores, there's no fixed or predefined structure to data records. 
+
+Document stores are commonly used for applications involving content management catalogs and sensor readings. Each interaction, product or sensor reading from an IoT device, for example, can be stored as a single document with a flexible schema. But be careful, this flexibility can have a downside. I've seen document databases become absolute nightmares to manage inquiry. 
+
+And if you're ingesting data from a NoSQL document store as your source system, the flexibility of the schema makes it even easier for source system owners to change something that'll break your data pipelines. Both relational databases and NoSQL databases can be used as sort of a wide range of applications. When it comes to applications processing online transactions in areas like banking, finance and e commerce, among others, things are happening fast, money is changing hands, and products are on the move. And these types of online transaction processing or OLTP applications, any errors or inconsistencies in the data can cause major problems. 
+
+
+## Database ACID Compliance
+
+Both relational and non-relational databases can support very high transaction rates. They are commonly used in **online transaction processing or OLTP systems**. These systems typically need to store rapidly changing application states, such as the details of bank account balances or online orders. 
+
+Most relational database systems are what's known as **acid compliant**, which means they support the principles of 
+- atomicity, 
+- consistency, 
+- isolation, and 
+- durability 
+
+This helps ensure transactions are processed reliably and accurately in an OLTP system. 
+
+By contrast. Many NoSQL databases are **not asset compliant** by default, but many offer you the ability to **configure** them to be asset compliant. In this video, I'm going to talk about what each asset principle is so you can get a better sense of when these principles will apply to the work you do as a data engineer. 
+
+#### Atomicity
+The first asset principle is **atomicity**, which ensures that transactions are atomic, or in other words, treated as a **single indivisible unit**. 
+
+A transaction might consist of multiple operations. 
+![[Pasted image 20251123163941.png]]
+
+But the atomicity principle ensures that either all of the operations within a transaction are executed successfully, or none of them are. 
+![[Pasted image 20251123164109.png]]
+
+
+#### Consistency
+The second principle is **consistency**, which means that **any changes** to the data made within a transaction must follow the set of rules or constraints defined by the database schema. 
+
+This ensures that the database will transition from **one valid state to another**. 
+![[Pasted image 20251123164356.png]]
+
+For example, suppose that the inventory database schema prevents any stock level from going below zero. Let's say that the stock level for a particular item is currently one. If a customer tries to place in order for two of those items, then the operation will fail, and the entire transaction will be ruled back to ensure that the database remains consistent with the predefined schema. 
+
+>	*As I already mentioned, this is the default in relational databases, but would need to be configured in most NoSQL systems.* 
+
+
+>	Quick Note:
+>	The word *consistency* ends up getting a little overloaded here. Previously, we described the *"strong consistency"* property of relational databases, which refers to the idea that all nodes in a distributed system will provide the same up to date data. 
+
+>	It turns out that strong consistency of a database system is a result of compliance with the ACID principles, but a slightly different *concept* than the consistency represented by the C in ACID. ![[Pasted image 20251123164808.png]]
+
+#### Isolation
+The next principle is **isolation**, which ensures that when several clients try to execute transactions concurrently, each transaction is executed **independently** in **sequential order**. 
+
+For example, let's say the inventory shows that there are 10 of one item remaining. Suppose that two customers place an order for five of these items at the exact same time each. The isolation principle guarantees that even though the time stamp on these two transactions may be the same, both transactions will happen independently in sequence, so that when the two transactions are completed, inventory level for that item will be zero and not five. 
+Similarly, if one customer orders five and another orders 10 of the item at the same time, whichever order gets processed first, we'll go through, and the second one will fail, resulting in a sock level of either five or zero. 
+
+
+#### Durability
+The final principle is **durability**, which guarantees that once a transaction is completed, its effects are *permanent* and will survive any subsequent system failures, such as a power loss. 
+
+This is essential for maintaining the reliability of the database, even when faced with an unexpected event like a natural disaster. 
+
+
+### Summary
+In summary, the ACID principles guarantee that a database will maintain a consistent picture of the world. 
+
+That might sound logical and relatively even straightforward. But in the real world, a database might be **partitioned across multiple servers** because of its size or replicated across multiple data centers for **redundancy and speed**. In these cases, it's especially critical to know that the data you're reading and writing **remains consistent** across the entire network of servers. This is the principle of what's called **strong consistency**, which is a key feature of ACID compliance that holds even for a distributed database system. 
+
+Now, it's important to note that while relational databases are typically ACID compliant, not all databases are required to abide by all of the ACID principles in order to support application back ends. 
+
+Some NoSQL databases only possess some degree of ACID compliance. But relaxing one or more of these constraints, you can improve certain aspects of the databases performance and make it more scalable. As a data engineer, understanding **when** your database needs to be ACID compliant can help you prevent disasters. 
+
+

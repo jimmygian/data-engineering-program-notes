@@ -4,21 +4,37 @@
     "type": "split",
     "children": [
       {
-        "id": "6046ab081a0b3074",
+        "id": "203fd8f69f594564",
         "type": "tabs",
         "children": [
           {
-            "id": "62f0e8f8227ac590",
+            "id": "7514e98ea8e39c47",
             "type": "leaf",
             "state": {
-              "type": "markdown",
+              "type": "image",
               "state": {
-                "file": "C2/W1/C2_W1_class-notes.md",
-                "mode": "source",
-                "source": false
+                "file": "assets/Pasted image 20251123171158.png"
               },
-              "icon": "lucide-file",
-              "title": "C2_W1_class-notes"
+              "icon": "lucide-image",
+              "title": "Pasted image 20251123171158"
+            }
+          }
+        ]
+      },
+      {
+        "id": "fbdef1780b2b2187",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "97ed37eb97e9d0fb",
+            "type": "leaf",
+            "state": {
+              "type": "pdf",
+              "state": {
+                "file": "C2/W1/C2_W1_slides.pdf"
+              },
+              "icon": "lucide-file-text",
+              "title": "C2_W1_slides"
             }
           }
         ]
@@ -169,35 +185,36 @@
       "bases:Create new base": false
     }
   },
-  "active": "62f0e8f8227ac590",
+  "active": "9907a137ea75bef3",
   "lastOpenFiles": [
+    "C2/NoSQL.md",
+    "assets/Pasted image 20251123171158.png",
+    "assets/Pasted image 20251123170317.png",
+    "assets/Pasted image 20251123165954.png",
+    "assets/Pasted image 20251123165848.png",
+    "assets/Pasted image 20251123165754.png",
+    "C2/SQL.md",
+    "C2/W1/C2_W1_class-notes.md",
+    "assets/Pasted image 20251123164808.png",
+    "assets/Pasted image 20251123164356.png",
+    "assets/Pasted image 20251123164109.png",
+    "assets/Pasted image 20251123164055.png",
+    "assets/Pasted image 20251123163941.png",
+    "C2/W1/C2_W1_slides.pdf",
+    "C2/W2/C2_W2_slides.pdf",
+    "C1/Coursera A25I8TW0YTAN.pdf",
     "C1/W3/C1_W3_class-notes.md",
     "C2/W4/C2_W4_slides.pdf",
     "C2/W4",
-    "assets/Screenshot 2025-11-10 at 23.16.28.png",
-    "assets/Screenshot 2025-11-10 at 23.11.14.png",
-    "assets/Screenshot 2025-11-10 at 23.09.40.png",
-    "assets/Screenshot 2025-11-10 at 23.00.32.png",
-    "assets/Screenshot 2025-11-10 at 22.45.13.png",
-    "assets/Screenshot 2025-11-10 at 22.38.38.png",
-    "assets/Screenshot 2025-11-10 at 22.32.57.png",
     "C2/W3/C2_W3_slides.pdf",
     "C2/W3",
-    "C2/W2/SQL.md",
-    "C2/W2/C2_W2_slides.pdf",
     "C2/W2",
-    "C2/W1/C2_W1_slides.pdf",
-    "C2/W1/C2_W1_class-notes.md",
     "C2/W1",
     "C2",
     "C1/W4/C1_W4_class-notes.md",
     "C1/W4/C1_W4_PROJECT.md",
-    "C1/Coursera A25I8TW0YTAN.pdf",
-    "assets/Pasted image 20251014221941.png",
-    "assets/Pasted image 20251014221642.png",
     "Data Engineering Professional Certificate Program.md",
     "2025-10-12.md",
-    "assets/Pasted image 20251012143709.png",
     "C1/W2/C1_W2_class-notes.md",
     "README.md",
     "C1/W1/C1_W1_class-notes.md",
