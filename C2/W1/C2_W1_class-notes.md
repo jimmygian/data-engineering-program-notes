@@ -113,11 +113,10 @@ Many web and mobile applications use relational databases on the backend, and y
 
 They are also commonly used for what are called **online transaction processing**  (OLTP) systems where you need to execute a high volume of transactions concurrently, like for banking or online bookings. 
 
-The name "relational" database comes from the fact that this type of database is most often used to store data across different tables that are related to one another through a set of keys or common attributes. These tables are typically organized based on how information is structured in the business. 
+The name "*relational*" database comes from the fact that this type of database is most often used to store data across different tables that are related to one another through a set of keys or common attributes. These tables are typically organized based on how information is structured in the business. 
 
-So, as a data engineer working at an e-commerce company, for example, you might be working with a relational database where one table captures customer information, another table captures product information, and a third table captures order information. 
+So, as a data engineer working at an e-commerce company, for example, you might be working with a relational database where one table captures customer information, another table captures product information, and a third table captures order information. ![[Screenshot 2025-11-10 at 22.31.14.png]]
 
-![[Screenshot 2025-11-08 at 00.17.05.png]]
 Structuring a database in this way **reduces redundancy** and makes the data easier to manage by not having the same piece of information duplicated across multiple rows or tables in the database. 
 
 **The way** in which a database is organized into related table is called the **database schema**. Relational databases represent these relationships across tables through the **use of keys**. 
@@ -132,12 +131,118 @@ Beyond the row structure in a relational database, each **column** has a
 - unique name, and a
 - specified data type. 
 
-For example, in the customers table you might have columns like id, first name and last name that contain strings, and another column called age that contains an integer. Each new row in a table then has to follow the same column structure, meaning the same sequence of columns and data types. This is part of the database schema as well. Now, in a database with schema like this one, to record information about a new order from an existing customer, you could create a new record in the orders table and indicate the customer's id from the customer's table and the product id from the products table and the details of the order, like date, time, and payment, and so on. And again, if that customer changes their address or the SKU number of the product they ordered changes, those changes would only affect a single row in the customers or product table, and the information would stay consistent. 
+One big table for everything will almost certainly lead to many duplications, and inconsistency in case some details need updating.
+![[Screenshot 2025-11-10 at 22.32.57.png]]
+![[Screenshot 2025-11-10 at 22.38.38.png]]
 
-As you can imagine, there are many different ways you could potentially establish relationships between tables, and this is where the concept of data normalization comes into play. Data normalization is an approach that was developed in the 1970s to minimize redundancy and ensure data integrity by storing data across tables in a logical way. But now I think it's worth pausing for a minute to ask, why worry so much about redundancy or duplicated information in the first place? Like it might seem logical and orderly to structure your data like I've been describing. But is there any downside? Well, it turns out while a normalized relational database structure provides a high degree of integrity and minimize redundancy, it can actually be slow when it comes to querying the data. Nowadays, storage is relatively cheap and speed is often of the essence. 
+Relational data can help with better data structure and no duplication of the same data in multiple tables through the use of keys.
 
-Data integrity is so critical, of course, but the answer to exactly how you just store your tabular data could depend on what you're trying to optimize for. As a data engineer, you might be ingesting normalized data from a relational database system, but depending on the end use case you're serving, you might decide to organize the data according to a different model in your own storage systems. Today, there are even some use cases where data engineers are electing to take a so called one big table or OBT approach, where all the data is recorded in a single table for faster processing than will be possible if joining multiple tables in a traditional relational database. We'll get more into the details of data modeling in Course 4, specialization. When it comes to interacting with the database, you'll use a relational database management system, or RDBMS. That's a software layer that sits on top of a relational database. There are many popular RDBMs out there, including MySQL, PostgreSQL, Oracle, and SQL Server. 
+ The way in which a database is **organized** into related tables like this is called **the "database schema"**. Relational databases represent these relationships across tables through the use of keys. A primary key is a special column or a collection of columns that uniquely identify each row in a table.
 
-Most RDBMS support the structured query language, also known as sequel or SQL for short. Some people say SQL, some say SQL. You can go with whatever you prefer. I sometimes say both myself. The important thing to know is that SQL provides a set of commands for performing various operations on the relational databases. And as a data engineer, SQL will be part of your everyday work. In the next video, I'll walk you through some of the SQL commands that you'll need for the lab. 
 
-Then in the lab, you'll get a chance to practice querying data in a relational database using SQL queries. After that, join me in the next video, take a look at NoSQL databases.
+**Data Normalization**
+As you can imagine, there are many different ways you could potentially establish relationships between tables, and this is where the concept of **data normalization** comes into play.  Data normalization is an approach that was developed in the 1970s to minimize redundancy and ensure data integrity by storing data across tables in a logical way. 
+
+**Normalized Relational Data vs OBT approach**
+But is there any downside to structuring the data in a relational normalized way? Well, it turns out while a normalized relational database structure provides a high degree of integrity and minimizes redundancy, it can actually be slow when it comes to **querying** the data. Nowadays, storage is relatively cheap and speed is often of the essence.  Data integrity is so critical, of course, but the answer to exactly how you just store your tabular data could depend on **what you're trying to optimize for.** 
+
+Today, there are even some use cases where data engineers are electing to take a so called one big table or **OBT approach**, where all the data is recorded in a single table for faster processing than will be possible if joining multiple tables in a traditional relational database. 
+
+**RDBMS**
+When it comes to interacting with the database, you'll use a relational database management system, or RDBMS. That's a software layer that sits on top of a relational database. There are many popular RDBMs out there, including **MySQL, PostgreSQL, Oracle, and SQL Server**. 
+
+Most RDBMS support the structured query language, also known as sequel or SQL for short. 
+SQL provides a set of commands for performing various operations on the relational databases. 
+
+And as a data engineer, SQL will be part of your everyday work. 
+
+![[Screenshot 2025-11-10 at 22.45.13.png]]
+
+
+## SQL Queries
+
+Working with an SQL database requires understanding of many aspects of the database.
+
+Let's take an example:  Database for a fictitious DVD rental company called **Rentio**.
+
+Rentio's database includes tables that contain information about stores, staff, DVD inventory, customers, etc.
+
+To query the data, we need to:
+- Know how to (practical SQL querying skills)
+- Understand the Database Schema (names of tables, columns, relationships through keys), This database is normalized, meaning that data is stored in separate tables to reduce redundancy and make it easier to update the data when it changes. You can refer to this as the "**entity relationship model**" that shows the relationships and attributes of the tables in Rentio's database.
+
+Basic SQL Statements:
+
+```sql
+SELECT [column] FROM [table] LIMIT [no_of_rows]
+SELECT * FROM ..
+```
+
+> 	*You'll learn how quarries are executed behind the scenes in the next course. But for now, just know that it can take a lot of processing resources to retrieve all data from all the columns, especially if your dataset is very large.* 
+
+
+I recommend **only** using `SELECT *` to retrieve all the data in a table, where you can filter the results with some Boolean condition. For example, let's say you're only interested in exploring films that are less than 60 minutes long. You can add a `WHERE` clause after the `FROM` clause to filter the results based on the length column. 
+
+```sql
+SELECT * FROM film
+WHERE length<60
+ORDER BY length DESC
+LIMIT 10
+```
+
+
+What if we want to explore data from more than one table?
+We can use the `JOIN` clause to combine two or more tables.
+
+For example, let's say I want to get 
+- a list of film titles 
+- and their corresponding film_category 
+- for all films 
+- that are under 60 minutes long.
+
+![[Screenshot 2025-11-10 at 23.00.32.png]]
+
+
+```sql
+SELECT film.title, category.name 
+FROM film
+JOIN film_category
+ON film.film_id = film_category.film_id
+JOIN category
+ON category.category_id = film_category.category_id
+WHERE length<60
+
+```
+
+**INNER JOIN**
+
+Note that by default, the `JOIN` clause combines **only** the records from both tables that have a matching column value specified in the ON statement. It will not include any records from either table that don't have matching values. **For example, if the film table has a row with film_id that doesn't appear in the film_category table, then that row will not be included in the results.** This type of join is also known as the INNER JOIN, and you can think of the join results as the **middle overlapping part** of a Venn diagram.
+![[Screenshot 2025-11-10 at 23.09.40.png]]
+
+
+The other types of joins include: 
+- the LEFT JOIN, which returns all records from the first table, along with any matching records from the second table, 
+- the RIGHT JOIN, which returns all the records from the second table, along with any matching records from the first table, and 
+- the FULL JOIN, which returns all the records from both tables **and combines the ones with matching values.**
+![[Screenshot 2025-11-10 at 23.11.14.png]]
+
+**GROUP BY**
+Going back to the results from the last query, I can see that quite a few of the shorter films belong to the children or documentary category. Let's say I want to know for sure which is the most popular category for short films. I can use the **GROUP BY** command to group the rows based on the film_category. Then use the **COUNT** command to count the number of records for each of the film categories. The GROUP BY command is written after the WHERE clause. Here I'll add GROUP BY category.name. Then I'll modify the SELECT statement to select category.name and **COUNT(*)**, which counts all the rows for each category. 
+
+I will also use the **AS** command to give the output of this count the film_count **alias name**. Finally, I'll order the results by the film count in descending order. 
+
+```sql
+SELECT category.name, COUNT(*) AS film_count
+FROM film
+JOIN film_category
+ON film.film_id = film_category.film_id
+JOIN category
+ON category.category_id = film_category.category_id
+WHERE length<60
+GROUP BY category.name
+ORDER BY film_count DESC
+```
+
+
+The lab also covers some **data manipulation operations**, including **CREATE**, **INSERT INTO**, **UPDATE**, and **DELETE**. Make sure you read the instructions carefully when trying each of the exercises. 
+![[Screenshot 2025-11-10 at 23.16.28.png]]
