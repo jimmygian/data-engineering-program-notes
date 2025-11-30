@@ -1,3 +1,5 @@
+Also Check this week's slides: [C2_W1_slides](./C2_W1_slides.pdf)
+
 This course includes a focus **on the first two stages of the data engineering life cycle**, which are: 
 - Data Generation and Source Systems.
 - Data Ingestion from those source systems.
@@ -248,6 +250,9 @@ The lab also covers some **data manipulation operations**, including **CREATE**
 ![[Screenshot 2025-11-10 at 23.16.28.png]]
 
 
+Check  [SQL](../SQL)'s document for more.
+
+
 ## NoSQL Databases
 
 In the early 2000s, tech giants like Google and Amazon began outgrowing their relational databases. They needed to process large volumes of data from disparate sources that didn't fit neatly into the relational database model. Enforcing tabular structures would lead to **data redundancy and performance issues at scale**, and so these companies led the way in developing new distributed non-relational databases to scale their web platforms. 
@@ -368,4 +373,262 @@ Now, it's important to note that while relational databases are typically ACID 
 
 Some NoSQL databases only possess some degree of ACID compliance. But relaxing one or more of these constraints, you can improve certain aspects of the databases performance and make it more scalable. As a data engineer, understanding **when** your database needs to be ACID compliant can help you prevent disasters. 
 
+Check [Lab_2_NoSQL](Lab_2_NoSQL.md) and [NoSQL](../NoSQL)'s DynamoDB documentation for more.
 
+
+## Object Storage
+
+Files are one of the **most common source systems** that you will deal with every day as a data engineer. And you might be receiving or accessing these files from a file system like **GoogleDrive** or an object storage system like **AWS S3**, or simply as an attachment to an **email**. 
+
+While files may come at you from many different places, object storage is arguably the most important mechanism for file storage and retrieval in your work as a data engineer. 
+
+Object Storage treats data, files in this case, as **individual objects** and stores them in a **flat structure** that doesn't adhere to a traditional file system hierarchy. This means that while you might be accustomed to storing files in a hierarchy of folders and subfolders on your local computer, Object Storage has **no hierarchy**.
+![[Screenshot 2025-11-29 at 12.58.54.png]]
+
+
+>	*Now, just as a side note, this flat structure approach can be confusing. If you go into Amazon S3 for example, there is a **Create Folder** button, and you can go ahead and create folders and subfolders to your heart's content and happily store your files in what looks very much like a hierarchical file system. 
+>	
+>	However, it turns out this is just a feature of the user interface to keep things looking organized in a way that looks familiar. The actual storage mechanism is **flat**, meaning that even though it might look like you have folders and subfolders in the UI, all files are actually stored right at the top level. And this is by design because it allows **quick and straightforward access** to all objects without worrying about the overhead of a folder structure.
+
+So objects can be anything from CSV, JSON, text, video, image, or audio files, to machine-readable binary data. This versatility makes Object Storage the **perfect repository for semi-structured and unstructured data**, which can be useful when supporting applications like serving data for training machine learning models. Object storage plays a crucial role as a **data source**.
+
+
+### Key Components of Object Storage
+In later weeks and courses, you'll see how object storage is also integrated throughout the entire data engineering lifecycle. But for now, let's take a look at some of the **key components of object storage**. 
+
+##### UUIDs
+In Object Storage, each object is assigned a **Universal Unique Identifier**, or **UUID**, which is a sort of a **key**. This key is required for accessing and managing the corresponding object. 
+
+Each object also has associated metadata, which is additional information about the object, like the creation date, file type, or owner. It's worth noting that after the initial write, objects technically become **immutable**, and they don't support random write or append operations. In this sense, a file in Object Storage is not like a table in a relational database or a document in a non-relational database that you can update or append to. 
+
+To change the data stored in an object, you must **rewrite the full object** and **have the uuid point to this new object**. 
+
+##### Object Versioning
+With object storage, you can enable **object versioning**, which allows you to add metadata to an object to specify its version. So when you update an object, instead of overwriting the old object under the same uuid, you can **keep multiple versions of that object**. 
+
+### So why use object storage? 
+- Object Storage allows you to store files of various data formats without a specific file system structure. This removes the complexity associated with hierarchical folder systems and databases. 
+- In a cloud environment, object storage can easily scale out to provide virtually **limitless storage** space for massive amounts of data. 
+- In terms of availability, the data in **cloud** object storage is typically replicated across **several availability zones**, meaning that data is replicated across multiple physical data centers that are isolated from each other. This makes the data highly durable and available even in the case of natural disasters. For example, Amazon S3 offers 99.9999999% of data durability, which means Object Storage on S3 can withstand concurrent device or data center failures. 
+- Also, Object Storage is often **cheaper** than other storage options, especially if you're storing data that you don't need access to on a regular basis. 
+
+Cloud Object Storage is used in many applications and is the underlying storage for newer architecture designs such as data lakes and data lake houses because of its flexibility, high scalability, cost-effectiveness, and durability. 
+
+## Logs
+
+The simplest type of streaming system I can think of is a **log**. In fact, the log isn't even a system at all. It's just a **record of information about events** that can serve to track the activity of a system or an application. 
+
+In the previous course, I mentioned that it used to be common for developers to regard the data coming from software applications **as an exhaust or a byproduct**, not necessarily having any intrinsic value on its own, but useful for monitoring or debugging a system. 
+
+The specific data that is most commonly regarded as exhaust is the data contained in **logs** produced by software applications. When a developer deploys a product or a platform, like a website or mobile app, they'll set it up such that all activity that occurs within the application **is recorded in a log**. The log might include 
+- a user activity, like 
+	- a user logging in, or 
+	- navigating to a particular page. 
+- It might also include **a record of events** on the back end, like 
+	- an update to a database, or 
+	- an error that was generated when trying to run a particular procedure. 
+
+Logs are most commonly used in practice as a means of monitoring the health of systems. Engineers will use logs to trigger alerts or to debug, what went wrong when an error occurs. In this sense, logs can seem boring and the characterization of logs as application exhaust might seem appropriate. 
+
+However, logs are a **rich source of data** that can be useful for much more than just monitoring the health of an application. As such, they can be an important source system. You'll ingest data from in your work as a data engineer. 
+
+***At its core, a log is an append-only sequence of records, ordered by time, capturing information about events that occur in systems.*** 
+
+For example, if you're the data engineer for an e-commerce company, your web server logs can capture detailed user activity data that could be used to support downstream analysis of user behavior patterns. 
+
+Many database systems will have logs that you could use to 
+- **track changes** in the database process known as **change data capture** or **CDC**, for short. 
+- You could use those changes to **trigger your ingestion processes** so that they run based on the arrival of new data in the database. 
+- Or you might ingest log data for use in certain **machine learning applications**, like anomaly detection, if, for example, you're ingesting log data from security systems. 
+
+Logs play a crucial role in tracking what happened in many of the upstream software systems you'll work with. This makes them a rich data source that can support downstream use cases like data analysis, troubleshooting issues, monitoring performance, machine learning applications, and automation.
+
+![[Screenshot 2025-11-29 at 16.53.49.png]]
+
+Log data may be recorded as simple unstructured text or in JSON or CSV format, or even as binary encoded data. In addition to the data describing the time and substance of an event, logs will also often include a tag to categorize the event by assigning what's known as a log level to each record. 
+
+**Log Tags**
+Log levels might include **tags** like debug, info, warn, error, or fatal that let you know what kind of information a particular record contains. For example, a record containing basic activity information would be assigned the info log level. Well, a record containing an error message might be assigned the error log level, or if something more serious happens, like major systems have failed and need urgent attention. This might carry the fatal log level as a tag. We'll talk more about log levels later on when you start building logs into your own data pipeline applications, instead of monitoring for your own systems. As a data engineer, it's important that you understand how to work with logs, their types, formats, and applications. Logs will be an important source of data for the work that you do and can help you troubleshoot issues, monitor performance, and serve lots of downstream use cases. 
+
+
+## Streaming Systems
+
+ In this section, we'll take a closer look at the details of **event-driven architectures** and how **message queues** and **streaming platforms** work as *source systems* for your data pipelines. 
+ 
+ First, let's define some terminology. 
+ 
+ Throughout these courses, so far, we've been talking about streaming data in terms of 
+ - events, 
+ - messages, and 
+ - streams. 
+
+**Event**
+*Broadly speaking, an event is just something that happened in the world or a change to the state of the system.* 
+
+For example, a user clicking on a link or a sensor measuring a change in temperature are both examples of events. 
+
+As mentioned before, in some sense, you can think of all data as being streaming data at its source. This is because essentially all data consists of a record of events that happened out in the world or within some system. 
+
+**Message**
+A message is a record of information about an event. 
+
+A message might include details about the event, like which button a user clicked or what temperature the sensor recorded, as well as some metadata around the event and a timestamp of when the event happened. 
+
+**Stream**
+Messages can be generated continuously to form a stream. 
+
+A stream is a sequence of messages that might be a series of sensor readings or website clicks over a period of time. 
+
+**Streaming Data**
+Messages and streams collectively make up streaming data. 
+
+>	If you want to handle chunks of this data all at once, like over a specific time interval, then that would be **batch processing** **applied to a stream of messages**. 
+
+> 	If you want to process each message as it's received, then you need a system that's set up to take **action based on incoming messages**. 
+> 	Then what you have is a system where messages record information about events and action is taken as messages are received, or in other words, a streaming system. 
+> 	![[Screenshot 2025-11-29 at 17.02.49.png]]	
+Now, out in the real world, you'll often hear the words **event** and **message** used almost interchangeably when it comes to describing the various components of an event-driven architecture. 
+>
+But don't let that worry you. While it's technically accurate to say that events are the things that happen and messages or the information or data recorded about those events, for all intents and purposes in data engineering, it's not important to distinguish between the two. 
+
+When we're talking about events or messages being produced, or consumed, or stored in a queue, it's all the same thing. 
+
+### Components of a Streaming System
+There are three components of a streaming system: 
+- the event producer, 
+- the event consumer, and 
+- the event router, also known as the streaming broker that sits between the producer and the consumer. 
+> ![[Screenshot 2025-11-29 at 17.04.40.png]]
+
+> 	*Just note that here, I could say message producer, message consumer, and message router, and it would mean the same thing. It's just that you'll often see these things described in terms of events, and so we'll go with that terminology here.* 
+
+**Event Producer**
+The event producer is what generates the messages in a stream. The producer could be an IoT device, a mobile app, an API, or a website, to name a few examples. 
+
+**Event Consumer**
+The event consumer, sometimes known as the **subscriber**, is what processes each individual message, and **there can be more than one consumer** in any given streaming system. 
+
+**Event Router**
+The way that events **find their way** to the correct destination is through the **event router** or **streaming broker**, such as **Apache Kafka**, which acts as a buffer to filter and distribute the events from the producer to the consumer. 
+
+It's this router that helps decouple the producer from the consumer, which enables asynchronous communication between them, so the producer doesn't have to wait for the event to be delivered to the consumer before it can send another one. This also prevents events from being lost even if the consumer is not immediately available. 
+
+##### Event Systems as a source system
+When you work with **event systems** as a **source system**, it could be that your upstream source is a simple event producer, like an IoT device, and your system comprises both the event router and consumer. 
+
+![[Screenshot 2025-11-29 at 17.08.44.png]]
+
+Or it could be that your upstream source system is made up of multiple producers, routers, and consumers, and the systems you build are effectively just another downstream consumer of events. 
+
+![[Screenshot 2025-11-29 at 17.09.00.png]]
+
+### Types of Streaming Systems
+In your work building data pipelines to process stream data, you'll encounter **two** main types of streaming systems : 
+- message queues and 
+- streaming platforms. 
+
+I often see these two types of systems confused with one another. While there are many similarities and potential overlaps and how they can work, there's one main difference between them, and that's in **how the event router works**. So I'd like to spend a minute talking about that now. 
+
+**Message Queue**
+In a **message queue**, the event router **acts as a queue** that accumulates the messages sent by the producer. The event consumer then reads the messages from the queue in a first-in-first-out order (FIFO). Once the consumer reads the message from the queue and acknowledges this, the message is deleted from the queue. 
+![[Screenshot 2025-11-29 at 17.15.13.png]]
+![[Screenshot 2025-11-29 at 17.15.51.png]]
+![[Screenshot 2025-11-29 at 17.16.28.png]]
+
+With a message queue, the event producer can push new messages to the queue at any time, and the event consumer can read them at any time. 
+
+You can think of the queue itself as a sort of **temporary storage solution** that allows event producers to be decoupled from event consumers. 
+
+An example of a message queue that you might encounter as a data engineer is **Amazon Simple Queue Service** (**SQS**). It's a fully managed message queue that's commonly used for microservices, distributed systems, and serverless applications. 
+
+
+**Streaming Platforms**
+With a streaming platform like **Apache Kafka** or **Amazon Kinesis Data Streams**, the event producer streams events to a log, which, as we looked at in the previous video, is an **append-only record of events**. The event router then distributes messages in the log to appropriate event consumers. The consumer processes messages in the log sequentially as a read-only operation. 
+
+![[Screenshot 2025-11-29 at 17.17.30.png]]
+This means that unlike a message queue, the **messages do not get deleted from the log**, and the data is **persistent**. Since the data is retained in this way in a streaming platform, it's possible to replay batch or reprocess events in the log from a past point in time. 
+
+Streaming systems will be among the source systems you'll ingest data from as a data engineer. As you saw in the previous course and as you'll continue to see throughout these courses, you can also build streaming systems into your own data pipelines as part of the ingestion, transformation, and serving stages of the life cycle.
+
+
+# Interaction with Source Systems
+
+When it comes to *actually* connecting to source systems and your work as a data engineer, it's relatively common to run into unforeseen issues that block you from accessing the data you're interested in. 
+
+These issues can be due to things like 
+- having improper identity and access management or IAM definitions, 
+- broken networking configurations, or even 
+- just having the wrong set of access credentials. 
+
+These might at first sound like relatively trivial issues, but in my own experience, running into these problems happens all the time in data engineering, and they can be **major blockers** if you don't know how to debug and solve them properly. 
+
+- In this section, I'll start by going over some of the details of **how you connect to different source systems.** I'll demonstrate this in AWS. But the principles we'll be looking at also apply to other Cloud platforms. 
+- In the context of IAM roles and permissions, we'll look at the importance of **security in the Cloud**, where IAM is the key to controlling and managing access to Cloud based data sources and other components within your data pipelines. 
+- Finally, we'll get into **networking**. I'll start you off with a high level overview, and then Morgan will walk you through the details of networking on AWS, including VPCs and subnets, gateways, routing, security groups, and more. 
+	![[Screenshot 2025-11-29 at 17.32.21.png]]
+
+## Connecting to Source Systems
+
+Before you can ingest data, you need to first **establish a connection** to your **data source** and **verify that you're authorized to read data from it**. 
+
+You've already had some experience doing this in previous labs. 
+
+For instance, in the **DynamoDB** lab, you used **Boto3**, which is the AWS software development kit or SDK for Python to **create a client connection** to a table within DynamoDB. 
+
+```python
+def create_client():
+    try:
+	    client = boto3.client("dynamodb")
+	    return client   
+    except ClientError as e:
+        error = e.response.get("Error", {})
+        logging.error(
+            f"Failed to load DynamoDB. Error: {error.get('Message')}"
+        )
+        response = {}
+    return response
+```
+
+And you also connected to an **Amazon RDS MySQL instance** by running this command with proper parameter values. 
+
+```Shell
+mysql --host=<MySQLEndpoint> --user=<DatabaseUserName> --password=<Password> --port=3306
+```
+
+- The *endpoint* and *port* information you see here are what you use to locate the correct database instance. 
+- And the *username* and *password* credentials were used to authenticate you as someone with the proper permissions to access the database. 
+
+And so, as you can see, there's more than one way to connect to a database. Or any resource for that matter. So let's take a closer look at this. 
+
+**Using the AWS Management Console**
+If a source system is housed in a resource within your organization's AWS account, you can get the connection information from the management console. 
+
+For example, if I'm trying to connect to an **RDS database instance**, I can navigate to the RDS console, locate the database I want to connect to, and find the connection information, including the endpoint and the port number. 
+
+>	*And just as a side note, AWS is always rearranging exactly how things appear in the console. So what I'm showing here might look a little different than the console when you're looking at it.* But this basic set of steps will still be the same. 
+
+And so the console can be pretty convenient for finding information like this or spinning up resources and connections. But keep in mind that doing your work from the console involves you navigating through and clicking on widgets and buttons to get things done. 
+
+If you had to repeat this process in the future, it could be hard to remember exactly what steps you took. And like I said, by the time you want to do this again, AWS may have changed how things are arranged in the console, which could make things even harder. So in general, operating from the console is great to get something done quickly, maybe when you're prototyping something in your system. **But the process is not very repeatable nor traceable.** 
+
+
+**Using CLI tools**
+As a somewhat more programmatic way of finding the information you need and connecting to source systems, you can run code at the command line interface or CLI. 
+
+In this way, 
+- you can get the database endpoint, 
+- then you can connect to the database using the command syntax specific to the DBMS you're using. 
+
+And so issuing commands directly in the CLI like this is a common practice among data engineers in the connection and ingestion process, but it's still relatively *manual*. So it's typically better for simple workloads rather than complicated ones. 
+
+
+**SDKs**
+To take another step towards **repeatability and automation**, you can connect to a source system using an **SDK** like **boto3**, running code in an IDE or, for example, from a **Jupyter** notebook. 
+
+
+**API Connectors**
+For certain source systems, you can also connect to them through an API connector. For example, you might use 
+- a Java Database Connectivity, or JDBC for short, or 
+- Open Database Connectivity, or ODBC for short.
+
+Check [connecting-to-source-systems](../../Training/connecting-to-source-systems)

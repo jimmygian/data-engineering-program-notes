@@ -1,3 +1,5 @@
+Check [NoSQL](../NoSQL)'s DynamoDB Document.
+
 In the next lab, you'll work with **Amazon DynamoDB** as a key value database and apply some create, read, update, and delete, or **CRUD** operations on the data in this NoSQL database.
 
 You will create and interact with four DynamoDB tables using Python code in a Jupyter notebook. To do so, you will use **Boto3**, which is the A**WS Software Development Kit** that allows you to create and configure AWS services using Python.
