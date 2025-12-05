@@ -68,3 +68,67 @@ For certain source systems, you can also connect to them through an API connecto
 ## Connecting to an Amazon RDS MySQL Database
 
 You can create your own **Amazon RDS database** instance in your personal account through the AWS management console as explained [here](https://aws.amazon.com/getting-started/hands-on/create-mysql-db/). In the upcoming weeks, you will learn how to create an RDS database programmatically using Terraform.
+
+_**How to connect to an RDS instance?**_
+
+After you create your own public instance of an Amazon RDS database, you need to establish a connection to the database server to query it. In this example, the Amazon RDS database we are connecting to is MySQL, and the following information is needed:
+
+1. Database hostname/endpoint (address or location of the database server)
+2. Database port (the network port the MySQL server is running on)
+3. Database username & password (credentials to log in to the database)
+
+You can get the hostname/endpoint and port from the AWS management console or programmatically from the command line interface (CLI) after you create the table. You would have created the database username & password when setting up the database instance. Otherwise, ask the database administrator for this information.
+
+_**Connecting to the database through AWS CloudShell**_
+
+AWS CloudShell is a browser-based shell providing command-line access to your AWS resources in the selected region. You can access CloudShell from the console as follows.
+
+![[Pasted image 20251130102928.png]]
+![[Pasted image 20251130102941.png]]
+
+To connect to MySQL database through the console, you can use the following command ([link to documentation](https://dev.mysql.com/doc/refman/8.0/en/connecting.html))
+
+```shell
+mysql --host=[hostname] \
+ --port=[port number] \
+ --user=[database user name] \
+ --password=[database user password]
+```
+
+This command is specific to MySQL. Each DBMS specifies how to connect to its database through the command line. For example, here's [the documentation](https://www.postgresql.org/docs/9.1/app-psql.html) for connecting to a PostgreSQL database.
+
+The endpoint and port number were manually entered, but you could get them programmatically using this [_describe-db-instances_](https://docs.aws.amazon.com/cli/latest/reference/rds/describe-db-instances.html) command:
+
+```shell
+aws rds describe-db-instances --filters "Name=engine,Values=mysql" --query "*[].[DBInstanceIdentifier,Endpoint.Address,Endpoint.Port,MasterUsername]"
+```
+
+After you establish the connection, you can send your queries to the database using SQL.
+
+_**Connecting to the database through Python**_
+
+To connect to MySQL database using Python, first install [pymsql](https://pymssql.readthedocs.io/en/stable/). pymsql allows you to establish a connection to a MySQL database in your Python code using the .connect() method.
+
+You need to specify the following pieces of information:
+
+- Database hostname/endpoint (address/location of the database server)
+- Database port 
+- Database username & password (credentials to connect to the database)
+- Database name
+
+You can get the port and endpoint programmatically in Python using the AWS software development kit (SDK) [boto3](https://boto3.amazonaws.com/v1/documentation/api/latest/index.html). It allows you to connect to your provisioned resources and extract the necessary parameters.
+![[Pasted image 20251130103509.png]]
+The second cell in the image above shows how to set the access and secret access keys. These keys are generated for any AWS IAM user as long-term credentials to programmatically connect to AWS resources. However, it is not best practice to include these credentials in your code. For best practice, you should save these keys in a config file. Check [here](https://wellarchitectedlabs.com/common/documentation/aws_credentials/) for other options.
+
+To get the parameters in 'dbInstance', you can run 'dbInstance'. The output is shown below.
+![[Pasted image 20251130103550.png]]
+
+Once you have the necessary parameters, you can establish a connection to the database using pymysql.connect(), and then you can perform your SQL request.
+![[Pasted image 20251130103612.png]]
+
+**Final Remark**
+
+If you created an RDS database instance for practice, please remove it when you are done.
+
+From the RDS service page, click on "Databases" in the left-hand menu, select the database you just created, and delete it (you can find the delete option in the "Action" drop-down menu or by right-clicking on the database).
+

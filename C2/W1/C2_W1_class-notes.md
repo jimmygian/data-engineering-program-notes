@@ -631,4 +631,516 @@ For certain source systems, you can also connect to them through an API connecto
 - a Java Database Connectivity, or JDBC for short, or 
 - Open Database Connectivity, or ODBC for short.
 
-Check [connecting-to-source-systems](../../Training/connecting-to-source-systems)
+Check [connecting-to-source-systems](../../Training/connecting-to-source-systems) for more detailed instructions on creating and connecting to databases.
+
+
+## Basics of IAM and Permissions
+
+When you're building data pipelines in a Cloud-based architecture, identity and access management, also known as **IAM**, is central to your role as a data engineer. 
+
+As a data engineer, you're entrusted with sensitive data. Whether that's the personal and private information of your clients or proprietary business information. The owners of that data are trusting that their information is safe in your hands. 
+
+Now, security on the cloud is a vast and complicated subject, but for the purposes of these courses, we're going to focus on the **basics**. And that's because by simply adhering to a basic set of best practices, you'll be able to successfully avoid the vast majority of data disasters. In fact, a study in 2023 found that more than half of all cloud data breaches were caused by simple human error, things like **insecure storage of passwords** or other credentials, or **IAM** **misconfigurations**. 
+
+**What is IAM?**
+*IAM is a **framework for managing permissions**. Permissions define **which actions** an identity, like a person or an application, can perform on a specific set of resources, like a database or an ETL tool.*  IAM ensures that **the appropriate set of identities have access to the right resources at the right time**. 
+
+Remember the principle of least privilege we talked about in the previous course? IAM is how you exercise this principle in practice, as it allows you to grant people and applications access to only the essential resources they need to do their jobs, and only for the duration that it's required. 
+
+### AWS IAM
+Many cloud providers have built in IAM services that help users manage access and permissions to their cloud resources, for instance, **AWS IAM** is a web service that helps you manage and securely control access to AWS resources in your account. 
+
+As a brand new data engineer, chances are that you won't be the person setting up IAM configurations at a high level across your company's cloud service account. But you will be interacting with various cloud resources, and you may be responsible for configuring IAM for the resources you deploy as part of your data pipelines. And so you need at least a basic understanding of the different IAM components so that you can operate securely and troubleshoot problems as they come up. And so we'll look at these iam components in the context of AWS Iam. But just know that these same types of components are common across other cloud providers like GCP or Azure, they just might go by different names in some cases. 
+
+**AWS IAM Policies**
+In AWS IAM, you'll use **policies** that **grant identities permissions for actions** on AWS resources. 
+
+>	**AWS Identities**
+>	There are different types of AWS identities. 
+>		- There's the **Root User** who created the AWS cloud account and has unrestricted access to all resources in that account. 
+>		 - Then, there are **IAM Users** who are given specific permissions to certain resources. As a junior data engineer, it's most likely that you'll be assigned an IAM User account within your company's AWS account. You'll be given a set of **long term credentials**, like a username and password, **or an access key** that you can use to programmatically access AWS resources using code. 
+>		- Then there are **IAM groups**, which are **collections of users** that you can attach a policy to. 
+
+A policy is just a **JSON document** that includes the details of what resources and permissions that policy allows. This streamlines the process of provisioning resources. For example, your company might have an **IAM group for data engineers**, where every user in that group has access to the resources needed to build and maintain data pipelines. 
+
+**IAM Roles**
+And finally, there are IAM roles which are **not associated with a specific person or application long term**, but are **briefly assumed by a user, application, or service** to grant them **temporary permissions** to perform specified actions on your AWS resources for a limited time. 
+
+For example, by default, an EC two instance does not have permission to read or write to s three storage, but you can create a rule that has read and write permissions to specific s three buckets and let the EC two instance assume this role when needed. This is a much more secure way to give the EC two instance permission to work with s three than, for example, storing your long term user credentials within the EC two configurations. If you ever get an access denied error message when making a request with temporary role credentials, it's good to check whether those credentials have expired. 
+
+IAM Policy Examples: https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_examples.html
+
+In the previous labs, we were given specific policies that allowed us to access specific resources while prohibiting us from accessing others:
+
+![[Screenshot 2025-11-30 at 11.16.49.png]]
+
+Check [AWS IAM](../../Training/AWS/IAM) doc for more info.
+
+## Basics of Networking in the Cloud
+
+When you're building a data pipeline in a cloud based architecture, what you're really building is **a network of connected resources.** And so the way you configure that network plays a key role in ensuring that the data flows properly throughout your data pipeline. 
+
+Networking is really jus**t a collection of connected devices** that can share data and communicate among themselves and over the internet. 
+
+When it comes to networking in the cloud, the basic principles are roughly the same across all major cloud providers. Here I'll go over the principles in the context of AWS, since that's what you're working with in these courses.
+
+The term cloud computing can sound a little abstract, like computation is somehow happening out in the ether. But make no mistake, the cloud and cloud computing is made up of very real **physical data centers** that are spread out around the world. 
+- The **AWS cloud** is a global network that is spread across different geographical areas known as **regions**. 
+- Each region contains **clusters of availability zones**
+- Each availability zone consists of one or more data centers with redundant power, networking, and connectivity. 
+
+> ![[Screenshot 2025-11-30 at 18.00.04.png]]
+
+In many cloud computing applications, data and resources are **replicated across regions** and availability zones to ensure that systems keep working even if one or more data centers were to go down. As a data engineer spinning up new resources on the cloud, you'll need to decide which region to host your resources in. 
+
+**Region considerations:**
+When choosing a region for your data to be stored, there are many things to take into account:
+- You might need to consider things like **legal compliance**. For example, does storing your data in a specific region mean it needs to adhere to unique data privacy or regulatory requirements? 
+- You might also need to consider other factors like **latency**. The closer your end users are to the region where your resources are hosted, the lower the latency.
+- and **availability**. The more availability zones your resources are replicated across, the better you will be able to withstand or recover from a disaster. 
+- **Cost**. In addition to these considerations, **the cost of resources can vary from one region to the next,** which may be a factor in your decision. 
+
+And so, when you're actually working with resources on the cloud, it can be easy to lose sight of the fact that what you're really doing is interacting with a network of physical devices that are spread out around the globe. But as a data engineer, it's important to understand how this global infrastructure is set up and how it impacts things like latency, cost, reliability, and availability of the systems that you build. 
+
+**Virtual Private Cloud (VPC)**
+So moving back to important things you need to know about networking in the cloud. **Within** any given **region**, you can create **custom virtual private clouds, or VPCs,** which are smaller networks that span multiple availability zones within a region. 
+![[Screenshot 2025-11-30 at 18.07.08.png]]
+- Creating VPCs allows you to have more fine-grained control over who can access what resources. 
+
+You can then divide the space in your VPC into **subnetworks**, or **subnets** for short, that house your actual data pipeline resources. 
+![[Screenshot 2025-11-30 at 18.09.01.png]]
+
+Each subnet can then have **its own security rules**, known as a **network access control list**, or **network ACL** for short, as well as **routing configurations** through an internet gateway. 
+
+![[Screenshot 2025-11-30 at 18.09.51.png]]
+- This lets you create public subnets for internet-facing resources, like web servers, and private subnets for internal resources, like databases. 
+
+In the real world, things can get complicated very quickly, especially when you start setting up multiple VPCs, subnets, gateways, and routing configurations between resources. And it's in this context that the simple act of connecting to a database depends on multiple layers of networking configurations, not to mention IAM permissions. And so, understanding the details of network configuration is critical when it comes to connecting to your source systems. It's also required for successful orchestration and automation of your data pipelines, which we'll get into in the last week of this course.
+
+
+## AWS Networking Overview - VPCs & Subnets
+
+**Networking** will be a significant part of your job as a data engineer, and networking can feel overwhelming at first with all there is to know about setting up connections between resources, permissions, security and all the rest. But don't worry, networking in the cloud is something you can become proficient in. It just takes time and understanding a set of core concepts and how you can apply those concepts in building your data systems. 
+
+Through this and the next several sections, I'll go over the details of these important core concepts including 
+- **Amazon Virtual Private Clouds**, or **VPCs**, 
+- subnets, 
+- gateways, 
+- route tables, 
+- network access control lists (**ACLs**), and
+- security groups. 
+
+**Example Scenario**
+Let's see how to build out the **VPC** and **networking components** for a scenario where you need to deploy: 
+- an **Amazon RDS** database and 
+- an **Amazon EC2** instance. 
+Let's imagine there is
+- a web application running on the EC2 instance 
+- that allows you to query the database running on RDS. 
+
+This is a simple scenario for any kind of web application with a relational database on the backend. So the end state will look like this. 
+
+- One **VPC**, with:
+	- 2 **public** and 
+	- 2 **private** subnets
+- **EC2** and **RDS** database instances deployed into the *private* subnets, 
+- **NAT gateways** in the *public* subnets, 
+- as well as an application **load balancer** to front the web application fronting on the EC2 instances. 
+![[Screenshot 2025-11-30 at 18.18.31.png]]
+
+I'll walk through each setup step for this scenario that is related to networking and explain all of these components as we go along. We won't actually deploy the EC2 or RDS instances or the application load balancer, but we will build out all of the networking components needed for it. 
+Having this scenario in mind will hopefully make the networking concepts easier to grasp.
+
+### 1. Creating VPC and Subnets
+ So to get started, we will need a **VPC** and **subnets** to place the EC2 and RDS instances in. 
+![[Screenshot 2025-12-03 at 13.08.35.png]]
+
+Let's go ahead and complete that task:
+
+- From the AWS console homepage, I will go to the search bar and type VPC. ![[Screenshot 2025-12-03 at 13.40.37.png]]
+  
+- Then I'm going to select VPC. This brings us to the **VPC dashboard** where I can then select the **Create VPC** button. ![[Screenshot 2025-12-03 at 13.41.28.png]]
+  
+- Now on the create VPC page, I am *only* going to create one VPC. Then we will manually create these subnets next. ![[Screenshot 2025-12-03 at 13.42.20.png]]
+
+
+	**Default VPC** **- Explained:**
+	Before moving ahead though, I want to point out that there is what's called a **"default VPC"** in *each* region. By default, in an AWS account, the default VPC includes:
+	-  a **public** subnet in each availability zone in that region, 
+	- and an **Internet gateway**
+	Using the default VPC can allow you to quickly launch *public Internet facing EC*, two instances without additional setup. This can be convenient for experimenting with launching public resources like a simple website, but **for most real world use cases**, you likely don't actually want directly public facing resources, and instead you want **network protected resources**. 
+	
+	So with that in mind, your default should not be to use the default VPC for any real work. Instead, you should create **custom vpcs** for your specific use cases, and that's what I'm going to show you how to do here. 
+
+
+As we've seen before, AWS operates in *regions* around the world, and these regions are made up of *multiple availability zones,* or **AZs** for short. 
+
+**A VPC has the ability to span all of the AZs within the region in which the VPC was created.**
+![[Screenshot 2025-12-03 at 13.16.18.png]]
+
+Here were going to create **one VPC**, but a region can have **more than one** VPC in it. For example, you might create different VPCs for different projects, environments, or other organizational or technical considerations. 
+![[Screenshot 2025-12-03 at 13.17.06.png]]
+- Each VPC is isolated from other VPCs by default. 
+- Resources within the same VPC can communicate with each other, but communication between resources from two different vpcs is something you would need to design and configure. 
+	![[Screenshot 2025-12-03 at 13.18.16.png]]
+
+
+When you create a VPC, you need to give it: 
+- a name, 
+- a private IP address range, 
+- and choose the region you want it to be placed into. 
+![[Screenshot 2025-12-03 at 13.47.13.png]]
+
+It's useful to give VPCs a descriptive name so you can more easily identify which VPC is which. 
+
+- I will go ahead and name this VPC *project-1*. And you can see here the region im creating this VPC in is **US-East-1**, but I could choose another region from the dropdown if I needed to. ![[Screenshot 2025-12-03 at 13.48.07.png]]
+
+- Next, you need to define the IPv4 **CIDR block**. CIDR stands for "*Classless Inter-Domain Routing*" and it defines the range of private IP addresses that can be used within the VPC or how many private IP addresses are available in the VPC. 
+  
+  Any resource that gets deployed into this VPC will be assigned a **private** IP address from this range. That being said, if you want to create a resource that is **available via the Internet**, you would also need it to have a **public** IP address. Any public IP address assigned to it would come from a pool of AWS managed public IPs. 
+  
+  So this CIDR range here is ONLY for private IP addresses. I'm going to type **10.0.0.0/16** for the CIDR. 
+  ![[Screenshot 2025-12-03 at 13.50.35.png]]
+
+And I'd like to pause now and go over this CIDR notation because it can seem complicated if you're not used to seeing it. I'm going to try to simplify it to make it easier to grasp if this is your first time getting into the details of networking. 
+
+![[Screenshot 2025-12-03 at 13.28.13.png]]
+
+- IP addresses have **four numbers separated by dots**. 
+- Each number can range from 0 to 255. In other words, each number in the address is an **eight bit integer** value. 
+  In the case of this example, 10.0.0.0/16, the 10.0.0.0 is the starting address of our network. The 16 part is a **prefix length** which tells you how many bits are used for the **network part** of the address. So in this case, the 16 tells you that **16 bits**, or in other words, the first two of these eight bit integers will be the network prefix. 
+  ![[Screenshot 2025-12-03 at 13.25.38.png]]
+
+- In binary form an IPV4 address consists of 32 bits, which again, just means that each number between the dots in the address represents 8 bits, with 4 numbers of 8 bits each. So as I said, the 16 means that the first 16 bits or the first two numbers are **fixed** and define the network, while the remaining 16 bits or the other two numbers can vary and are used for host addresses within that network. 
+- That means that any resource deployed into this network would have a private IP address that starts with **10.0**. Then the other two numbers could be anything between 0 and 255. ![[Screenshot 2025-12-03 at 13.28.56.png]]
+- If I wrote /24 instead of /16, that would mean that the first *three* numbers would be fixed and only the last number would be able to be used to assign host addresses. 
+- You'll see why you need to know this in the next step when we create subnets.
+
+So now back in the AWS console I have defined the different pieces I need to create a VPC and I can select **create VPC** . ![[Screenshot 2025-12-03 at 13.53.44.png]]From here I need to create the subnets. 
+
+**Subnets**
+Subnets **are sub networks within the VPC**, meaning, **smaller divisions** of the private IP space for the VPC that you can use to **group resources** based on their network access and security requirements. 
+> 	*Later, we'll use network access control lists (ACLs) and security groups to control what types of network traffic can come in and out of each subnet.* 
+
+- Each subnet is associated with a **specific AZ**, meaning that when you create a subnet, you MUST specify which AZ it resides in. 
+- By strategically placing your resources in *different subnets across multiple AZs*, you can enhance the redundancy and availability of your applications. 
+- It's common to create at least: 
+	- one private, and 
+	- one public subnet 
+	*per* AZ that you intend to use.
+	
+Here. I would like to deploy the EC2 instances and RDS databases into *private* subnets so that they aren't exposed to the Internet. And for **redundancy** I plan to create two public subnets and two private subnets across two azs in this VPC, which is a common pattern to follow. That way, for example, if the primary database instance experiences degradation, or if the AZ itself has temporary availability issues, you have all of your data and an instance running in another AZ that can absorb the traffic after failover occurs. 
+![[Screenshot 2025-12-03 at 13.40.19.png]]
+
+So, to create these subnets I will select Subnets in the navigation and then select Create subnet. 
+![[Screenshot 2025-12-03 at 13.57.05.png]]
+![[Screenshot 2025-12-03 at 13.56.39.png]]
+
+Now I need to select which VPC I want to create the subnets in. I will select the dropdown and choose the project-1 VPC. 
+![[Screenshot 2025-12-03 at 13.57.28.png]]
+
+From this page I can create all four subnets. 
+- For the first subnet I will name it public subnet one and then select a specific AZ. So later I can ensure I am deploying additional subnets to different AZs. 
+
+I will select us east one a for this one. ![[Screenshot 2025-12-03 at 13.57.54.png]]
+
+Then I need to give it a CIDR range and subnets need to have an IP range that is a subset of the IP range of the VPC. The VPC is defined to use 10.0.0.0/16 so I will make the range for this first subnet 10.0.1.0/24. 
+![[Screenshot 2025-12-03 at 13.58.28.png]]
+
+This means that any resource deployed into the subnet will be assigned an IP address that starts with 10.0.1. 
+
+Then the last number will be assigned to identify the specific host. Now to create my first private subnet I will select add new subnet and then repeat the same steps. But this time, I will name the subnet private-subnet-1 and give it a CIDR of 10.0.2.0/24. 
+
+Now let's do it two more times for the other public subnet and private subnet for the other AZ which I will use us-east-1b for. 
+
+So the next thing to do is to create the public-subnet-2 which has a CIDR of 10.0.3.0/24 and then private-subnet-2 which has a CIDR of 10.0.4.0/24. >> Then I can finally select Create which will create all four subnets. 
+
+All right, you now have a VPC with two public and two private subnets ready to use and it looks like this. 
+![[Screenshot 2025-12-03 at 13.34.41.png]]
+
+The way this sits right now, anything deployed into this VPC would not have access to the Internet. 
+![[Screenshot 2025-12-03 at 13.34.56.png]]
+
+You can add the EC2 and RDS instances to this diagram to show them sitting in the private subnet. Neither of these resources would be accessible from the Internet and they wouldn't be able to initiate connections with any resource on the Internet either. 
+![[Screenshot 2025-12-03 at 13.35.08.png]]
+
+So at this point, it's a closed network and you will need to deploy and configure some more resources to make Internet connectivity possible for anything in this VPC. ![[Screenshot 2025-12-03 at 13.35.35.png]]
+
+Up next, we will look at Internet connectivity and how Internet and NAT gateways work.
+
+
+
+### AWS Networking - Internet Gateway & NAT Gateway
+
+At the end of the last video, we had created a VPC with two public subnets and two private subnets. 
+
+In our current configuration state, if you deployed any resource like an EC2 Instance into one of the public subnets,
+- it would NOT be accessible via the Internet, 
+- and it would NOT be able to establish connections to other resources on the Internet either. 
+![[Screenshot 2025-12-03 at 13.35.08.png]]
+
+That is because VPCs and subnets alone create an isolated network. No traffic in or out. In this section, we will discuss how to make Internet connectivity possible using 
+- **Internet gateways** and 
+- Network Address Translation, or **NAT gateways**. 
+
+
+Now, if you recall the scenario we are following, you would have an EC2 Instance and an RDS database in your VPC. As a best practice, both the application running on the EC2 Instance and the RDS database should be in **private subnets** and wouldn't need direct connectivity with the Internet. 
+
+However, I want to call out *two considerations* we didn't discuss before. 
+1. The applications running on the EC2, DO need to occasionally **download updates from resources on the Internet** for things like application upgrades and patching. 
+2. You would still need a way to **submit requests to the application** running on the EC2 Instance through the load balancer so that you can query your data on RDS. 
+
+![[Screenshot 2025-12-03 at 15.13.41.png]]
+
+Both of these considerations mean that your VPC does, in fact, need Internet connectivity. 
+
+
+To better understand what an Internet gateway is and what it does, I want you to think of your VPC in its current state like a **house without a door.** If you build a house around you without a door, you wouldn't be able to leave the house, and no one can enter the house from the outside. 
+
+If you were in the house, you could move freely from room to room. But in order to get out, you would need to **install a door to the outside world**. So that's what we have so far here, a house without a door. And so what we will be doing next with our VPC is to install a door to the Internet. Or in other words, we will attach an **Internet gateway** to it. ![[Screenshot 2025-12-03 at 15.17.28.png]]
+- Internet gateways allow resources in your *public* subnets to connect with the Internet. 
+- They support both *inbound* and *outbound* traffic. 
+
+> 	*Creating an Internet gateway and attaching it to the VPC is j**ust one step** in allowing Internet traffic to flow to and from the public subnets. You will also need to configure **routes** in the **route tables** and configure **network security rules**, and we will do those in the next couple videos.* 
+
+
+Now, I mentioned earlier that our EC2 Instance will be in *private* subnets. And here I am saying that we will be attaching an Internet gateway to allow traffic to flow to and from the *public* subnets. How will this help if our resources are in the private subnets? Well, let's recall our two considerations from earlier. 
+
+- First, the EC2 Instance needs to be able to download updates from resources on the Internet. This means that our EC2 Instance in the private subnet needs to be able to make outgoing connections from the VPC. 
+- And the second, you need to be able to **submit requests** to the application *from* the Internet. 
+
+Let's talk about how **NAT gateways** and an **application load balancer** can help us meet these requirements. 
+
+
+**NAT Gateway**
+The NAT and NAT gateway stands for Network Address Translation, and this is a service that: 
+-  **allows resources in a *private* subnet to connect to the Internet or other AWS services** but 
+- **prevents the Internet from initiating connections with those resources**. 
+
+Think of it as a **controlled doorway** that only allows *outgoing* traffic and protects the resources inside that are initiating that traffic. With a NAT gateway in place, your EC2 Instances in the private subnet can **download updates and patches** from the Internet without exposing them directly to the public Internet. 
+![[Screenshot 2025-12-03 at 15.21.36.png]]
+
+
+**Application Load Balancer (ALB)**
+Next, we need to address the second consideration, **allowing external users to submit requests** to our application. This is where the Application Load Balancer, or ALB comes in. The ALB distributes incoming application traffic across multiple back end targets, like our EC2 Instances, which are hosted across two availability zones. 
+
+The ALB serves as the **entry point for external users**. Handling the load and ensuring the application remains responsive and available while also allowing us to keep those EC2 Instances private. 
+
+![[Screenshot 2025-12-03 at 15.22.23.png]]
+>	*We won't actually be building this part since I am focusing on the networking aspect of this architecture for these lessons. However, it's good to know when to use an ALB to allow for application connectivity without directly exposing your back end EC2 Instances. 
+
+
+
+So now let's create and attach an Internet gateway and deploy two NAT gateways to the VPC we built in the previous section. Here I am in the AWS Management Console on the Home page. And I will type in VPC into the Search bar. Then from the VPC dashboard, I will select Internet gateways from the Navigation panel. ![[Screenshot 2025-12-03 at 15.24.16.png]]
+From the Internet gateways page, I will select the Create Internet gateway button. ![[Screenshot 2025-12-03 at 15.25.03.png]]On the next page, I can give the Internet gateway a name. I'll name it Project 1 Gateway, and then select Create Internet Gateway. 
+![[Screenshot 2025-12-03 at 15.25.31.png]]
+So now we have an Internet gateway, but we need to attach it to the VPC. 
+
+> 	*Just as a note, **one VPC can have one Internet gateway, and an Internet gateway can only be attached to one VPC at a time.*** This is a one-to-one relationship. 
+
+From here, I'm going to select actions, then attach to VPC. On the next screen from the list of VPCs, I can select the Project 1 VPC, and then select attach Internet gateway. Now, the state of this gateway is attached. So we have installed the front door to this VPC. 
+
+![[Screenshot 2025-12-03 at 15.26.05.png]]
+![[Screenshot 2025-12-03 at 15.26.35.png]]
+![[Screenshot 2025-12-03 at 15.26.55.png]]
+
+The next step is to create the **NAT gateway**. It's a best practice to create **one NAT gateway in every AZ that you are operating in.** So I will actually create two NAT gateways and place them in each public subnet. To do this from the navigation panel, I will select NAT gateways then create NAT gateway. From this screen, you'll configure the NAT gateway. So first, I'll give it a name. I'll call this one NAT Gateway 1, and then select Public subnet 1 from the dropdown. 
+![[Screenshot 2025-12-03 at 15.27.12.png]]
+Then this needs to have an **elastic IP address** configured, which will provide a static IP address, and I will select Allocate Elastic IP to do this. ![[Screenshot 2025-12-03 at 15.29.50.png]]
+
+Then I will select Create NAT Gateway. Then I will repeat the steps, but this time, place the NAT gateway into the other public subnet. I'll name this one NAT Gateway 2, and then select Public subnet 2 from the drop down. Create the Elastic IP address, and then finally, create the gateway. 
+
+At this point, this is what our network looks like with the EC2 Instances, RDS database, and ALB included. ![[Screenshot 2025-12-03 at 15.30.27.png]]
+There are a few more steps that we need to walk through before inbound and outbound Internet connectivity is working. 
+
+In the next steps, we will walk through the process of setting up the necessary elements, which will include configuring **route tables** and defining **security rules** to secure our VPC. By the end of the series of videos, we'll have a VPC with both secure Internet connectivity and robust access control.
+
+### AWS Networking - Route Tables
+
+The next basic component of networking on AWS you need to learn about is **route tables**. In the last video, we ended with an architecture diagram like this. 
+![[Screenshot 2025-12-03 at 15.41.20.png]] 
+- There is a VPC 
+	- with two public and 
+	- two private subnets across two AZs 
+- and an Internet gateway attached to the VPC, 
+- with EC2 instances and RDS database instances in the private subnets, 
+- NAT gateways deployed in the public subnets in each AZ, 
+- and a public application load balancer, which *fronts* the private EC2 instances. 
+
+
+The next step to enable Internet connectivity is to **configure the route tables** for the **subnets**. 
+- Route tables are essential for **directing network traffic within your VPC**. 
+- Each subnet can be associated with a route table, which contains a **set of rules or routes** that determine where network traffic is directed. 
+
+**Default Route Table**
+When you create a VPC, AWS automatically creates a *default* route table. 
+This default route table allows internal communication within the VPC, meaning resources in different subnets can communicate with each other. However, it does not include routes for Internet connectivity. 
+
+This is where you need to customize your route tables to meet your specific requirements. 
+
+Without these routes, your subnets won't know how to direct traffic either to the Internet or within the VPC itself. ![[Screenshot 2025-12-03 at 15.49.06.png]]
+
+- For *public* subnets, you'll configure the route table to direct ALL Internet-bound traffic to the **Internet gateway**. This allows resources in the public subnet to access the Internet. ![[Screenshot 2025-12-03 at 15.49.40.png]]
+
+- For *private* subnets, you'll direct Internet-bound traffic to the **NAT gateway** in the public subnet. This allows resources in the private subnet to make outbound connections to the Internet while preventing inbound connections from the Internet. ![[Screenshot 2025-12-03 at 15.50.31.png]]
+
+Let's hop into the AWS Management Console and build out these route tables and routes. First, I will create and associate the route tables. Then we will actually go back in and create the actual routes. 
+
+Starting from the VPC dashboard, I will select route tables from the Navigation panel and then select Create route table.
+![[Screenshot 2025-12-03 at 15.51.50.png]]
+![[Screenshot 2025-12-03 at 15.52.31.png]]
+![[Screenshot 2025-12-03 at 15.52.50.png]]
+
+I'll create **one route table per subnet** in our VPC. 
+- The first one I will name public-route-table-1. 
+- Then select Project-1 VPC, and then select Create route table. 
+![[Screenshot 2025-12-03 at 15.53.43.png]]
+
+Then I can associate this one with the first public subnet by selecting: 
+
+actions > Edit subnet associations
+![[Screenshot 2025-12-03 at 15.54.09.png]]
+
+selecting public-subnet-1 > and then save Associations. 
+![[Screenshot 2025-12-03 at 15.54.55.png]]
+
+
+Next, we will do the same for the other three subnets. Select Route tables, Create route table, name the second one public-route-table-2. Select the VPC, and create. Then associate this route table with public-subnet-2. 
+![[Screenshot 2025-12-03 at 15.56.44.png]]
+
+
+***Creating private routes through AWS Console***
+Now it's time to create the private route tables. I can name this one private-route-table1. Select the VPC and create. Then associate this route table with private-subnet-1. Finally, to create the last one, I'll name it private-route-table-2, select the VPC and create. Then associate this route table with private-subnet-2. Now that we have the route tables, it's time to create the routes. 
+
+For this step, we will want to create routes for the traffic that will flow between the public subnets and the Internet gateway and routes for the private subnets that will flow to the NAT gateway. 
+
+From the route tables dashboard, I will select public-route-table-1, > Edit routes. ![[Screenshot 2025-12-03 at 15.58.14.png]]
+- There is already one route in the table, and this route is a default route added to every route table that you create for communication within the VPC. 
+
+To add the route to allow Internet traffic to be directed to the Internet gateway, I will select Add route. Then for the destination, this will be 0.0.0.0/0. If you remember the lesson about CIDR notation, this has a slash zero prefix, which means it can match any IP address because zero bits are fixed. This represents any IP address or in other words, the entire Internet. 
+
+The destination is 0.0.0.0/0 or any IP address. ![[Screenshot 2025-12-03 at 15.58.53.png]]The route we will want to direct traffic to is the Internet gateway. 
+
+Under target, I will select the dropdown and then select the Internet gateway attached to this VPC we created in the last video.![[Screenshot 2025-12-03 at 15.59.39.png]]
+- I'll set up this route along with other network and configurations in the next video to allow instances in our public subnet to send and receive traffic from the Internet via the Internet gateway. 
+For now, I will select Save changes and then navigate back to the route tables page. 
+
+
+Let's move on to configuring the private subnets route table. I'll select a route table associated with one of our private subnets and add a new route. 
+
+Again, the destination will be 0.0.0.0/0, but this time, the target will be the NAT gateway that we deployed to the public subnet. This ensures that any Internet-bound traffic from our private subnet instances is routed through the NAT gateway, allowing these instances to access the Internet for updates and patches while remaining isolated from direct inbound Internet traffic. ![[Screenshot 2025-12-03 at 16.00.41.png]]
+
+To complete this, you would do the same steps for the other public and private subnets. 
+
+
+Now, our route tables are configured to handle both internal and external traffic as required. The public subnets have routes directing Internet-bound traffic to the Internet gateway, enabling instances within these subnets to communicate with the Internet. The private subnets have routes directing Internet-bound traffic to the NAT gateway, allowing instances within these subnets to make outbound connections to the Internet securely. 
+
+In the next section, we'll cover additional networking configurations, such as security groups and network ACLs. These configurations will further secure our VPC by defining the inbound and outbound traffic rules for instances and subnets.
+
+
+
+### AWS Networking - Network ACLs & Security Groups
+
+As a reminder, in the previous section we left off having configured the route tables for these subnets which will direct traffic for the VPC here, well look at a few other networking configurations you're going to need to know about. In our scenario, the application load balancer will send Internet traffic to the EC two instances which would then create a connection with the RDS database instances for queries. ![[Screenshot 2025-12-03 at 16.03.47.png]]
+
+You can configure **networking rules** to allow only the network traffic you want to reach these instances. By default, *no traffic* is allowed to reach these instances even with the route tables in place. (Principle of least privilege)
+- Routes are building the actual "roads" that lead to the resources, but these roads are guarded.
+- Rules are the "passes" we give to resources to be allowed to pass through that road that leads to these resources.
+
+To change that, you first need to understand 
+- security groups![[Screenshot 2025-12-03 at 16.16.58.png]]
+
+- and network access control lists, aka network **ACLs**. ![[Screenshot 2025-12-03 at 16.17.32.png]]
+
+
+**Security Groups**
+Let's start with security groups. Think of security groups as **instance level virtual firewalls** controlling both *inbound* and *outbound* traffic. 
+
+By default, security groups **deny** all inbound traffic and **allow** all outbound traffic. 
+![[Screenshot 2025-12-03 at 16.19.25.png]]
+
+So, you need to define inbound rules which determine 
+- ***what* types of traffic you want to allow** and 
+- **where** you want to allow that traffic to come from. 
+
+Security groups are also **stateful**, which means that *if* you allow inbound traffic to an instance, the return traffic is automatically allowed even if there are no outbound rules explicitly permitting it. For instance, if you permit an inbound HTTP traffic on Port 80, the responses to those HTTP requests are allowed to flow out without needing an explicit outbound rule. ![[Screenshot 2025-12-03 at 16.21.39.png]]
+- This stateful nature simplifies security group management because you don't have to create matching outbound rules for every inbound rule. 
+
+Resources that are placed in VPCs use security groups, like EC2 instances, load balancers, and RDS database instances. All of them can use security groups with different rules, and the rules for security groups **can reference other security groups**. 
+
+
+**Security Group Chaining**
+
+In our example, we have: 
+- an application load balancer (ALB) that would need to accept traffic for HTTP on port 80 and HTTPs on port 443 from the Internet. 
+
+- Then we have an EC2 instance hosting our web server. So you'll need to allow HTTP and HTTPS traffic coming *from* the application load balancer. To do that, you could **reference** the security group used by the load balancer. 
+
+- We also have **RDS database instances** which would need to allow TCP on Port 3306, which is commonly used by databases like MySQL coming from the security group used by the EC2 instances. 
+
+This is called security **group chaining**. 
+![[Screenshot 2025-12-03 at 16.25.30.png]]
+
+---
+
+
+Now let's walk through an example of creating a security group that could be used by the application load balancer. 
+
+To set up a security group, navigate to the VPC dashboard, and then select security groups. Then select create security group. 
+![[Screenshot 2025-12-03 at 17.21.42.png]]
+
+- First you give it a name like `alb-sg` 
+- Then we want to select *which* VPC this security group belongs to. Because security groups are associated with one VPC, we will select the `project-1` VPC. ![[Screenshot 2025-12-03 at 17.23.56.png]]
+- Next, we need to define the *inbound* rules. 
+	- I'll select Add rule. 
+	- Then for the type of traffic, I will select HTTP, which will auto populate the port range to be 80. 
+	- Then I will select 0.0.0.0/0 for the source which will allow traffic from the Internet on Port 80. ![[Screenshot 2025-12-03 at 17.24.22.png]]
+	- Then I will add another rule for HTTPs which uses port 443 and will allow traffic from the Internet. 
+
+- Then I will select create security group. 
+
+This security group can then be associated with the load balancer. 
+
+**Network ACLs**
+Now let's move on to network ACLs which provide an additional layer of security ***at the subnet level***. 
+
+- Unlike security groups which are stateful, network ACLs are stateless. 
+	- This means you need to define *both* inbound and outbound rules explicitly. 
+- They offer more *granular* control over traffic and can be particularly useful for implementing security policies at the **subnet level**. 
+- By default, network ACLs allow all inbound and outbound traffic, but you can modify these rules to meet your specific security requirements. 
+
+We don't need to change this behavior for our simple use case, but it's still important to know as **it's one of the main ways to control network traffic on AWS** and you may need to tweak these rules if you are troubleshooting a network issue. 
+
+So this is what our diagram looks like: ![[Screenshot 2025-12-03 at 17.27.59.png]]
+
+Now, accounting for the places where we could apply security groups and network ACLs. 
+
+In the upcoming lab, you will need to troubleshoot connectivity issues with a database, which is a very common scenario you will run into as a data engineer. 
+
+
+##### **AWS Networking - Summary**
+Resource: 
+- First, we covered the basics of **VPCs** and **subnets**, which give you a way to define **a private isolated network on AWS**. 
+
+- We discussed the importance of correctly **configuring route tables** to direct traffic within the VPC and to the Internet. 
+
+- You learned how to set up **public subnets** with routes pointing to the Internet gateway, allowing resources within these subnets to access the Internet. 
+
+- Similarly, we covered configuring **private subnets** with **routes** pointing to the **NAT Gateway**, enabling instances to initiate outbound connections securely. 
+	- Notice how we call the subnets public subnets or private subnets, *but it's actually the route table that determines that access*. 
+	- There is nothing magic about creating a public or private subnet. It's all about correctly configuring and managing the route tables. 
+
+- Next, we explored security groups, which act as virtual firewalls. At the instance level. They control both inbound and outbound traffic, and their stateful nature means that if you allow inbound traffic, the return traffic is automatically permitted. It's most common to configure inbound rules **only on security groups**, as they by default, allow all outbound traffic. 
+
+- We then moved on to network ACLs, which provide an additional layer of security at the subnet level.
+	- Unlike security groups, network ACLs are *stateless*, requiring explicit rules for both inbound and outbound traffic. 
+	- This allows for more granular control and is useful for implementing specific security requirements. 
+
+So if you encounter connectivity issues, 
+1. Start by verifying your VPC has an **Internet gateway properly attached**, 
+2. that the **route tables have appropriate rules** to direct traffic correctly, and 
+3. that the **route table associations with the subnets are configured correctly**. 
+4. Next, **check security groups** to make sure they have the needed rules in place, and 
+5. **review network ACLs** to confirm they allow the necessary traffic. Also, 
+6. double check **instance configurations** to ensure they are **associated with the correct security groups and subnets**. 
+
