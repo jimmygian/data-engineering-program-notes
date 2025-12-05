@@ -1144,3 +1144,26 @@ So if you encounter connectivity issues, 
 5. **review network ACLs** to confirm they allow the necessary traffic. Also, 
 6. double check **instance configurations** to ensure they are **associated with the correct security groups and subnets**. 
 
+# Summary
+
+Key learnings (concepts) of this week, in no particular order:
+
+- Understanding how source systems work.![[Screenshot 2025-12-05 at 14.13.18.png]]
+
+- How to connect to these data sources
+- Troubleshooting AWS
+- CRUD operations
+- ACID compliance
+- DBMS / RDBMS
+- Data Normalization
+- NoSQL / SQL basics
+- Data integrity / data redundancy
+- AWS Networking Basics (VPS, AZ, Subnets)
+- IAM concepts (policies, users, roles, groups)
+- structured / semi / un structured data
+- Connecting to a database
+- Streaming VS Batch processing
+
+# Resources
+
+- Chapter 5 and Appendix B of [Fundamentals of Data Engineering](https://go.redpanda.com/fundamentals-of-data-engineering)
