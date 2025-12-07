@@ -250,3 +250,294 @@ The most common type of API is what's known as a **REST API**, where REST stan
 REST APIs commonly use **Hypertext Transfer Protocol** or what you might know more familiarly as **HTTP** methods as a basis for communication. 
 
 ![[Screenshot 2025-12-05 at 18.07.44.png]]
+
+
+## Streaming Ingestion Details
+
+In week one of this course, we looked at streaming systems, including *message queues* and *event streaming platforms*, from the perspective of these being source systems, where your data pipeline was *on the consumer end* of these data sources. ![[Screenshot 2025-12-06 at 17.33.40.png]]
+
+I also mentioned that **depending on the system you're working with**, the actual source might just be **the event producer** or multiple elements of a streaming system, like **multiple producers**, **brokers**, and **consumers** could be upstream of your ingestion system.
+![[Screenshot 2025-12-06 at 17.35.50.png]]
+
+In this sections, I'd like to talk a little more about the details of message streams, and after that you'll be on your way to the lab. 
+
+And so as a quick reminder, you'll have 
+- event streaming platforms and 
+- message queues 
+as the **two main modalities of streaming ingestion**. 
+
+
+**Message Queue**
+A message queue is essentially a **buffer** used to deliver messages **from an event producer to a consumer in an asynchronous manner**. 
+
+Message queues typically operate on a first in, first out or FIFO basis, meaning that the event consumer will always read the oldest message in the queue first, and once a message is consumed, **it is deleted from the queue**. 
+![[Screenshot 2025-12-06 at 17.39.14.png]]
+![[Screenshot 2025-12-06 at 17.39.35.png]]
+**Event Streaming Platform**
+Event streaming platforms, on the other hand, function by **storing messages** in a **persistent** way in an **append-only log**. The "**event router**" distributes messages in the log **to the "subscribers"**, and it's possible to *replay* or *reprocess* any messages in the log. 
+
+![[Screenshot 2025-12-06 at 17.40.53.png]]
+![[Screenshot 2025-12-06 at 17.40.59.png]]
+
+You'll be using Amazon's **Kinesis** service as your event streaming platform in the lab, but another widely used platform is **Apache Kafka**. 
+![[Screenshot 2025-12-06 at 17.42.04.png]]
+
+
+In this section, I'll use Kafka as the example platform to talk through some of the details and draw parallels with Kinesis where they exist. And then in the next section, Morgan will go through kinesis in more detail. So by the end of this week you can have some context on both of these solutions. 
+
+
+### **Apache Kafka**
+Apache Kafka is an *open-source event streaming platform*, and while streaming platforms come in a number of different flavors and varieties, the principles of how events are routed and stored are similar across platforms. 
+
+At a high level: 
+- **Event Producers** *send* or *push* messages over the network to a **Kafka cluster**
+- **Kafka Cluster** contains *one* or *more servers*, also called "**brokers**". 
+-  **Event Consumers** then *read* or *pull* messages from that Kafka Cluster. 
+>    ![[Screenshot 2025-12-06 at 17.55.29.png]]
+>    
+	**Kafka Cluster**
+	Let's zoom in a bit on the Kafka Cluster. *Within* a Kafka cluster, 
+	- **"message streams"** are **split up** and **routed** into what are called "**topics**". 
+	- "Topics" can be thought of as a *category that holds a collection of related events*, or maybe in another sense, like a *road* to somewhere. And so messages line up in topics similar to how rows of cars line up on different highways based on their destination. 
+		- A topic could contain any type of messages, for example, fraud alerts, customer orders, or temperature readings from IoT devices. 
+		- It's the job of the **producer** to send a message to its corresponding topic. 
+	- Each topic has one or more **"partitions"**, which are just **logs** containing ordered, immutable sequences of messages that you continually add new messages to. Using the road system analogy, partitions are like lanes on the highway. More lanes allow more cars to pass through, and so each partition handles a subset of messages as they are added to the topic. This allows for more efficient traffic or message flow. 
+		- And again, it's a **job of the** **producer** to decide on which partition to send each message. The decision could be based on a **round-robin strategy**, for example, or by computing the destination partition based on the **message key**.
+
+![[Screenshot 2025-12-06 at 17.57.28.png]]
+
+With kinesis, all these concepts are essentially the same, but instead of topics, you have streams, and instead of partitions, you have what are called shards. 
+
+![[Screenshot 2025-12-06 at 17.58.07.png]]
+
+- **Event Consumers**
+	- Event consumers are **grouped**, and each consumer group can **subscribe** to **one or more topics**. The consumers of a group cooperate together to consume the messages from all partitions of a given topic. 
+	  
+	- Each partition can only be assigned to **a single consumer** in the group, and each consumer consumes messages from a different subset of partitions. ![[Screenshot 2025-12-06 at 17.58.43.png]]![[Screenshot 2025-12-06 at 17.59.04.png]]When a producer publishes a message to a topic partition, that message is delivered to one consumer within each subscribing consumer group. 
+	  
+	- Once a message is published to a topic, the Kafka cluster retains that information for a configurable period of time, whether or not the message was consumed. This allows consumers to replay and reprocess messages as needed. 
+
+
+**How it works**
+![[Screenshot 2025-12-06 at 18.00.16.png]]
+You could imagine a scenario where you have direct access to monitor the web server log for new messages. Then you could treat the web server log as the event producer. From there, events could be ingested to a Kafka topic or a Kinesis stream as a first step in your ingestion pipeline. 
+
+**CDC**
+You can also monitor database activity through a process known as c**ontinuous change data capture, or continuous CDC**. By processing the database log, you can stream data changes into your data pipeline to ensure that the data in your pipeline is synchronized with the data updates in the source database. 
+
+
+## Kinesis Data Streams Details
+
+Event Producers --> Push data to the stream
+Event Consumers --> Pull/read data from the stream
+
+Kinesis Data Stream will be our upstream source system in the upcoming lab.
+
+
+
+Just like how in Kafka **producers** send data to **topics**, when working with Kinesis Data Streams, a "**producer**" pushes data to a specific "**stream**".  ![[Screenshot 2025-12-07 at 12.21.57.png]]
+
+**One "stream**" is made up of **many "shards"**, which provide the "**units of capacity**" for the stream. 
+![[Screenshot 2025-12-07 at 12.22.55.png]]
+
+
+As you need to scale your stream up to ingest more data, you need to add more shards to the stream. 
+![[Screenshot 2025-12-07 at 12.23.15.png]]
+
+
+**How to know how many shads I need**
+In order to know how many shards you'll need for your use case or when you'll need to increase the number of shards, you'll need to know the "*size*" and "*rate*" of **write and read operations** you're expecting in your pipeline. 
+
+- Write operations are when *an event producer writes data to the stream*, 
+- Read operations are when *downstream consumers read data from the stream*. 
+
+![[Screenshot 2025-12-07 at 12.25.22.png]]
+
+
+When it comes to **capacity**, each of the Shards: 
+- can support up to **five READ operations per second** (5 read ops p/s), 
+- and those 5 operations can add up to a **maximum total data read rate of two megabytes/second.** In other words, they cannot exceed 2MB/s.
+![[Screenshot 2025-12-07 at 12.32.24.png]]
+
+
+For **writing** data, a producer: 
+- can write up to 1,000 records per second to a Shard 
+- with a maximum total data write rate at 1 MB/s. 
+![[Screenshot 2025-12-07 at 12.33.02.png]]
+
+
+To determine the number of shards you would need for a specific use case, it would take some analysis and some math, given the size and rate of read and write operations that you expect. 
+
+**On-Demand VS Provisioned Mode**
+Sometimes it can be hard to estimate the exact number of read and write operations. For example, in a brand new application. 
+
+Or in other cases, the only thing you might know for sure is that you expect the traffic in your application to vary dramatically over time, like on an e commerce platform or other public facing applications. 
+
+For those situations, you can use Kinesis in "**on-Demand**" mode. 
+- On-demand mode will automatically manage the scaling of the shards up or down as needed,
+- and you are only charged for what you use. 
+- This can be more convenient from an operational perspective when compared to the alternative, which is provisioned mode. 
+
+With **provision** mode: 
+- you specified the number of shards necessary for your application based on the expected write and read request rate. 
+- And then it's up to you to add more shards or re shard when needed. 
+- Provision mode might be a good fit for your work if you have predictable application traffic, or if you want to be able to control your costs more carefully. 
+
+
+**What kind of data do the producers produce?**
+When it comes to the data moving through a stream, **each** data record that is sent to the stream from a producer includes: 
+- a partition key, 
+- a sequence number, and 
+- the data itself in the form of what's called a binary large object, or "BLOB" for short. 
+
+
+**Partition Keys**
+When you are setting up the data producer for your system, you need to choose a **partition key**. The partition key is then used to determine which **shard** the data record is placed into. 
+Kinesis itself then assigns a s**equence number** as each record is written to maintain the order of the records within the Shard. 
+![[Screenshot 2025-12-07 at 13.10.01.png]]
+
+
+For example, let's say you wanted to create a stream of transactions from an e commerce platform. Then you might want to use the **customer ID** as the partition key.
+![[Screenshot 2025-12-07 at 13.10.57.png]]
+
+ In this case, all transactions for a single customer could be stored in the same shard. 
+![[Screenshot 2025-12-07 at 13.11.30.png]]
+- This would then make it easier for downstream consumers to pool records related to a single customer for aggregation and analysis. 
+
+
+
+**Shared VS Enhanced Fan-Out**
+A producer puts data into shards, and a consumer reads data from Shards, and it is common to have multiple consumers reading data from a Shard. 
+![[Screenshot 2025-12-07 at 13.13.02.png]]
+
+By default, consumers share a Shards read capacity, which is called "***shared Fan-Out***". 
+![[Screenshot 2025-12-07 at 13.13.16.png]]
+
+>	This means that the consumers are contending for read capacity. 
+>	This can be an issue for some use cases. 
+
+To avoid running into this capacity issue, you can set things up so that each consumer is able to read at **the full two megabytes/second** read capacity of the Shard, which is called "***Enhanced Fan-Out***".
+![[Screenshot 2025-12-07 at 13.14.35.png]]
+
+![[Screenshot 2025-12-07 at 13.18.30.png]]
+
+
+You can use managed services such as AWS Lambda, Amazon Managed Service for Apache Flink, and ADS Glue to process data stored in Kinesis data streams, 
+![[Screenshot 2025-12-07 at 13.19.01.png]]
+
+or you can write your own custom consumers using the **Amazon Kinesis client library (KCL)**. 
+
+You can also set things up so that the output of one stream becomes the input for another, which can allow you to build more complex real time data processing workflows. 
+![[Screenshot 2025-12-07 at 13.20.22.png]]
+
+Consumers can also send data to other AWS services, like integrating with A***mazon Data Firehose*** to store data in ***Amazon S3.*** It's important to remember too that Kinesis Data Streams allows for *multiple applications to work with the same stream at the same time*. Each one consuming the data independently and sending that data downstream to different systems. 
+
+
+## What is Change Data Capture (CDC)?
+
+Suppose you extracted and loaded data from a database into your storage system. After some time, you might need to update the data stored in your storage system to ensure that it is in-sync with the data in the source system. There are two strategies for this:
+
+- **Full snapshots or full load:**  in this approach, every time you want to update the data stored in your system, you ingest the entire data from your source system, replacing the old stored data with the new updated data. If your data is tabular, fully loading the data means that you delete all the old data from the stored table and extract all rows from the source table every time you need to update your stored data. This is a straight-forward approach that ensures the consistency between the data in the source system and the data stored in your data pipeline. However, for high-volume data, it can take a long time to run and it can require lots of processing and memory resources. It is more suitable for cases where there’s no need for frequent data updates.
+
+- **Incremental (differential) load**: in this approach, you only load updates and changes since the last read from the source systems. For example, when loading updates from a source database, you might utilize a _last_updated_at_ column to identify the rows of data that have been updated since you last read from this source database, and then only load the updated data from these identified rows. While this approach is faster than the full load approach, especially for high-volume data, it might require more complex logic to implement. When working with databases, this process is known as **Change Data Capture or (CDC).**  
+
+*According to the book Fundamentals of Data engineering, “Change data capture (CDC) is a method for extracting each change event (insert, update, delete) that occurs in a database” and making it available for downstream systems.*
+
+
+### Use Cases for CDC
+
+- CDC helps you synchronize data across different databases, supporting continuous database replication. For example, you might have a source PostgreSQL system that supports an application and you want to periodically or continuously ingest table changes into a data warehouse to enable analytics based on the most recent data. Or if you work in a hybrid company, you might need to use CDC to capture changes in on-premises databases and apply those changes to on-cloud databases.
+    
+- CDC helps you capture every historical change for auditing and other business purposes. For example, certain businesses are required to maintain complete historic information of their customer purchases for regulatory purposes, or to extract insights that allow businesses to improve.
+    
+- CDC enables microservices to track any change in the source database. For example, consider a microservice that manages purchase orders. When a new order is placed, you can use CDC to relay information to shipment service and customer service.
+    
+
+### **Two approaches to CDC**
+
+- **Push:** This approach requires you to implement some sort of logic or process to capture changes in the source database. Then, it relies on the source database to _push_ any data updates to the target system when something changes in the source system. This method allows the target systems to be updated with the latest data in near real-time, but if you don't set this up properly, you risk losing data updates if the target systems are unreachable when the source systems try to push the changes.
+
+- **Pull:** This approach requires the target systems to continuously poll the source database to check for changes and then _pull_ in data updates when they happen. This method typically results in a lag before the target systems pull in any new data updates because the changes are usually batched between pull requests.
+
+
+### **CDC Implementation Patterns**
+
+There are several methods for how CDC can extract changes from databases.
+
+- **Batch-oriented or query-based CDC (pull-based)**: In this approach, you query the database itself to identify if there has been a change in data. In the case of relational databases, this requires that the database has an additional column labeled as _updated_at_, _last_updated_ or _last_modified_ that helps you find all updated rows past a certain specified time. This process allows you to extract changes and incrementally update a target table. However, t**his approach can add computational overhead** to the source system because target systems have to scan each row in the table to identify the last updated values. 
+    
+- **Continuous or log-based CDC (pull-based)**:  Instead of running periodic queries to get the table changes as a batch, you can treat each update to the database as an event using **continuous CDC**. This type of CDC relies on **checking the database log**. A database log records every change to the database sequentially  (e.g., every create, update, delete) and is used in case of a failure to restore the database state. You can read the events from this log (by writing your own code or using a CDC tool such as **Debezium**) and send them to a streaming platform, such as Apache Kafka. This way, you can capture data changes in real-time without incurring any computational overhead or requiring the need for an extra column in the source databases.![[Screenshot 2025-12-07 at 13.22.22.png]]
+
+- **Trigger-based CDC (push-based method)**:  A trigger is a stored function that you can configure to run when a specific column changes. The triggers inform the CDC of the changes in the source databases and in this way it relieves the CDC from detecting changes. However, **too many triggers can negatively impact the write performance of the source database**. 
+
+### Tools for CDC
+
+Feel free to read more about some of the common tools used to implement CDC
+- [Debezium](https://debezium.io/)
+- [AWS DMS](https://docs.aws.amazon.com/dms/latest/userguide/CHAP_Task.CDC.html)
+- [Kafka connect API](https://limadelrey.medium.com/kafka-connect-how-to-create-a-real-time-data-pipeline-using-change-data-capture-cdc-c60e06e5306a) 
+- [Airbyte log-based CDC](https://airbyte.com/solutions/database-replication)
+
+
+## Summary: General Considerations for Choosing Ingestion Tools
+
+When choosing an ingestion tool for your data systems, you should consider 
+- the *characteristics of the data* you're ingesting, 
+- as well as the *reliability and durability of the ingestion tool*.
+
+
+### Characteristics of the data 
+
+_Note: In the book “Fundamentals of data engineering”, Joe and Matt refer to the characteristics of the data as the "**data payload**", which includes data kind (type and format), shape, size, schema and data types, and metadata._
+
+- **Data type & structure**: You learned in course 1 that data in source systems could be structured, unstructured, or semi-structured. When deciding how to ingest data and what tool to choose, you need to understand the data type and structure (e.g. an image in PNG format) so that you can identify the appropriate ingestion tool and transformations you might need to apply later on.
+    
+- **Data volume**: For data volume, you need to consider two things:
+    - **Data size in bytes** of the existing data that you need to ingest: _In case of batch ingestion,_ you need to consider the size of the historical data that you need to ingest. Can you ingest the entire historical data in one big chunk? Depending on the network connection between the source system and the target system, it may be possible to transfer the historical data over the network, but if you have limited bandwidth then you may need to *split  the massive payload into chunks*, which effectively reduces the size of the payload into smaller subsections. _In case of streaming ingestion_, you need to consider the **message size**.  You must ensure that the streaming ingestion tool can handle the maximum expected message size. For example, Amazon Kinesis Data Streams supports a maximum message size of 1 MB, while Kafka defaults to this maximum size but can be configured to support a maximum data size of 20 MB or more.
+    - **The size of the future data** that you may ingest with the same pipeline: how are you expecting the data to grow? What is  the daily, monthly, or yearly growth of data?  Considering the actual and future size helps you understand how to configure your tool and what cost to anticipate to ensure that your ingestion system meets the demands.
+
+- **Latency requirements:** When designing your pipeline, one of the stakeholder requirements that you need to consider is latency: how fast do stakeholders want to operate on data? What is the acceptable delay? Do they need to extract insights from the data one day after it is ingested, or do they need near real time insights? In other words, is it a batch scenario: where data needs to be ingested once a day, a week, a month. Or does the data need to be streamed from a streaming source continuously with the lowest delay possible (for instance, in milli-seconds)? To meet the latency requirement, you need to think about how quickly you need to process the ingested data once it reaches your pipeline and also understand how quickly the source data is generated. The velocity of the data will impact the tools (batch or streaming tools) you choose to ingest and process the data.
+    
+- **Data quality**: Is the source data in good shape for immediate downstream use? What post-processing is required to serve it? Depending on the source systems the data might be incomplete, or contain inconsistent information, duplicates, or errors. If the data is not expected to be in good shape, then you may need to check the quality of the data ingested in order to fix any issues. Some ingestion tools can help you fill in missing values or detect/fix inconsistencies or invalid entries. You’ll learn more about quality checks in the upcoming course. 
+    
+- **Changes in schema**_: schema changes (e.g. adding a new column, changing a column type, creating a new table, renaming a column) frequently occur in source systems and are generally out of your control. If you’re expecting these changes to happen frequently, then you might need to consider using ingestion tools that automatically detect schema changes. However, communication between you and the upstream stakeholders is as important as the automation that checks for schema changes.
+    
+
+### Reliability and Durability
+
+Reliability and durability are two important considerations in the ingestion stage. 
+
+- Reliability means making sure that ingestion systems are performing their intended function properly. 
+- Durability means making sure that data isn’t lost or corrupted. 
+
+If you design a reliable ingestion system, you will ensure the durability of the ingested data. For example, streaming systems such as IoT devices do not retain events indefinitely, so if you don’t correctly ingest its data, the data may be lost. Make sure to understand the characteristics of the source systems and the ingestion tools. 
+
+**Advice**: Evaluate the tradeoffs between the cost of losing data vs building an appropriate level of redundancy. For more information and consideration, please check out chapter 7 of _Fundamentals of Data Engineering_.
+
+
+
+## Week Summary
+
+This week we've been looking at the ingestion stage of the data engineering lifecycle in the context of batch and streaming, and some of the tools you can use for these two types of ingestion patterns. You implemented a batch ingestion solution, pulling data from a public API, and you set up streaming ingestion for a recommender system. So nice work. One of the main ideas we started with at the top of this week is that while batch and streaming ingestion are often discussed as two distinct ingestion paradigms, they really exist along a continuum where at one end you have ingestion of relatively large batches of data on an infrequent cadence, and on the other end you have real time streaming ingestion of individual messages as they're generated. In between, you have a wide range of batch and micro batch scenarios, as well as different approaches to streaming. 
+
+>	*Whatever approach you take for your own data pipelines should be determined by what stakeholders really need and the requirements of your system.* 
+
+
+When it comes to batch ingestion specifically, we looked at ETL and ELT and how you might think about the trade offs and advantages of one versus the other depending on the requirements of the system you're building. 
+
+You also saw, however, that doing in flight transformations is something to think about in the context of streaming pipelines as well. In the first lab, you ingested data from a public API and got some practice with API specific concepts like the connection authentication and pagination steps that will apply to many different ingestion scenarios when your source is an API, and then in the second lab, you set up streaming ingestion for a recommender system. In that case, the source system was a Kinesis data stream, and you set up a consumer using Python code, perform some in flight transformations in the data, and then push the messages into two separate streams for downstream consumption by the recommender model. With each of these labs and the concepts we've discussed in between, you've deepened and broadened your knowledge of data ingestion.
+
+
+## Week 2 Resources
+
+**Optional reading and reference material:**
+
+- Chapter 7 of [Fundamentals of Data Engineering](https://go.redpanda.com/fundamentals-of-data-engineering)
+
+- Amazon Kinesis Data Streams
+    - [Kinesis Data Streams: High-level architecture](https://docs.aws.amazon.com/streams/latest/dev/key-concepts.html#high-level-architecture)    
+    - [Quotas and limits](https://docs.aws.amazon.com/streams/latest/dev/service-sizes-and-limits.html)
+
+- Apache Kafka
+    - [Kafka Documentation (Only check the introduction section 1.1)](https://kafka.apache.org/081/documentation.html#introduction)
+    - [Gentle introduction into Kafka: Gently down the stream](https://www.gentlydownthe.stream/)
