@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "C2/W3/C2_W3_class-notes.md",
+                "file": "C2/W3/Lab_1_Terraform.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "C2_W3_class-notes"
+              "title": "Lab_1_Terraform"
             }
           },
           {
@@ -183,20 +183,22 @@
   },
   "active": "4b03909afc18e311",
   "lastOpenFiles": [
+    "Screenshot 2025-12-17 at 15.29.44.png",
+    "Screenshot 2025-12-17 at 15.22.25.png",
+    "Screenshot 2025-12-17 at 15.18.10.png",
+    "assets/Screenshot 2025-12-12 at 16.54.34.png",
+    "C2/W3/Lab_1_Terraform.md",
+    "assets/Screenshot 2025-12-12 at 17.11.25.png",
+    "assets/Screenshot 2025-12-12 at 17.10.59.png",
+    "assets/Screenshot 2025-12-12 at 17.04.06.png",
+    "assets/Screenshot 2025-12-12 at 17.03.43.png",
+    "assets/Screenshot 2025-12-12 at 17.03.21.png",
+    "C2/W3/C2_W3_class-notes.md",
     "Untitled.base",
     "Untitled.md",
     "assets/Screenshot 2025-12-10 at 15.28.06.png",
-    "C2/W3/C2_W3_class-notes.md",
     "assets/Screenshot 2025-12-12 at 13.48.52.png",
     "C2/W2/C2_W2_slides.pdf",
-    "assets/Screenshot 2025-12-12 at 13.44.49.png",
-    "assets/Screenshot 2025-12-12 at 13.44.16.png",
-    "assets/Screenshot 2025-12-12 at 13.43.39.png",
-    "assets/Screenshot 2025-12-12 at 13.38.21.png",
-    "assets/Screenshot 2025-12-12 at 13.32.45.png",
-    "assets/Screenshot 2025-12-12 at 13.28.49.png",
-    "assets/Screenshot 2025-12-12 at 13.28.31.png",
-    "assets/Screenshot 2025-12-12 at 13.27.49.png",
     "C2/W2/C2_W2_class-notes.md",
     "C2/W2/Lab_2_Streaming.md",
     "C2/W2/Lab_1_API.md",
@@ -226,7 +228,6 @@
     "C1/W4/C1_W4_class-notes.md",
     "C1/W4/C1_W4_PROJECT.md",
     "Data Engineering Professional Certificate Program.md",
-    "2025-10-12.md",
-    "C1/W2/C1_W2_class-notes.md"
+    "2025-10-12.md"
   ]
 }

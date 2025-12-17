@@ -226,6 +226,11 @@ You can structure your configuration files as 5 sections. 
 < Block of code>
 
 
+# providers
+
+< Block of code>
+
+
 # resources
 
 < Block of code>
@@ -282,10 +287,10 @@ terraform {
 
 I'd like to pause for a moment to say a little bit more about providers because I feel this can be a bit confusing the first time you're using Terraform. 
 
-- So in the language of Terraform, a provider is a *plugin file* or a *binary file* that Terraform needs to install in order to interact with external resources. 
+- In the language of Terraform, a provider is a *plugin file* or a *binary file* that Terraform needs to install in order to interact with external resources. 
 - You can find all the available providers in the Terraform registry https://registry.terraform.io/. 
 - Some providers allow Terraform to interact with the cloud platform, and others are utilities providers that allow you to use additional functionalities in Terraform. 
-- So just to be clear, in Terraform, the word ***provider*** is not a reference to the cloud provider where you're setting up resources. Instead, a provider in this context is that plugin or binary file that Terraform needs in order to interact with external resources. 
+- So just to be clear, in Terraform, the word ***provider*** is not a reference to the cloud provider where you're setting up resources. Instead, a provider in this context is a plugin or binary file that Terraform needs in order to interact with external resources. 
 
 Let's check the AWS provider for example: https://registry.terraform.io/providers/hashicorp/aws/latest. 
 	- And again, AWS provider here is not referring to AWS as the cloud provider. Instead, this is the file that allows Terraform to interact with resources on AWS. 
@@ -366,6 +371,7 @@ What you see here in this configuration file is enough to create an EC2 instance
 
 
 In the example here, I'm going to start with the Terraform init command. 
+
 ```terminal
 terraform init
 ```
@@ -411,7 +417,7 @@ In the previous section, I incorporated some hard-coded values inside the config
 
 **Input**
 
-The use of **input variables** allows you to customize your infrastructure and specify different values for your variables when you want to create your resources, instead of manually editing your configuration files. 
+The use of **input variables** allows you to *customize* your infrastructure and specify different values for your variables when you want to create your resources, instead of manually editing your configuration files. 
 
 In this example, under the Input Variables section, I'm going to create one variable that represents the region name, and another one that represents the server's name. You can declare these variables like this using the `variable` keyword. 
 
