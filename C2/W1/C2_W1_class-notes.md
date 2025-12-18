@@ -631,7 +631,7 @@ For certain source systems, you can also connect to them through an API connecto
 - a Java Database Connectivity, or JDBC for short, or 
 - Open Database Connectivity, or ODBC for short.
 
-Check [connecting-to-source-systems](../../Training/connecting-to-source-systems) for more detailed instructions on creating and connecting to databases.
+Check [connecting-to-source-systems](connecting-to-source-systems.md) for more detailed instructions on creating and connecting to databases.
 
 
 ## Basics of IAM and Permissions
@@ -674,7 +674,7 @@ In the previous labs, we were given specific policies that allowed us to access 
 
 ![[Screenshot 2025-11-30 at 11.16.49.png]]
 
-Check [AWS IAM](../../Training/AWS/IAM) doc for more info.
+Check [AWS IAM](IAM.md) doc for more info.
 
 ## Basics of Networking in the Cloud
 
