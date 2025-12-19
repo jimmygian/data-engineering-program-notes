@@ -103,11 +103,6 @@ You can access these stores and their settings through the ***"data_context"*** 
 
 
 
-
-
-
-
-
 ## Resources
 
 **Coursera**

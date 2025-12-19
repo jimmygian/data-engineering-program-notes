@@ -909,3 +909,22 @@ I've been emphasizing that you should communicate with source system owners to 
 Like a lot of things in data engineering, there are many different ways to monitor your data quality. You could do some things manually, or maybe write some custom code to perform a set of tests or trigger alerts. Those approaches might make sense in certain scenarios, like when you're first setting up or prototyping your pipelines. But nowadays there are a number of **tools** you can use to ensure data quality and also spare you from any *undifferentiated heavy lifting*.
 
 
+
+
+## Resources
+
+**Optional reading and reference material:**
+
+- [Terraform Documentation](https://developer.hashicorp.com/terraform/docs)
+- [AWS CloudFormation (User Guide)](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/Welcome.html)
+- [Great Expectations Documentation](https://docs.greatexpectations.io/docs/core/introduction/)
+
+- To read about the third pillar "Incident Response", check the following two articles:
+    - [article 1](https://medium.com/@mikldd/incident-management-for-data-teams-5a14acd4e3d8)
+    - [article 2](https://cloud.google.com/docs/security/incident-response)
+
+- [Data Quality Fundamentals](https://learning.oreilly.com/library/view/data-quality-fundamentals/9781098112035/) , by Barr Moses, Lior Gavish, Molly Vorweck [book]
+- [The rise of Data contracts](https://dataproducts.substack.com/p/the-rise-of-data-contracts), by Chad Sanderson [blog]
+- [What is data observability?](https://learning.oreilly.com/library/view/what-is-data/9781098120993/ch02.html#characteristics_of_a_data_incident) , by Andy Petrella [book]
+- [Driving data quality with data contracts](https://learning.oreilly.com/library/view/driving-data-quality/9781837635009/B19790_02.xhtml#_idParaDest-34), by Andrew Jones [book]
+- [Data Contracts: Why Thought Leaders Opt for Ounces Over Pounds](https://www.gable.ai/blog/data-contracts), by Chad Sanderson

@@ -674,7 +674,7 @@ In the previous labs, we were given specific policies that allowed us to access 
 
 ![[Screenshot 2025-11-30 at 11.16.49.png]]
 
-Check [AWS IAM](IAM.md) doc for more info.
+Check [AWS IAM](AWS%20IAM.md) doc for more info.
 
 ## Basics of Networking in the Cloud
 
