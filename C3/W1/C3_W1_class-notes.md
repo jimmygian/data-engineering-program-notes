@@ -46,4 +46,3 @@ As you've seen in previous courses, you can think of data storage as a sort of 
 
 In your work as a data engineer, having deep expertise in storage solutions and queries will help you be more successful at every stage of the lifecycle. >> Great, let's get started.
 
-

@@ -1,4 +1,4 @@
-This is IBM's and AWS's official Data Engineering Certificate Program, comprising 4 courses:
+This is DeepLearning.AI's and AWS's official Data Engineering Certificate Program, comprising 4 courses:
 
 * Course 1: Introduction to Data Engineering
 * Course 2: Source Systems, Data Ingestion, and Pipelines
