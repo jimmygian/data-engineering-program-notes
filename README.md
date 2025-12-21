@@ -11,6 +11,11 @@ These are my notes from DeepLearning.AI's and AWS's official **Data Engineering 
 * Course 4: Data Modeling, Transformation, and Serving
 
 
+The notes have been taken while watching the Course's lectures, videos, and Labs. They are meant to track my progress and help me refresh my knowledge when needed. 
+
+They are best viewed using [Obsidian](https://obsidian.md/). 
+
+---
 
 ## **Program Outline**
 
