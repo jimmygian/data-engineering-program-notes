@@ -4,11 +4,9 @@
 These are my notes from DeepLearning.AI's and AWS's official **Data Engineering Certificate Program**, comprising 4 courses:
 
 * Course 1: Introduction to Data Engineering ✅
-![[Coursera A25I8TW0YTAN.pdf]]
-
+	* See certification [here](./C1/Coursera A25I8TW0YTAN.pdf).
 * Course 2: Source Systems, Data Ingestion, and Pipelines ✅
-![[Coursera E7TKQ4UOJ5XR.pdf]]
-
+	- See certification [here](./C2/Coursera E7TKQ4UOJ5XR).
 * Course 3: Data Storage and Queries - _IN PROGRESS_
 * Course 4: Data Modeling, Transformation, and Serving
 
