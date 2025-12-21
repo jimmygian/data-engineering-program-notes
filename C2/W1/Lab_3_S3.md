@@ -1,4 +1,4 @@
-Check [Object Storage](../Object-Storage)'s S3 Document.
+Check [Object Storage](Object-Storage.md)'s S3 Document.
 Lab link: https://www.coursera.org/learn/source-systems-data-ingestion-and-pipelines/ungradedLab/6tu85/practice-lab-3-interacting-with-amazon-s3-object-storage
 
 - you'll work with AWS Object Storage and Amazon S3. 

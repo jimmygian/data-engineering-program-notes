@@ -8,7 +8,7 @@
         "type": "tabs",
         "children": [
           {
-            "id": "a843d812078a4297",
+            "id": "750195a8499763e4",
             "type": "leaf",
             "state": {
               "type": "markdown",
@@ -22,32 +22,35 @@
             }
           },
           {
-            "id": "750195a8499763e4",
+            "id": "540ef6c633ef0fad",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "C2/W4/C2_W4_Lab-1.md",
+                "file": "C2/W4/C2_W4_assignment.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "C2_W4_Lab-1"
+              "title": "C2_W4_assignment"
             }
           },
           {
-            "id": "540ef6c633ef0fad",
+            "id": "0f71fd184115c9de",
             "type": "leaf",
             "state": {
-              "type": "pdf",
+              "type": "markdown",
               "state": {
-                "file": "C2/W4/C2_W4_slides.pdf"
+                "file": "C2/W4/C2_W4_class-notes.md",
+                "mode": "source",
+                "source": false
               },
-              "icon": "lucide-file-text",
-              "title": "C2_W4_slides"
+              "icon": "lucide-file",
+              "title": "C2_W4_class-notes"
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -195,32 +198,42 @@
       "bases:Create new base": false
     }
   },
-  "active": "a843d812078a4297",
+  "active": "540ef6c633ef0fad",
   "lastOpenFiles": [
-    "assets/Screenshot 2025-12-20 at 15.23.07.png",
+    "C2/W4/C2_W4_slides.pdf",
+    "C2/W4/C2_W4_assignment.md",
+    "C2/W4/C2_W4_Lab-2.md",
     "Tools-Training/Airflow.md",
+    "Screenshot 2025-12-21 at 13.39.43.png",
+    "Screenshot 2025-12-21 at 12.50.00.png",
+    "Screenshot 2025-12-21 at 09.33.44.png",
+    "C2/W4/C2_W4_class-notes.md",
+    "Tools-Training/NoSQL.md",
+    "assets/bOwLSreTQNGipBCI5yUO7w_e6db8253277a4de1abeec20fd490d2f1_YcrQRbIxsonZkzZ5qEer7haifSAgPwV4co-HyUB1bRRw6iGWEbCetvPygW5LBbo-HcmvZw0xXBGpfgp2YOEUqpeZSvkG3JnNITqg0SG57kCto_cNDdCTRY7_FiP1I5v3CxIqek_wehq5nUiLRlnwzwo.png",
+    "assets/Screenshot 2025-12-20 at 21.32.59.png",
+    "C2/W4/C2_W4_Lab-1.md",
+    "C2/W4/FDE-AMPFBDP.pdf",
+    "Users/dimitriosl/Documents/code/dimitriosl/data_engineering/data-engineering-program-notes/C2/W4/Functional.md",
+    "Users/dimitriosl/Documents/code/dimitriosl/data_engineering/data-engineering-program-notes/C2/W4",
+    "Users/dimitriosl/Documents/code/dimitriosl/data_engineering/data-engineering-program-notes/C2",
+    "Users/dimitriosl/Documents/code/dimitriosl/data_engineering/data-engineering-program-notes",
+    "Users/dimitriosl/Documents/code/dimitriosl/data_engineering",
+    "Users/dimitriosl/Documents/code/dimitriosl",
+    "Users/dimitriosl/Documents/code",
+    "Users/dimitriosl/Documents",
+    "Users/dimitriosl",
+    "assets/Screenshot 2025-12-20 at 15.23.07.png",
     "assets/Screenshot 2025-12-20 at 18.10.40.png",
     "assets/Screenshot 2025-12-20 at 18.10.00.png",
     "assets/Screenshot 2025-12-20 at 18.09.07.png",
     "assets/Screenshot 2025-12-20 at 18.06.47.png",
-    "assets/Screenshot 2025-12-20 at 17.59.31.png",
-    "assets/Screenshot 2025-12-20 at 17.59.17.png",
-    "assets/Screenshot 2025-12-20 at 17.43.37.png",
-    "assets/Screenshot 2025-12-20 at 17.40.45.png",
-    "assets/Screenshot 2025-12-20 at 17.38.45.png",
-    "assets/Screenshot 2025-12-20 at 17.37.36.png",
-    "C2/W4/C2_W4_Lab-1.md",
-    "C2/W4/C2_W4_class-notes.md",
-    "C2/W4/C2_W4_slides.pdf",
     "Tools-Training/GX (Great Expectations).md",
     "Tools-Training/AWS/AWS IAM.md",
     "C2/W3/C2_W3_class-notes.md",
     "Tools-Training/AWS/AWS CloudWatch.md",
-    "C2/W2/C2_W2_slides.pdf",
     "C2/W3/C2_W3_Assignment_GreatExpectations.md",
     "Tools-Training/Terraform.md",
     "C2/W3/Lab_1_Terraform.md",
-    "Untitled.base",
     "Untitled.md",
     "C2/W2/C2_W2_class-notes.md",
     "C2/W2/Lab_2_Streaming.md",
@@ -230,18 +243,7 @@
     "C2/W1/Lab_4_Troubleshooting.md",
     "C2/W1/Lab_3_S3.md",
     "Tools-Training/AWS/AWS Networking.md",
-    "C2/W1/C2_W1_slides.pdf",
-    "Tools-Training/AWS",
     "README.md",
-    "Tools-Training/connecting-to-source-systems.md",
-    "C2/NoSQL.md",
-    "Tools-Training",
-    "C2/Traomomg",
-    "().md",
-    "C2/W1/Lab_2_NoSQL.md",
-    "C2/Object-Storage.md",
-    "C1/Coursera A25I8TW0YTAN.pdf",
-    "C2/W4",
-    "C2/W3/C2_W3_slides.pdf"
+    "Tools-Training/connecting-to-source-systems.md"
   ]
 }

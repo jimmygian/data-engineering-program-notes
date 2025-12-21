@@ -1,4 +1,4 @@
-Check [NoSQL](../NoSQL)'s DynamoDB Document.
+Check [NoSQL](NoSQL.md)'s DynamoDB Document.
 
 In the next lab, you'll work with **Amazon DynamoDB** as a key value database and apply some create, read, update, and delete, or **CRUD** operations on the data in this NoSQL database.
 

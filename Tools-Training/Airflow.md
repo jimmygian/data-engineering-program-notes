@@ -601,5 +601,475 @@ When writing DAGs, there are some best practices that help ensure your code is e
 **Additional References** _(if you’d like to learn more)_
 - [Airflow best practices](https://airflow.apache.org/docs/apache-airflow/stable/best-practices.html#communication)
 - [Other best practices](https://docs.astronomer.io/learn/dag-best-practices)
-- [Functional-data-engineering-a-modern-paradigm-for-batch-data-processing](https://maximebeauchemin.medium.com/functional-data-engineering-a-modern-paradigm-for-batch-data-processing-2327ec32c42a) by Maxime Beauchemin
+- [Functional-data-engineering-a-modern-paradigm-for-batch-data-processing](FDE-AMPFBDP.pdf) by Maxime Beauchemin
 
+
+### Determinism and Idempodence
+
+Airflow best practices help you write **reproducible**, **efficient** and **reliable** code, **appropriately share data between tasks** and **reduce the time to recover from a** **data downtime**. Determinism and Idempotence, which are essential concepts in Data Engineering, are the basis for reproducible and reliable data pipelines. 
+- **Determinism** means that the same input will always produce the same output. 
+- **Idempotence** means if you execute the same operation multiple times, you will obtain the same result.
+
+In Airflow, you can achieve determinism and idempotence by: 
+- correctly defining your DAGs and tasks, 
+- using built-in Airflow variables, 
+- and building parameterized operators. 
+
+When defining your DAG, there are several parameters that you can specify to manage your DAG execution and ensure that it is deterministic and idempotent. The following are the most important ones:
+
+- The `schedule` parameter: defines the *frequency* at which the DAG will be executed. 
+- The `start_date` parameter: defines the *start date* of the first data interval. 
+	- The start date should be **static** to avoid missing DAG runs and prevent confusion; static date means a fixed date like `datetime.datetime(2024, 5, 20)`.  
+- The `catchup` parameter: defines whether the DAG will be executed for all the data intervals between the `start_date` and the current date. It is recommended that you set it to `False` to have more control over the execution of the DAG. You can also use the [Backfill](https://airflow.apache.org/docs/apache-airflow/stable/core-concepts/dag-run.html#backfill) feature to execute the DAG for a specific date range.
+
+
+### Built-in Variables and Templating 
+
+**Templating** allows Airflow tasks to *dynamically* evaluate information at runtime and use it to execute tasks. You can use templating to dynamically evaluate either **user-created variables** or **built-in Airflow** variables. 
+
+The templating syntax is `{{ variable }}`. 
+
+You can find more information about templating in the [Airflow documentation](https://airflow.apache.org/docs/apache-airflow/stable/concepts/variables.html#templating-with-variables). 
+
+An advantage of Airflow templating is that it leverages the power of [Jinja Templating](https://airflow.apache.org/docs/apache-airflow/stable/concepts/operators.html#concepts-jinja-templating), as it uses double curly braces `{{}}` to retrieve the information, avoiding the need to write top-level code in your DAG file. 
+
+>	Airflow provides a set of [built-in variables](https://airflow.apache.org/docs/apache-airflow/1.10.12/macros-ref.html) that you can use to retrieve information about the execution of your DAG. 
+
+For example, you can use the `{{ ds }}` variable to retrieve the DAG run’s logical date as `YYYY-MM-DD`. In this way, your specific DAG run will be able to retrieve the information detailed to its execution and achieve determinism. You can also use **Macros** to transform or format the built-in variables, for example, you could change the format of the `{{ ds }}` variable using the `macros.ds_format` function. You can find more documentation [here](https://airflow.apache.org/docs/apache-airflow/stable/templates-ref.html#airflow.macros.ds_format).
+
+
+### User-Created Variables
+
+Hard-coded and duplicated values can harm your DAG. Updating those values in multiple places can be tedious and open the door for errors. To avoid this unnecessary burden and follow the Don't Repeat Yourself (DRY) principle, a best practice is to use [user-created variables](https://airflow.apache.org/docs/apache-airflow/stable/howto/variable.html), allowing you to store, update, retrieve and delete key-value content to be used dynamically by your DAG.
+
+To access a user-created variable inside the DAG, you can use this example:
+
+```python
+from airflow.models import Variable
+foo = Variable.get("foo")
+```
+
+### XCOMs
+
+Airflow tasks are executed **independently** but sometimes you need to share information between the tasks. For example, you might need to pass information from one task to another task, or you might have to gather information from a previous task. In these cases, you can use XCOMs to **share information between tasks**.
+
+An XCOM is identified by a key, as well as the `task_id` and `dag_id` where it came from. They are stored using the `xcom_push` method and retrieved using the `xcom_pull` method inside the task. But, many operators will automatically push their results into an XCOM key called `return_value`.
+
+Because XCOMs are stored in the Airflow metadata database by default, you should not use them to store large amounts of data as they can harm the performance of your Airflow database. Instead, you can use them to store small pieces of information that you need to share between tasks.
+
+```python 
+# Pushing an XCom
+context['ti'].xcom_push(key='data_key', value=data)
+
+# Pulling an XCom
+data = context['ti'].xcom_pull(key='data_key', task_ids='task_id')
+```
+
+
+### Task Groups
+
+In Airflow, you can **group** tasks using **Task Groups**. Task Groups allow you to group tasks in the Airflow UI, organize your DAGs and make them more readable. Inside the task group, you can define tasks and the dependencies between them using the bit-shift operators `<<` and `>>`. You can create a Task Group using the `with` statement, as shown in the following example.
+
+```python 
+from airflow.utils.task_group import TaskGroup
+
+with DAG(...):  
+    start = DummyOperator(...)
+    task_group = []
+    with TaskGroup(...) as etl_tg:
+        task_a = PythonOperator(...)
+        task_b = PythonOperator(...)            
+        task_a >> task_b
+        # append each of the `etl_tg` elements into the `task_group`
+        task_group.append(etl_tg)
+    end = DummyOperator(...)
+    start >> task_group >> end 
+```
+
+
+
+## Connections
+
+Link to documentation: https://airflow.apache.org/docs/apache-airflow/stable/authoring-and-scheduling/connections.html
+
+Airflow is often used to pull and push data into other systems, and so it has a first-class Connection concept for storing credentials that are used to talk to external systems.
+
+You can use Connections to **store credentials** that enable your DAG to connect to external systems. A connection consists of a set of parameters such as:
+- login, 
+- password 
+- hostname
+along with the **connection type** and **connection Id**. You can create a connection in the Airflow UI and then use the connection ID in your code, or you can create it using the CLI. See [managing connections](https://airflow.apache.org/docs/apache-airflow/stable/howto/connection.html) for more.
+
+Connections may be defined in the following ways:
+- in [environment variables](https://airflow.apache.org/docs/apache-airflow/stable/howto/connection.html#environment-variables-connections)
+- in an external [Secrets Backend](https://airflow.apache.org/docs/apache-airflow/stable/security/secrets/secrets-backend/index.html)
+- in the [Airflow metadata database](https://airflow.apache.org/docs/apache-airflow/stable/howto/connection.html#connections-in-database) (using the [CLI](https://airflow.apache.org/docs/apache-airflow/stable/howto/connection.html#connection-cli) or [web UI](https://airflow.apache.org/docs/apache-airflow/stable/howto/connection.html#creating-connection-ui))
+
+
+
+
+
+
+
+## Taskflow API
+
+Let me introduce TaskFlow API and show you an example that follows this paradigm. 
+
+Until now, to define your DAG, you instantiated a DAG object and to create your task instances you use Python operators. This is known as the traditional paradigm. 
+
+Airflow 2.0 introduced another paradigm known as **TaskFlow API.** 
+
+>	*The goal of this new paradigm is not to replace a traditional one, but to make writing DAGs easier and more concise, especially when the DAG uses lots of Python functions.* 
+
+This new paradigm relies on the use of **decorators** (`@`) that help with the creation of a DAG and its tasks and simplifies the writing of code at the same time. 
+
+>	*I'd like to clarify that the API in TaskFlow API is not related to REST API. You can think of TaskFlow API as an interface that provides you with a more user-friendly programming experience.* 
+
+Let's go back to the a previous DAG example, and we'll rewrite it using the TaskFlow API paradigm. 
+![[Screenshot 2025-12-21 at 09.33.44.png]]
+
+
+
+To define your DAG, you use the context manager as shown here: 
+
+```Python
+from airflow import DAG
+from dtaetime import datetime
+
+# context manager
+with DAG(
+	dag_id = "my_first_dag",
+	description = "ETL pipeline",
+	tags = ["data_engineering_team"]
+	schedule = "@daily",
+	start_date = datetime(2024, 12, 1),
+	catchup = False
+):
+	# define tasks here
+	
+	# define dependencies here
+```
+
+With a TaskFlow API, instead of explicitly calling the DAG constructor, you can use the decorator `@dag`, pass in the DAG parameters to the decorator, and then define the content of your DAG as a Python function directly after the decorator. 
+
+```Python
+from airflow import DAG
+from dtaetime import datetime
+from airflow.decorators import dag, task
+
+@dag(
+	description = "ETL pipeline",
+	tags = ["data_engineering_team"]
+	schedule = "@daily",
+	start_date = datetime(2024, 12, 1),
+	catchup = False)
+def my_first_dag():
+	# define tasks here
+	
+	# define dependencies here
+
+my_first_dag()
+```
+- In this case, the function name will be used as a DAG ID to identify the DAG in the Airflow UI. 
+- As you see above, you need to import that decorator in the top of the file.
+
+The role of the `@dag` decorator is to **implicitly call the DAG constructor**.
+
+Let's see how creating the task is different with a TaskFlow API. 
+
+In the traditional paradigm, you use the PythonOperator to create your tasks. 
+
+```Python
+from airflow import DAG
+from dtaetime import datetime
+
+def extract_data():
+	# code for exttracting data
+	print("Done with extraction task")
+
+def transform_data():
+	# code for exttracting data
+	print("Done with transformation task")
+
+def load_data():
+	# code for exttracting data
+	print("Done with loading task")
+
+# context manager
+with DAG(
+	dag_id = "my_first_dag",
+	description = "ETL pipeline",
+	tags = ["data_engineering_team"]
+	schedule = "@daily",
+	start_date = datetime(2024, 12, 1),
+	catchup = False
+):
+	# define tasks here
+	task_1 = PythonOperator(task_id='extract', python_callable=extract_data)
+	task_2 = PythonOperator(task_id='transform', python_callable=transform_data)
+	task_3 = PythonOperator(task_id='load', python_callable=load_data)
+	# define dependencies here
+```
+
+In doing so, you need to keep track of the 
+- `task_id`, (e.g. `task_id='extract'`)
+- **name** of the Python function (e.g. `extract_data`), 
+- and the name of the **variable** that represents the task (e.g. `task_1`). 
+
+With a TaskFlow API, you'll keep track of fewer names. 
+
+```Python
+from airflow import DAG
+from dtaetime import datetime
+from airflow.decorators import dag, task
+
+@dag(
+	description = "ETL pipeline",
+	tags = ["data_engineering_team"]
+	schedule = "@daily",
+	start_date = datetime(2024, 12, 1),
+	catchup = False)
+def my_first_dag():
+	# define tasks here\
+	@task
+	def extract_data():
+		# code for exttracting data
+		print("Done with extraction task")
+	
+	@task
+	def transform_data():
+		# code for exttracting data
+		print("Done with transformation task")
+	
+	@task
+	def load_data():
+		# code for exttracting data
+		print("Done with loading task")
+
+	# define dependencies here
+	extract_data() >> transform_data() >> load_data()
+	
+my_first_dag()
+```
+
+- Instead of explicitly calling the `PythonOperator`, you use the `@task` decorator to define your tasks. 
+	- Here, inside your DAG function, you use the @task decorator to create the first task, which is the extraction step. 
+	- Then you define the **extract_data()** function directly after the decorator. 
+- Similar to before, the function name will be used as the task ID to identify the task in the Airflow UI.
+- The job of the decorator is to implicitly call the Python operator, which simplifies your code. 
+- To define the remaining task, you just repeat the same steps, similar to the DAG decorator. To use a task decorator, you need to import it as shown in the top of the file. 
+- Finally, to define the dependencies between the tasks, you'll still use the bit-shift operator. But this time, you will **call the functions** that represent each task as follows. 
+
+This is how you can use TaskFlow API to define a DAG. This is equivalent to how you defined your DAG previously, using the traditional paradigm, in terms of arriving at the same result. 
+
+![[Screenshot 2025-12-21 at 12.50.00.png]]
+
+
+### Using `XCom` with Taskflow API
+
+Let's take a look at one more example to see how you can use XCom with TaskFlow API. 
+
+In the traditional approach, you call `xcom_push` to store the data you want to pass to other tasks. Then you call `xcom_pull `in the function for the task that uses the data. 
+
+```Python
+def extract_from_api(**context):
+	# code that connect API
+	ratio_senior_jobs = # code
+	context['ti'].xcom_push(key='ratio_senior_jobs', value=ratio_senior_jobs)
+	
+def print_data(**context):
+	data = context['ti'].xcom_pull(
+				key='ratio_senior_jobs', task_ids='extract_from_api')
+	print(data)
+```
+
+
+With TaskFlow API: 
+```Python
+from airflow import DAG
+from dtaetime import datetime
+from airflow.decorators import dag, task
+
+@dag(
+	description = "First DAG",
+	tags = ["data_engineering_team"]
+	schedule = "@daily",
+	start_date = datetime(2024, 3, 13),
+	catchup = False)
+def example_xcom_taskapi():
+	# define tasks here
+	@task
+	def extract_from_api():
+		# code that connects API
+		ratio_senior_jobs = #code
+		return ratio_senior_jobs
+	
+	@task
+	def print_data(geo_ratios: dict):
+		print(geo_ratios)
+	
+	# define dependencies here
+	data = extract_from_api()
+	print_data(data)
+
+my_first_dag()
+```
+- you can **simply include a return statement**, as shown here in this `extract_from_api()` function, to store the data you want to share in an XCom variable.  
+- Then for the task that uses the data, you can specify that the function expects an input representing the data shared by a previous task (e.g. `geo_ratios: dict`)
+- Finally, when you want to define the dependencies between two tasks, you call the function of the first task and assign the value it returns to a variable (`data = extract_from_api()`) . 
+
+
+
+You can still use xcom_pull and xcom_push with TaskFlow. 
+
+```Python
+	# define tasks here
+	@task
+	def extract_from_api():
+		# code that connects API
+		ratio_senior_jobs = #code
+		return ratio_senior_jobs
+	
+	@task
+	def print_data(**context):
+		data = context['ti'].xcom_pull(
+					key='ratio_senior_jobs', task_ids='extract_from_api')
+		print(data)
+```
+
+
+>	*Note that the decorator does not replace all operators. This is why you may still need to use both paradigms and maybe combine both of them in the same code, depending on your use case.* 
+
+
+## Branching in Airflow
+
+Branch operators in Airflow *dynamically* direct task flow, deciding which subsequent task to execute next based on a specified condition. For instance, consider the following DAG:![[Screenshot 2025-12-21 at 13.39.43.png]]
+
+In the first task, you `extract_data` from an API and compute a certain ratio. In the second task , you check the value of the ratio (`check_ratio`): if this value is greater than half, you execute the task `print_greater`’ otherwise you execute the task `print_less`. And finally, you execute the last task `do_nothing` regardless of which task was previously executed. 
+
+Let’s see this example in code form. We'll take a look at the code written based on the **traditional** paradigm and the code written with TaskFlow API.
+
+```Python
+with DAG(
+		dag_id="branching", 
+		start_date=datetime(2024, 3, 13), 
+		schedule='@daily', 
+		catchup=False):
+    task_1 = PythonOperator(task_id='extract_data', 
+					    python_callable=extract_from_api)
+    task_2 = BranchPythonOperator(task_id='check_ratio', 
+						python_callable=check_ratio)
+    task_3 = PythonOperator(task_id='print_greater',
+						python_callable=print_case_greater_half)
+    task_4 = PythonOperator(task_id='print_less',
+					    python_callable=print_case_less_half)
+    task_5 = EmptyOperator(task_id='do_nothing', 
+						trigger_rule = 'none_failed_min_one_success')
+    
+    task_1 >> task_2 >> [task_3, task_4] >> task_5
+```
+- Note that for the last task (‘do_nothing’), we needed to specify the parameter trigger_rule as follows: `trigger_rule = none_failed_min_one_success.` This is because we want this task to execute *regardless* of which previous task was executed, otherwise it will be skipped.
+
+
+Now, let’s check out the function of each task.
+
+This is the first function: **extract_from_api**
+```Python
+
+def extract_from_api(**context):
+   import requests
+   number_posts = 40
+   location = "usa"
+   url_link = "https://jobicy.com/api/v2/remote-jobs"
+   response = requests.get(url_link, params={"count": number_posts, 
+                                             "geo": location, 
+                                             "industry": "engineering",
+                                             "tag": "data engineer"}).json()
+   count = 0
+   for job in response['jobs']:
+       if job['jobLevel'] == 'Senior':
+           count += 1
+   ratio = count / len(response['jobs'])
+   context['ti'].xcom_push(key='ratio_us', value=ratio)
+```
+
+Now let’s check out the function **check_ratio** that corresponds to the `BranchPythonOperator`:
+
+```Python
+
+def check_ratio(**context):
+   if float(context['ti'].xcom_pull(key='ratio_us', task_ids='extract_data'))>0.5:
+       return 'print_greater' #task_id of the greater than case
+   return 'print_less' #task_id of the less than case
+```
+
+You can see that it's a regular if statement, but it returns the id of the task that should be executed in each case. 
+
+And finally, let's check out the functions of the remaining tasks:
+```Python
+
+def print_case_greater_half(**context):
+   print("The ratio is greater than half: " + str(context['ti'].xcom_pull(key= 'ratio_us', task_ids='extract_data')))
+
+def print_case_less_half(**context):
+   print("The ratio is less than half: " + str(context['ti'].xcom_pull(key= 'ratio_us', task_ids='extract_data')))
+
+```
+
+
+Here's the equivalent in TaskFlow API:
+
+```Python
+from airflow import DAG
+from datetime import datetime
+from airflow.decorators import dag, task
+
+@ dag(start_date=datetime(2024, 3, 13),schedule='@daily', catchup=False)
+def example_branching():
+    @task
+    def extract_from_api():
+        import requests
+        number_posts = 40
+        location = "usa"
+        url_link = "https://jobicy.com/api/v2/remote-jobs"
+        response = requests.get(url_link, 
+                    params={"count": number_posts,  
+                            "geo": location, 
+                            "industry": "engineering",
+                            "tag": "data engineer"}).json()
+        count = 0
+        for job in response['jobs']:
+            if job['jobLevel'] == 'Senior':
+                count += 1
+        ratio = count / len(response['jobs'])
+        return ratio
+
+    @task.branch()
+    def check_ratio(ti=None):
+        if float(ti.xcom_pull(task_ids='extract_from_api')) > 0.5:
+            return 'print_case_greater_half' # task_id of the greater than case
+        return 'print_case_less_half'  # task_id of the less than case
+
+    @task
+    def print_case_greater_half(ti=None):
+        print( "The ratio is greater than half: " +
+                str(ti.xcom_pull(key='ratio_us', task_ids='extract_data')))
+
+    @task
+    def print_case_less_half(ti=None):
+        print("The ratio is less than half: " +
+                str(ti.xcom_pull(key='ratio_us', task_ids='extract_data')))
+
+    @task(trigger_rule='none_failed_min_one_success')
+    def empty_task():
+        pass
+    
+    extract_from_api() >> check_ratio() >> [print_case_greater_half(), print_case_less_half()] >> empty_task()
+
+
+example_branching()
+```
+
+Note the use of decorator: `@task.branch()` , which is the decorated version of the BranchPythonOperator. Also note that for the empty task, we used the operator @task and we defined a Python function that does nothing. Also to specify the trigger_rule for this task, we passed them to the task decorator: @task(trigger_rule='none_failed_min_one_success')
+
+Also note how the task instance is accessed when calling xcom_pull: in the example you saw in the previous video, you saw that you can pass in the entire Airflow context dictionary to the task function (`**context`), and then access the task instance as follows: `context[‘ti’]`. Instead of passing the entire dictionary, you could just pass the task instance as follows: `def check_ratio(ti=None) `(instead of def check_ratio(`**context)`)

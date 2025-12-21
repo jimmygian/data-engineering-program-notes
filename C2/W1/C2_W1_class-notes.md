@@ -250,7 +250,7 @@ The lab also covers some **data manipulation operations**, including **CREATE**
 ![[Screenshot 2025-11-10 at 23.16.28.png]]
 
 
-Check  [SQL](../SQL)'s document for more.
+Check  [SQL](SQL.md)'s document for more.
 
 
 ## NoSQL Databases
@@ -373,7 +373,7 @@ Now, it's important to note that while relational databases are typically ACID 
 
 Some NoSQL databases only possess some degree of ACID compliance. But relaxing one or more of these constraints, you can improve certain aspects of the databases performance and make it more scalable. As a data engineer, understanding **when** your database needs to be ACID compliant can help you prevent disasters. 
 
-Check [Lab_2_NoSQL](Lab_2_NoSQL.md) and [NoSQL](../NoSQL)'s DynamoDB documentation for more.
+Check [Lab_2_NoSQL](Lab_2_NoSQL.md) and [NoSQL](NoSQL.md)'s DynamoDB documentation for more.
 
 
 ## Object Storage
