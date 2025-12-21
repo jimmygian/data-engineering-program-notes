@@ -220,3 +220,86 @@ You can also set up **data quality checks** along the way to ensure that the da
 That might include checking for things like the null values or the range of some set of values or just verifying that the schema of the data you're ingesting is what you expect. 
 
 
+## Orchestration with Apache Airflow
+
+Check [[Airflow]].
+
+
+## Orchestration on AWS
+
+Now that you've gotten some practice using Airflow to orchestrate your data pipelines, those skills are going to help you with your orchestration work going forward, whether you're using Airflow or another orchestration tool. 
+
+In this section, I'd like to briefly introduce you to some of the other options you have when orchestrating data engineering tasks on **AWS**. 
+
+First off, with Airflow itself, there are multiple ways you can host and run your workflows on AWS. 
+
+#### 1 - Running Airflow on EC2
+The most hands-on way is that you can run the open-source version of Airflow on an Amazon EC2 instance or in a container. 
+
+>	*In the labs this week, you were using open-source Airflow in a set of containers that were running on an EC2 instance.*
+
+By using this approach, you have full control over the configuration and scaling of your Airflow environment. But this also comes with more *responsibility* as you need to manage all of the underlying infrastructure and integrations yourself. 
+
+As I've said before, when it comes to choosing tools and services to build your data pipelines, it often comes down to evaluating the trade-offs between **convenience** versus **control**, and the **requirements** for your particular use case.
+
+#### 2 - Using Amazon Managed Workflows (MWAA)
+If, instead of control, you were aiming to optimize for convenience when running Airflow on AWS, you could choose to use Amazon Managed Workflows for Apache Airflow, or MWAA, which is a *managed service* that runs Airflow for you and handles tasks like the provisioning and scaling of the underlying infrastructure. 
+
+When you use MWAA, it sets up an **Apache Airflow environment for you** using the same Airflow user interface and open-source code that you can download from the Internet. 
+
+This is a diagram showing how MWAA is architected. 
+![[Screenshot 2025-12-21 at 15.21.55.png]]
+
+The *scheduler* and *worker* components that you're now familiar with are hosted in containers on **AWS Fargate**, and they can access an *Airflow metadata database*, which is hosted on *Amazon Aurora*, to store the status of tasks and the state of the DAGs. 
+![[Screenshot 2025-12-21 at 15.23.14.png]]
+
+
+MWAA also integrates with other AWS services. For example, MWAA post Airflow logs and metrics to **Amazon CloudWatch**, uses **Amazon S3** as the DAG directory where you place your Python scripts, and it uses **AWS Key Management Service** to encrypt data at rest. 
+
+![[Screenshot 2025-12-21 at 15.23.50.png]]
+
+
+
+#### 3 - Alternative AWS Orchestration Services
+
+Apart from MWAA, there are other orchestration services on AWS that support similar functionality. 
+
+##### AWS Glue Workflows
+**AWS Glue workflows** is similar to Airflow in that it allows you to create, run, and monitor complex ETL workflows, where multiple Glue jobs and crawlers may be dependent on each other. 
+![[Screenshot 2025-12-21 at 15.25.47.png]]
+
+- A Glue workflow contains jobs, crawlers, and triggers. 
+- You would build out these components before building your workflow, 
+- and then you can use the AWS Glue console to visually build out and see the structure of your workflow graph. 
+
+You can then run these Glue workflows based on triggers, which could be 
+- on a schedule, 
+- on-demand, 
+- or an event coming from **Amazon EventBridge**. 
+
+
+##### AWS Step Functions
+Another option for orchestration on AWS is AWS Step Functions. Step Functions allow you to orchestrate multiple AWS services and states into workflows called **state machines**. 
+
+![[Screenshot 2025-12-21 at 15.28.12.png]]
+The states in a state machine can do various things. 
+- States can be tasks which do work 
+	- like a Lambda function that processes data, 
+	- a Glue job that transforms a dataset, 
+	- or an ECS task that runs a containerized application, just to name a few examples. 
+- States can also 
+	- make decisions based on their input, 
+	- perform actions from those inputs, and 
+	- then pass output to other states. 
+
+Like Airflow, AWS Step Functions are designed to coordinate tasks and manage dependencies between them, allowing you to define complex workflows involving multiple steps or states. 
+
+### Choosing between services
+When it comes to choosing between Airflow, either managed or open-source, versus Step Functions or Glue workflows or some other orchestration tool entirely, just like anything else, it's going to come down to your requirements and what you're trying to optimize for. 
+- Airflow with its Python-based DAGs and plug-in ecosystem offers a lot of **flexibility** and is good for complex workflows. 
+- Step functions provide a s**erverless option with extensive native AWS service integration**, which can be ideal for AWS-centric workflows. 
+- AWS Glue workflows are specifically designed for **ETL processes**, allowing you to orchestrate Glue jobs, crawlers, and triggers in a serverless environment. 
+![[Screenshot 2025-12-21 at 15.29.14.png]]
+
+The landscape of orchestration tools is evolving rapidly. So your best bet, in addition to getting practice with popular tools like Airflow, is to stay up to date on alternative and emerging tools so you can make the best choices in your own data architectures going forward.
+
