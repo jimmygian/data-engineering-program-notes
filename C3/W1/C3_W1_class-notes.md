@@ -839,3 +839,85 @@ There are also other methods that split the data based on meaningful attributes,
 - [Designing data intensive applications](https://www.amazon.com/Designing-Data-Intensive-Applications-Reliable-Maintainable/dp/1449373321/ref=sr_1_1?adgrpid=1344703291324157&dib=eyJ2IjoiMSJ9.i1bUGZK7N-KyWM2sQR7-B8KYS_yn_vgEDIPgCZKZEqrD3_kYv1WLMRNg2a_cyMTZkenScKZLD1xQT6PoxGtZjpfYLwagMBcOcvqwyg12Ux6vvPPHgXX1vMZoOg1vTM_pc7M5GoJOYAWtL-UQU8rix049vlX-qOUnpYLTJ2MrssfiHjzXSj62mtpldPZ9F8sSVwb2QyjkabDuQFUBKt8wljiPffjJIMY5B8rR7JfDvO8.HDmJ7Lu7-7fnydSo4DSG8hxechXwbUNz0baNI01HWH0&dib_tag=se&hvadid=84044027549737&hvbmt=be&hvdev=c&hvlocphy=44152&hvnetw=o&hvqmt=e&hvtargid=kwd-84044312865379%3Aloc-190&hydadcr=16438_10463512&keywords=designing+data+intensive+applications&qid=1713574421&sr=8-1) - Chapters 5 and 6 (Replication and partitioning)
 
 
+
+## How Databases Store Data
+
+One of the most common types of source systems you'll interact with are **databases**, specifically **relational databases**, and you'll use databases **throughout all the stages of the data engineering life cycle.** In this video, let's dive deeper into how databases store data. 
+
+Databases typically come with a **software layer** known as the **DataBase Management System** or "**DBMS**", that facilitates your interactions with the database. 
+
+This is true for the **relational databases** you saw in Course 2 and for non-relational databases, such as **graph** and **vector** databases that you'll explore in more detail later in this lesson. 
+
+A DBMS consists of a transport system, query processor, execution engine, and storage engine. 
+![[Screenshot 2025-12-23 at 17.51.43.png]]
+
+
+You'll learn how all these components work together to process a query in the last week of this course. But for now, let's focus on the storage engine. 
+
+**Storage Engine**
+The database **storage engine** does the heavy lifting for you when it comes to *physically storing data on disk*, including **serialization**, **arrangement** of data, and **indexing**. 
+
+You will likely work with modern storage engines that are optimized to: 
+- support the performance characteristics of SSDs and 
+- can handle modern data types and structures like 
+	- variable length strings, 
+	- arrays, and 
+	- nested data. 
+- offer robust columnar storage support for analytical applications. 
+
+![[Screenshot 2025-12-23 at 17.53.56.png]]
+
+
+When you want to retrieve data from a database by writing a query, ***speed*** is typically very important. 
+
+Suppose you're quering a very large relational table with millions or even billions of rows, and you're particularly interested in the rows related to certain countries, say you want to find the average price of products purchased in the USA. ![[Screenshot 2025-12-23 at 17.55.22.png]]
+
+You can write a SQL query like this:
+
+```SQL
+SELECT AVG(price)
+FROM my_table
+WHERE country = "USA"
+```
+
+
+Note that I'm using a SQL query here because I want to query a relational database. In the lab at the end of this lesson, you'll use a different query language to query a graph database. 
+
+**Indexing**
+Now, back to this example, to execute the query, the ***query processor*** would have to *scan the entire table each time to find* the record satisfying this filter condition. ![[Screenshot 2025-12-23 at 17.57.56.png]]
+
+Turns out that you can speed up data retrieval by using a ***special data structure*** called an "***index***". 
+
+>	*You can think of indexing as a way to **keep some metadata on the side** to help you locate the data you want more efficiently.* 
+
+In most relational database management systems, indexes are typically used for **primary table keys and foreign keys**, but you can also **apply indexes to other columns** to serve the needs of specific applications. 
+
+
+In this example, we can create a ***separate index table*** that consists of two columns:
+- One that includes the **country** value sorted in **alphabetical order.** 
+- And the other that consists of the **memory addresses** **referencing the corresponding rows in the original table**. 
+- Then when you execute a query to find the average price of products purchased in the US, the query processor can use binary search on the Dt index table to locate the rows that have a country code of USA.
+
+| ![[Screenshot 2025-12-23 at 18.01.25.png]] | ![[Screenshot 2025-12-23 at 18.01.42.png]] |
+| ------------------------------------------ | ------------------------------------------ |
+
+
+ This is much faster than scanning all the rows in a linear fashion to look for a specific country code. 
+ 
+ >	*If you're familiar with computer science, you'll see that you're effectively reducing the time complexity of the retrieval operation from ON to O Log N.* 
+
+
+This is one example of indexes, and there are **many other types of index structures** depending on the *database type* and your *use case*. 
+
+**In-Memory Databases**
+Now, I want to quickly mention **in-memory databases** that use RAM as the primary storage layer. Although RAM offers excellent transfer speeds and low latency, it's also extremely **volatile**. In-memory databases are generally used in applications that require **ultra fast data retrieval**, such as **caching** applications, **real-time bidding**, and **gaming leader boards**. But these databases **should not be used for retention or persistent storage purposes**. 
+
+For instance, you might use a key-value store like Memcached to cache database query results or API calls, where it's acceptable for data to be lost if the machine is restarted. 
+
+You might also encounter a popular memory-based storage system called `Redis`, which is a key-value store that supports more complex data types. **Redis** has several built-in persistence mechanisms, including ***snapshotting*** and ***journaling***. You can use this-key value store for extremely high performance applications that can tolerate a small amount of data loss. 
+
+
+## Row vs Column Storage
+
+...[TBC]
+
