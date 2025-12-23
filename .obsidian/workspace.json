@@ -8,17 +8,17 @@
         "type": "tabs",
         "children": [
           {
-            "id": "5585d079a2f44723",
+            "id": "d2a5c9c9e707efe2",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "README.md",
+                "file": "C3/W1/C3_W1_class-notes.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "README"
+              "title": "C3_W1_class-notes"
             }
           }
         ]
@@ -169,11 +169,24 @@
       "bases:Create new base": false
     }
   },
-  "active": "5585d079a2f44723",
+  "active": "d2a5c9c9e707efe2",
   "lastOpenFiles": [
+    "C3/W1/C3_W1_Lab-1.md",
+    "Screenshot 2025-12-23 at 15.23.07.png",
+    "assets/Screenshot 2025-12-23 at 13.24.49.png",
+    "assets/Screenshot 2025-12-23 at 14.10.24.png",
+    "assets/Screenshot 2025-12-23 at 14.05.33.png",
+    "assets/Screenshot 2025-12-23 at 14.04.31.png",
+    "assets/Screenshot 2025-12-23 at 14.03.36.png",
+    "assets/Screenshot 2025-12-23 at 13.46.13.png",
+    "assets/Screenshot 2025-12-23 at 13.42.20.png",
+    "C3/W1/C3_W1_class-notes.md",
+    "assets/Screenshot 2025-12-23 at 10.54.10.png",
+    "assets/Screenshot 2025-12-23 at 11.34.59.png",
+    "C3/W1/columnstoresfntdbs.pdf",
+    "C3/W1/05-compression.pdf",
     "README.md",
     "C1/Coursera.md",
-    "C3/W1/C3_W1_class-notes.md",
     "C2/Coursera E7TKQ4UOJ5XR.pdf",
     "Coursera.md",
     "Data Engineering Professional Certificate Program.md",
@@ -189,22 +202,10 @@
     "C3/W3",
     "C3/W2",
     "C3/W1",
-    "C3",
     "Tools-Training/Airflow.md",
     "C2/W4/C2_W4_assignment.md",
     "C2/W4/C2_W4_class-notes.md",
-    "assets/Screenshot 2025-12-21 at 14.08.41.png",
-    "assets/Screenshot 2025-12-21 at 15.29.14.png",
-    "assets/Screenshot 2025-12-21 at 15.28.12.png",
-    "assets/Screenshot 2025-12-21 at 15.25.47.png",
-    "assets/Screenshot 2025-12-21 at 15.23.50.png",
-    "assets/Screenshot 2025-12-21 at 15.23.14.png",
-    "assets/Screenshot 2025-12-21 at 15.21.55.png",
-    "C2/W4/DataQualityDimensions.pdf",
-    "assets/Screenshot 2025-12-21 at 09.33.44.png",
     "C2/W4/C2_W4_Lab-2.md",
-    "assets/Screenshot 2025-12-21 at 13.39.43.png",
-    "assets/Screenshot 2025-12-21 at 12.50.00.png",
     "Tools-Training/NoSQL.md",
     "C2/W4/C2_W4_Lab-1.md",
     "Users/dimitriosl/Documents/code/dimitriosl/data_engineering/data-engineering-program-notes/C2/W4/Functional.md",
@@ -214,7 +215,6 @@
     "Tools-Training/AWS/AWS CloudWatch.md",
     "C2/W3/C2_W3_Assignment_GreatExpectations.md",
     "Tools-Training/Terraform.md",
-    "C2/W3/Lab_1_Terraform.md",
-    "C2/W2/C2_W2_class-notes.md"
+    "C2/W3/Lab_1_Terraform.md"
   ]
 }
