@@ -919,5 +919,144 @@ You might also encounter a popular memory-based storage system called `Redis`,�
 
 ## Row vs Column Storage
 
-...[TBC]
+There are many types of databases used to sort the kinds of data you'll be working with as a data engineer. 
+
+In this section, I want to focus on two common ways to store structured tabular data in semi structured data that's commonly used in data engineering. 
+- First, you can store this data in a **row-oriented** storage system, or 
+- second, you can sort it in a **column-oriented** storage system. 
+
+As a data engineer, you'll choose between these two storage patterns based on your **"data access pattern"**, which is to say how the users and the system access your data. 
+
+#### Row Storage
+Traditional relational database management systems use row-oriented storage to store data row-by-row. 
+![[Screenshot 2025-12-27 at 10.16.34.png]]
+Each row represents a complete record of something (e.g. a transaction). 
+
+If you zoom in on the physical storage medium, you'll find that each row, or in the case of semi structured data, each object, is stored as a **consecutive sequence of bytes** on disk. 
+
+This way of storing related data next to each other makes row storage perfect for **OLTP systems** that need to perform **read and write operations with low latency**. 
+
+Say you want to query the data to locate a particular record based on the id column, since all the data for that record is stored together, once you have located that specific id, you you can efficiently read and update that data. 
+![[Screenshot 2025-12-27 at 10.18.20.png]]
+
+But what if you want to perform an analytical query that requires you to operate on the values of an entire column? 
+
+>	*Analytical queries focus on summarizing or aggregating columns to answer questions like what was the total revenue?* Which product was sold most frequently? Or what was the average quantity? 
+
+**Example** of an OLAP query on a row-oriented database:
+Let's say your row storage contains data with 
+- 1 million rows, 
+- 30 columns, and each entry is 
+- 100 bytes. 
+Suppose that the second column represents price, and you want to find the sum of all these prices. 
+![[Screenshot 2025-12-27 at 10.21.05.png]]
+
+So I'll write a query that selects the ***sum*** of the price column from a table called `my_table`. 
+
+```SQL
+SELECT SUM(price)
+FROM my_table
+```
+
+To execute this query: 
+- you need to first transfer all the rows one-by-one from the persistent disk storage to RAM. 
+- Then these rows will be sent to the CPU for processing, where the price from each row will be extracted and added together. ![[Screenshot 2025-12-27 at 10.23.01.png]]
+
+So the total data size you need to transfer to ram is 1 million rows x 30 entries per row x 100 bytes per entry = **3GB**.
+
+If the disk you're using has a data transfer speed of 200MB/s, how long would it take to read all the data to memory? 
+
+Answer: 3GB = 3000MB
+
+3000MB / 200MB/s = 15seconds
+
+That's not too bad, but now imagine that instead of 1 million rows, you actually had 1 billion rows of data, so your data size would be 3000GB at the same transfer speed. That would take you just over 4 hours to transfer all the rows with all their columns from disk to ram. That's **not scalable**.
+
+#### Column Storage
+ 
+So to accommodate such large-scale data transfers, engineers designed another storage pattern, the **column-oriented storage** or **column-oriented database,** which is a type of NoSQL database. When you store data in column storage, the data from each column ***is stored together*** on disk, so all the data from the first column is stored together. Then the data from the second column is stored together, and so on.
+
+![[Screenshot 2025-12-27 at 10.27.55.png]]
+ This allows you to read full columns of data all at once, rather than having to scan each row for the data in a single column. 
+
+**Exapmle**
+Let's take a look at the analytical query performance of column storage using the same example as before.
+
+Since column storage stores the data from each column together, to execute this query, you'll only have to transfer the data from the second column from disk to RAM. That means the size of the data you need to transfer is the **1 billion entries** from the second column x 100 bytes per entry = 100gb. 
+
+Suppose we have the same data transfer speed as before, 200 MB/s. Then how long would the transfer take? Well, it will take 100GB, which is 100,000 megabytes / 200MB/s = ~8 minutes. Comparing this to the 4 hours it would have taken with row storage, you can see that column storage is much more efficient when it comes to **analytical** queries on large datasets. 
+
+That's why column-oriented database are more suitable for **OLAP systems** that focus on applying analytical activities on data. However, for exactly the opposite reason, column storage is terrible for transactional workloads because you can't easily access the individual data rows. 
+
+As a data engineer, it's important that you understand the difference in how row storage and column storage work so that you can *choose the right approach for your use case.* Namely, using row storage for transactional workloads like the production database for your sales platform, and using column storage for analytical processing. 
+
+
+## The Parquet Format
+
+**Overview**
+
+Column-oriented storage is suitable for analytical workloads where you want to apply aggregating operations on columns. But it is not suitable for reading or writing/updating rows. On the other hand, row-oriented storage is suitable for transactional workloads that require read and write to be performed with low latency. But it is not suitable for efficient analytical workloads.
+
+***Parquet*** and ***ORC*** (optimized row columnar) are file formats that *combine both approaches* by following a hybrid approach that tries to get the best from both worlds. 
+
+The hybrid approach relies on **partitioning rows into groups** where **each row group is stored in a column-wise format.**
+![[Screenshot 2025-12-27 at 10.34.42.png]]
+![[Screenshot 2025-12-27 at 10.35.01.png]]
+
+>	*NOTE: Although they are similar, ORC is generally less popular than Parquet (ORC was very popular for use with Apache Hive - a data warehouse), and it enjoys somewhat less support in modern cloud ecosystem tools. So let’s focus on Parquet.*
+
+**A bit more detail about Parquet**
+
+With a Parquet file, 
+- the data is *horizontally partitioned* into row groups, where each row group has a **default size of 128 megabytes.**  
+- A row group consists of a column chunk for each column in the dataset. 
+- Each column chunk is divided up into ***pages***, where each page contains the encoded values for that column chunk, metadata like 
+	- the minimum, maximum and count of the values, 
+	- along with other data (repetition and definition levels) used to reconstruct the nested structure of the data. 
+- Parquet can be used to store **tabular** data as well as **nested** (i.e., semi-structured data like json) data. 
+
+Another advantage of Parquet is its portability. So you’ll get better performance with Parquet when interoperating with external tools, unlike proprietary cloud data warehouse columnar formats, that require deserialization and re-serialization for compatibility.
+
+To learn more about the Parquet format, feel free to check out [this video](https://www.youtube.com/watch?v=1j8SdS7s_NY&t=643s) by Databricks.
+
+**Resources** (optional further readings)
+- [Parquet, ORC and Avro](https://www.upsolver.com/blog/the-file-format-fundamentals-of-big-data)
+- [Parquet documentation](https://parquet.apache.org/docs/file-format/)
+
+
+## Wide-Column Databases
+
+A wide-Column database is a type of ***NoSQL database*** that's like a combination of a *relational* database and a *document* store. It structures the value part of a key-value pair into **more key-value pairs.**
+
+In a key-value database, the data is represented as follows:
+![[Screenshot 2025-12-27 at 10.45.03.png]]
+
+On the other hand, a **wide-column** database stores data in tables that are like two-dimensional key-value maps:
+![[Screenshot 2025-12-27 at 10.46.24.png]]
+
+Each row usually describes **a single entity**, and is identified by its row key. Within a row, data that’s related *is modeled into column families* that contain columns with unique column names. The actual data is stored within **cells**, which are uniquely identified by the combination of row key, column family, and column name (e.g. row key 1, column family 4, column key 3).  
+
+For example, let’s suppose you want to store customer and purchase information in a wide-column database like this:
+![[Screenshot 2025-12-27 at 10.47.31.png]]
+You could use the `customer_id` **12345** as the row key that points to **two column families** -- customer information with 3 columns (`first_name`, `last_name`, and `phone_num`) and purchase information with 2 columns (`invoice_num` and `store_id`).
+
+Each cell value is ***versioned*** and uniquely identified by its version number, typically its *timestamp*. Let’s say this customer changed their phone number or made more than one purchase, then these cells will contain multiple values, each identified by their timestamp.
+![[Screenshot 2025-12-27 at 10.49.05.png]]
+
+Now, let’s say you have another customer, with `customer_id` **45678**, who you don’t know the phone number for and who hasn’t made any purchases. Then their row key will point to the customer information column family that *contains only the customer’s* `first_name` and `last_name` columns without the `phone_num` column. Since this customer hasn’t made any purchases, you don’t have to point to a purchase information column family. When this information becomes available, you can add that to the wide-column database. 
+
+Since the wide-column database **doesn’t enforce a strict table schema**, adding columns becomes very flexible, and a column is only written if there’s data for it. 
+
+A wide-column database typically stores column families separately on disk. So it will store the customer information separately from the purchase information. Then the data within a column family is stored in a row-oriented fashion. So, for the purchase information, you would store all the data for a specific row key next to each other on disk, storing all the invoice_num values together, then the store_id values together, before moving on to the next row key, and so on.
+
+Examples of wide-column databases include [HBase](https://databass.dev/links/118), [BigTable](https://databass.dev/links/117), [Apache Cassandra](https://cassandra.apache.org/_/index.html), and [Amazon keyspaces](https://aws.amazon.com/keyspaces/) (for Apache Cassandra)
+
+**Resources** (optional further readings)
+- [Wide-column Databases](https://scaleyourapp.com/wide-column-and-column-oriented-databases/)
+- [https://www.scylladb.com/glossary/wide-column-database/](https://www.scylladb.com/glossary/wide-column-database/)
+- [Cassandra: The Definitive Guide](https://www.amazon.com/Cassandra-Definitive-Guide-Distributed-Scale/dp/1491933666)
+- [Introduction to HBase schema design](http://0b4af6cdc2f0c5998459-c0245c5c937c5dedcca3f1764ecc9b2f.r43.cf2.rackcdn.com/9353-login1210_khurana.pdf)
+- [Apache Cassandra VS Apache HBase](https://aws.amazon.com/compare/the-difference-between-cassandra-and-hbase/)
+
+
 
