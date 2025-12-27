@@ -1244,5 +1244,77 @@ The way this algorithm organizes the data reduces the time and computational res
 
 ## Neo4j and Cypher Query Language (Part 1)
 
-TBC
+Graph databases such as **Neo4j** allow you to model your data *as a graph* and interact with it similar to how you would interact with *relational* databases. 
 
+Here, I'd like to show you a particular graph model called **property graph model,** which you can implement in **Neo4j**. You'll also learn how to interact with such a graph using the **Cypher** query language. 
+
+In relational databases, you can represent your data with a relational model like this that describes the tables, the column names and each table, and how the tables are related to each other. 
+![[Screenshot 2025-12-27 at 11.37.59.png]]
+
+Similarly, in Neo4j, you can model your graph data using the **property graph model** as shown here. 
+
+![[Screenshot 2025-12-27 at 11.38.38.png]]
+Note that this diagram describes at a **high level** the graph structure, but *it doesn't show the actual data*. 
+The model describes 
+- **what types of node exist** in the graph and 
+- **how these are linked together**. 
+
+In this example, the model consists of five types of nodes, `customer`, `order`, `supplier`, `product`, and `category`. The type of node is referred to as the **"node label"**. 
+
+So for example, if a node represents a category of products, it should have `category` as its label. The edges between each node are called relationships and each relationship has a type which is shown in the text here next to each arrow. 
+![[Screenshot 2025-12-27 at 11.40.45.png]]
+Each relationship type connects a **source node** with a **target node**. 
+
+So for example, the supplies relationship has the supplier node as its source node and the product node as its target node. ![[Screenshot 2025-12-27 at 11.41.47.png]]
+
+
+Here's an example of some actual data that follows this graph model. 
+
+You can see five customer nodes shown in pink. ![[Screenshot 2025-12-27 at 11.42.56.png]]
+For each customer, you can see the orders they purchased, 
+![[Screenshot 2025-12-27 at 11.43.34.png]]
+what products each order contains, 
+![[Screenshot 2025-12-27 at 11.44.03.png]]
+to which category each product belongs, 
+![[Screenshot 2025-12-27 at 11.44.19.png]]
+and who supplies each product. 
+![[Screenshot 2025-12-27 at 11.44.32.png]]
+
+You can also see additional information associated with each node, such as the iD for the order node, the customer ID for the customer node, and the name of the product for the product node. This information is known as the node properties. 
+![[Screenshot 2025-12-27 at 11.45.06.png]]
+
+**You can associate *more than one* property with each node to further describe the entity it represents.** 
+
+Specifying the node properties is part of describing a complete graph model, hence the name "property graph model". 
+
+So in this example, each customer is associated with this set of properties, including their address, contact name, customer Id, and so on. ![[Screenshot 2025-12-27 at 11.46.09.png]]
+
+Here's an example showing the values for those properties for the customer QUEDE, ![[Screenshot 2025-12-27 at 11.46.41.png]]and here are the properties associated with the other node labels. 
+![[Screenshot 2025-12-27 at 11.46.57.png]]
+
+You can specify the properties not only for nodes, but also for each relationship. So for example, each relationship of type orders which maps an order to a particular product, has this set of properties, properties, discount quantity, and unit price.![[Screenshot 2025-12-27 at 11.47.27.png]]
+
+Here's an example showing the values for the properties of this orders relationship. 
+![[Screenshot 2025-12-27 at 11.48.03.png]]
+
+### Creating a Neo4j Graph DB
+There are several ways you can create a graph database in Neo4j. 
+
+One way is to write a *set of instructions* to Neo4j, specifying the **details** of the graph model such as 
+- the nodes, 
+	- their labels and properties, 
+- as well as the relationships between the nodes, 
+	- their types and properties, 
+- and where to find the data for the nodes and their relationships, which could be in some CSV files. 
+
+Neo4j will create the actual graph with the given data. Then, you can perform queries to interact with the graph and visualize the query results. 
+
+
+You'll need to use the cypher query language to create a graph database or to interact with the data in Neo4j.![[Screenshot 2025-12-27 at 11.50.07.png]]
+
+So in the next section, we'll go through some examples of how you can read information from a graph database using the Cypher query language. 
+
+
+## Neo4j and Cypher Query Language (Part 2)
+
+TBC

@@ -78,8 +78,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 200,
-    "collapsed": true
+    "width": 200
   },
   "right": {
     "id": "f9ed3059f5d31bd9",
@@ -172,17 +171,18 @@
   },
   "active": "d2a5c9c9e707efe2",
   "lastOpenFiles": [
-    "assets/Screenshot 2025-12-27 at 11.22.35.png",
+    "assets/Screenshot 2025-12-27 at 11.38.38.png",
+    "assets/Screenshot 2025-12-27 at 11.37.59.png",
     "C3/W1/C3_W1_class-notes.md",
-    "Pasted image 20251227113134.png",
-    "assets/Screenshot 2025-12-27 at 11.30.20.png",
-    "assets/Screenshot 2025-12-27 at 11.30.01.png",
-    "assets/Screenshot 2025-12-27 at 11.28.37.png",
-    "assets/Screenshot 2025-12-27 at 11.28.13.png",
-    "assets/Screenshot 2025-12-27 at 11.26.22.png",
-    "assets/Screenshot 2025-12-27 at 11.25.03.png",
-    "assets/Screenshot 2025-12-27 at 11.24.40.png",
-    "assets/Screenshot 2025-12-27 at 11.23.04.png",
+    "assets/Screenshot 2025-12-27 at 11.50.07.png",
+    "assets/Screenshot 2025-12-27 at 11.48.03.png",
+    "assets/Screenshot 2025-12-27 at 11.47.27.png",
+    "assets/Screenshot 2025-12-27 at 11.46.57.png",
+    "assets/Screenshot 2025-12-27 at 11.46.41.png",
+    "assets/Screenshot 2025-12-27 at 11.46.09.png",
+    "assets/Screenshot 2025-12-27 at 11.45.06.png",
+    "assets/Screenshot 2025-12-27 at 11.44.32.png",
+    "assets/Screenshot 2025-12-27 at 11.44.19.png",
     "C3/W1/C3_W1_Lab-1.md",
     "C3/W1/columnstoresfntdbs.pdf",
     "C3/W1/05-compression.pdf",
