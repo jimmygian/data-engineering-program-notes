@@ -1159,5 +1159,90 @@ With these databases, you'll use specialized languages like **Cypher**, **Greml
 
 ## Vector Databases
 
+Another type of database that's gained popularity with the rise of *machine learning applications* is the vector database. 
+
+**Vector databases** enable you to efficiently query data *based on **"semantic similarities*"**. This is called **"similarity search"**, and it has applications from recommendation systems to anomaly detection to text generation. 
+
+For example, if you wanted to recommend a product to a customer, you might query a vector database to identify products that are similar to those that the customer has purchased in the past. Or you can query a vector database to identify transactions that are dissimilar to other transactions in order to detect anomalies and potential fraudulent activities. 
+
+*These databases are optimized for storing and processing vector data, which consists of numerical values arranged in an array.* 
+
+So you could use a vector database for storing any kind of data that is in the **form of numbers in an array**. 
+
+For example, an array of numbers representing the amount of rainfall recorded each day over the course of a year. 
+![[Screenshot 2025-12-27 at 11.22.35.png]]
+
+Or you could store numerical data that could be rearranged into a vector, like image data, where you can unroll the RGB dimensions of the image into an array of numbers. 
+![[Screenshot 2025-12-27 at 11.23.04.png]]
+
+
+**Vector Embeddings**
+However, the importance of vector databases today is really about storage and retrieval of what are called ***"vector embeddings"***. 
+
+The core idea with vector embeddings is to take an item like a text document or an image and capture **its semantic content** using a **vector**. The way this works is that you pass the original data, say, a piece of text, through a machine learning model that has been trained to convert text to vector embeddings. You can then convert an entire database of documents or other text content into such embeddings and store them in a vector database. 
+
+The advantage of storing vector embedding representations of other types of content is that it's much easier and much faster to find and retrieve similar items based on their vector representation than it would be to compare across the original data items. 
+![[Screenshot 2025-12-27 at 11.25.03.png]]
+
+So, for example, suppose you have an item like a piece of text, and you want to find items in your vector database that are similar to that text. Then to query the database, you first need to compute the embeddings for the query item. Then the database can measure the similarity between any two vectors and return those that are most similar. 
+
+Vectors that are similar to one another semantically, will be closer to one another in the high dimensional vector space the vectors are represented in, and by closer I don't only mean closer to one another in terms of the euclidean distance you see here, which measures the length of the line segment between the endpoints of two vectors. You can also determine the closeness of two vectors by using other types of distance measures. Like the cosine distance, which determines the closeness based on the angle between the two vectors. Or by Manhattan distance, which is based on the distance between the vectors measured along their axes, as well as other metrics. 
+![[Screenshot 2025-12-27 at 11.26.22.png]]
+
+There are many algorithms available to you for performing a similarity search over a database of vector embeddings. 
+
+**KNN Search (K-nearest neighbours)**
+Let's take a closer look at one of the more popular algorithms, k-nearest neighbors, or KNN search. 
+
+Say you want to find the k most similar items to a given item. 
+![[Screenshot 2025-12-27 at 11.28.13.png]]
+The KNN algorithm will do an exhaustive search over all the vector embeddings of all items to compute the distance between those items and the given one. 
+![[Screenshot 2025-12-27 at 11.28.37.png]]
+
+- You can imagine that as the size of the vector database increases, this algorithm becomes less efficient. 
+- There's also the challenge of what's called the curse of dimensionality. Which is to say, because the high dimensional vector space may be sparse, distance measures might not reflect the accurate distance between them. 
+
+To overcome these challenges, you can use a different set of algorithms known as **ANN**, which stands for **approximate nearest neighbors**. These algorithms rely on finding a good guess for the nearest neighbors to a given item rather than calculating the exact distance from all the items. So even though they may result in slightly less accurate results, they are a lot more efficient. 
+
+In fact, vector databases are built to support ANN algorithms to enable you to perform efficient similarity search. When storing your vector embeddings in a vector database, the database applies an ANN algorithm to represent your data in a data structure that enables faster search. 
+![[Screenshot 2025-12-27 at 11.30.01.png]]
+
+Then, when you query the vector database to perform a similarity search based on the given item, the database uses its specific ANN algorithm to traverse the data structure to return the items that are approximately the closest. 
+![[Screenshot 2025-12-27 at 11.30.20.png]]
+
+I included an optional reading item about a popular ANN algorithm known as hierarchical navigable small world, or **HNSW**, after this section. 
+
+## ANN Algorithm: Hierarchical Navigable Small World (HNSW)
+
+***Hierarchical Navigable Small World (HNSW)*** is a popular ANN algorithm that underpins many vector databases and is considered to be among the best performing ANN algorithms.
+
+![[Pasted image 20251227113134.png]]
+
+This algorithm relies on building a **hierarchical graph representation of the embeddings**: each layer consists of a graph representation of the data, where: 
+- each node represents an embedding, 
+- and each edge represents the degree of similarity between two nodes. 
+
+The layers are constructed in a way so that the top layer contains more of the longest links and the bottom layer contains more of the shortest links. Moreover as you move up from the lowest layers to the highest layer, the number of nodes decreases.
+
+Given a query point (e.g. the green node in the image above), the algorithm starts at the entry node of the top layer (i.e. the red node) and navigates through the graph of that layer, each time choosing the neighboring node that is closest to the query point. It stops at the node that does not have any neighboring nodes closer to the query point. At this point, the algorithm shifts to the current node in the next lower layer and begins searching again. It repeats the process until it finds the nearest node at the bottom layer.
+
+The way this algorithm organizes the data reduces the time and computational resources needed for these searches when compared to the k-nearest neighbors algorithm.
+
+**Resources** (optional further readings)
+
+- [What is similarity search?](https://www.pinecone.io/learn/what-is-similarity-search/)
+- [Use cases of similarity search](https://hyper-space.hashnode.dev/what-is-similarity-search-definition-and-use-cases)
+- [What is a vector database?](https://www.pinecone.io/learn/vector-database/)
+- [HNSW](https://www.pinecone.io/learn/series/faiss/hnsw/)
+- Paper - [Efficient and robust approximate nearest neighbor search using Hierarchical Navigable Small World graphs](https://arxiv.org/pdf/1603.09320.pdf)
+
+**Vector databases**
+- [Neptune analytics](https://docs.aws.amazon.com/neptune-analytics/latest/userguide/algorithms.html)
+- [Pinecone](https://www.pinecone.io/) (Short Course - [Building Applications with Vector Databases](https://www.deeplearning.ai/short-courses/building-applications-vector-databases/))
+- [Weaviate](https://weaviate.io/) (Short course - [Vector Databases: from Embeddings to Applications](https://www.deeplearning.ai/short-courses/vector-databases-embeddings-applications/))
+
+
+## Neo4j and Cypher Query Language (Part 1)
+
 TBC
 
