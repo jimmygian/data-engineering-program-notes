@@ -1059,4 +1059,105 @@ Examples of wide-column databases include [HBase](https://databass.dev/links/118
 - [Apache Cassandra VS Apache HBase](https://aws.amazon.com/compare/the-difference-between-cassandra-and-hbase/)
 
 
+## Graph Databases
+
+Graph databases store data *within a mathematical graph structure using **nodes** and **edges**.* 
+- **Nodes** represent your data items, which are typically entities such as people, products, or locations, among other things. 
+- **Edges** represent the *relationship or connection between these data items*. 
+
+With modern applications, you might encounter graph databases if you're building a data system for a use case that involves **complex connections between data entities**. 
+![[Screenshot 2025-12-27 at 10.55.17.png]]
+
+
+For instance, if you work at an e-commerce company, you might use a graph database like this one to store data about the *relationships between users and products*: 
+![[Screenshot 2025-12-27 at 10.55.40.png]]
+
+You could, of course store this data in a relational database like this one:
+![[Screenshot 2025-12-27 at 10.55.54.png]]
+
+But graph databases treat relationships **as first-class citizens**, so you can very easily see the relationships between entities using a graph database compared to using a relational database. 
+
+When you want to query the data in a graph database, meaning you want to query the relationships between nodes and edges, you can traverse the graph structure. 
+![[Screenshot 2025-12-27 at 10.57.57.png]]
+
+For example, let's say you want to r***ecommend to a user the products that were purchased by their friends.*** 
+
+Starting with user one, you can traverse a graph by following the edges labeled "*friend*" to identify all the friends of this user. 
+![[Screenshot 2025-12-27 at 10.59.01.png]]
+
+Then, for each friend, you can follow the edges labeled "*purchased*" to create a list of the products that these friends have bought in the past and that you want to recommend to `user1`. 
+![[Screenshot 2025-12-27 at 11.00.11.png]]
+
+If the same data was stored in a ***relational*** database like I have here on the right, then to create the list of recommendations for `user1`, you would do the following: 
+```SQL
+SELECT DISTINCT purchaase.product
+FROM friendship
+JOIN purchase ON friendship.friend = purchase.user
+WHERE friendship.user = 'user1'
+...
+
+```
+
+- *join* the `friendship` table with the `purchase` table where the friend and friendship matches with the user in the purchase so that the joined results contain rows of users along with their friends and products purchased by their friends. 
+- Then you would **filter** this query so that you would only get information for user one. 
+- Then you could select the distinct products to get a list of the products that you should recommend to user one. 
+- ...
+
+Now you can imagine that if you wanted to recommend even more products to a user, say by considering the products that were purchased by the friends of their friends, then querying a relational database like this would require even more joins and that can get out of hand very quickly. 
+
+#### Graph Database Use Cases
+
+The above was an example of a product recommendation application.
+
+Aside from product recommendation applications, there are many other use cases for graph databases, including: 
+- *modeling* social networks, 
+- representing network and IT operations, 
+- simulating supply chain logistics, 
+- and tracing data lineage. 
+
+##### Use case - Fraud Detection
+Another not so obvious use case is in fraud detection, say in e-commerce transactions. 
+You can build a graph to model the relationship between entities such as 
+- customers, 
+- the products they purchased, 
+- the credit card used for the purchases, 
+- and their IP addresses. 
+![[Screenshot 2025-12-27 at 11.07.15.png]]
+
+Then you can identify suspicious activity by ***comparing*** these relationships with known fraudulent ones. 
+
+For example, suppose that you know that many fraudulent transactions include a credit card number that's already associated with one being used by a new user at a new IP address. 
+![[Screenshot 2025-12-27 at 11.08.16.png]]
+
+Then, by analyzing the relationships between users credit cards and IP addresses in this graph, you can flag all users who are using a credit card that's already associated with another user, but now from a new IP address as being suspicious. ![[Screenshot 2025-12-27 at 11.08.32.png]]
+
+
+#### Use Case - Knowledge Graphs
+You can also use graph databases to create **knowledge graphs** to connect data from disparate sources for a variety of use cases, like to enhance the accuracy and reliability of chatbots. 
+
+So, for example, you could create a knowledge graph to connect 
+- product, 
+- customer, 
+- and shipping data 
+across an e-commerce company. 
+![[Screenshot 2025-12-27 at 11.09.57.png]]
+
+
+When a user chats with a chatbot, you can search the knowledge graph for relevant information to provide additional context to the underlying large language model through a technique called retrieval augmented generation or RAG. 
+
+This technique gives the LLM access to fresh data that's relevant and specific to the e-commerce company itself, improving the query results. 
+![[Screenshot 2025-12-27 at 11.10.57.png]]
+
+We won't be getting into specific generative AI topics in these courses, but it's a very exciting time for generative AI. As a data engineer, I would encourage you to learn more about these topics by checking out the links to additional resources at the end of this week. 
+
+And so with all these potential use cases for graph databases, you need to develop some experience working with them. Nowadays, you can choose from many different graph databases including **Neo4j**, **ArongoDB**, and **Amazon Neptune.** 
+
+With these databases, you'll use specialized languages like **Cypher**, **Gremlin**, and **Sparkle** to query data. 
+
+![[Screenshot 2025-12-27 at 11.11.53.png]]
+
+
+## Vector Databases
+
+TBC
 
