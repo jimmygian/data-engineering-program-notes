@@ -1246,26 +1246,29 @@ The way this algorithm organizes the data reduces the time and computational res
 
 Graph databases such as **Neo4j** allow you to model your data *as a graph* and interact with it similar to how you would interact with *relational* databases. 
 
-Here, I'd like to show you a particular graph model called **property graph model,** which you can implement in **Neo4j**. You'll also learn how to interact with such a graph using the **Cypher** query language. 
+Here, I'd like to show you a particular graph model called **"property graph model",** which you can implement in **Neo4j**. You'll also learn how to interact with such a graph using the **"Cypher"** query language. 
 
-In relational databases, you can represent your data with a relational model like this that describes the tables, the column names and each table, and how the tables are related to each other. 
+In relational databases, you can represent your data with a relational model like this that describes the tables, the column names of each table, and how the tables are related to each other. 
 ![[Screenshot 2025-12-27 at 11.37.59.png]]
 
-Similarly, in Neo4j, you can model your graph data using the **property graph model** as shown here. 
-
+Similarly, in *Neo4j*, you can model your graph data using the **"property graph model"** as shown here. 
 ![[Screenshot 2025-12-27 at 11.38.38.png]]
 Note that this diagram describes at a **high level** the graph structure, but *it doesn't show the actual data*. 
 The model describes 
-- **what types of node exist** in the graph and 
-- **how these are linked together**. 
+- **what *types* of nodes exist** in the graph 
+- and ***how* these nodes are linked together**. 
 
 In this example, the model consists of five types of nodes, `customer`, `order`, `supplier`, `product`, and `category`. The type of node is referred to as the **"node label"**. 
 
-So for example, if a node represents a category of products, it should have `category` as its label. The edges between each node are called relationships and each relationship has a type which is shown in the text here next to each arrow. 
+So for example, if a node represents a category of products, it should have `category` as a node label. The *"edges"* between each node are called *"relationships"* and each relationship has a type which is shown in the text here next to each arrow. 
 ![[Screenshot 2025-12-27 at 11.40.45.png]]
 Each relationship type connects a **source node** with a **target node**. 
 
-So for example, the supplies relationship has the supplier node as its source node and the product node as its target node. ![[Screenshot 2025-12-27 at 11.41.47.png]]
+So, for example, 
+- the `supplies` **relationship**, has 
+	- the `supplier` node as its **source node** 
+	- and the `product` node as its **target node**. 
+![[Screenshot 2025-12-27 at 11.41.47.png]]
 
 
 Here's an example of some actual data that follows this graph model. 
@@ -1280,19 +1283,20 @@ to which category each product belongs,
 and who supplies each product. 
 ![[Screenshot 2025-12-27 at 11.44.32.png]]
 
-You can also see additional information associated with each node, such as the iD for the order node, the customer ID for the customer node, and the name of the product for the product node. This information is known as the node properties. 
+You can also see additional information associated with each node, such as the ID for the order node, the customer ID for the customer node, and the name of the product for the product node. This information is known as the **"node properties"**. 
 ![[Screenshot 2025-12-27 at 11.45.06.png]]
 
 **You can associate *more than one* property with each node to further describe the entity it represents.** 
 
 Specifying the node properties is part of describing a complete graph model, hence the name "property graph model". 
 
-So in this example, each customer is associated with this set of properties, including their address, contact name, customer Id, and so on. ![[Screenshot 2025-12-27 at 11.46.09.png]]
+So in this example, each customer is associated with this **set of properties**, including their address, contact name, customer Id, and so on. ![[Screenshot 2025-12-27 at 11.46.09.png]]
 
 Here's an example showing the values for those properties for the customer QUEDE, ![[Screenshot 2025-12-27 at 11.46.41.png]]and here are the properties associated with the other node labels. 
 ![[Screenshot 2025-12-27 at 11.46.57.png]]
 
-You can specify the properties not only for nodes, but also for each relationship. So for example, each relationship of type orders which maps an order to a particular product, has this set of properties, properties, discount quantity, and unit price.![[Screenshot 2025-12-27 at 11.47.27.png]]
+You can specify the properties not only for nodes, **but also for each relationship.** 
+So for example, each relationship of type orders which maps an order to a particular product, has this set of properties, properties, discount quantity, and unit price.![[Screenshot 2025-12-27 at 11.47.27.png]]
 
 Here's an example showing the values for the properties of this orders relationship. 
 ![[Screenshot 2025-12-27 at 11.48.03.png]]
@@ -1302,19 +1306,239 @@ There are several ways you can create a graph database in Neo4j. 
 
 One way is to write a *set of instructions* to Neo4j, specifying the **details** of the graph model such as 
 - the nodes, 
-	- their labels and properties, 
+	- their labels 
+	- and properties, 
 - as well as the relationships between the nodes, 
-	- their types and properties, 
-- and where to find the data for the nodes and their relationships, which could be in some CSV files. 
+	- their types 
+	- and properties, 
+- and where to find the actual *data* for the nodes and their relationships, 
+	- which could be in some CSV files. 
 
 Neo4j will create the actual graph with the given data. Then, you can perform queries to interact with the graph and visualize the query results. 
 
 
-You'll need to use the cypher query language to create a graph database or to interact with the data in Neo4j.![[Screenshot 2025-12-27 at 11.50.07.png]]
+You'll need to use the ***"cypher query language"*** to create a graph database or to interact with the data in Neo4j.![[Screenshot 2025-12-27 at 11.50.07.png]]
 
-So in the next section, we'll go through some examples of how you can read information from a graph database using the Cypher query language. 
+In the next section, we'll go through some examples of how you can **read** information from a graph database using the Cypher query language. 
 
 
 ## Neo4j and Cypher Query Language (Part 2)
 
-TBC
+
+Let's explore the graph you saw in the previous video. You'll use the `MATCH` statement to retrieve information you want from a graph. This statement enables you to **specify the pattern** that you want Neo4j to search for and return to you (It's similar to the `SELECT` statement you use with a relational database). 
+
+It always has this format,: 
+
+```Cypher
+MATCH pattern RETURN result
+``` 
+
+
+So let's say you want to retrieve *all* the nodes. In Cypher, you use parentheses to denote a node `()`. 
+
+Then inside the parentheses, you can specify the information of the node you want to retrieve. Since I want all the nodes to be returned, I don't need to specify any further information. I just need to use a **variable**, like `n`, to denote the node, and then I'll ask Neo4j to return `n`. 
+
+```Cypher
+Match (n) return n
+```
+
+This statement returns all the nodes. 
+
+
+Now let's say you want to get **the total number of nodes**. Again, In the return statement, I'll write return count (n). 
+
+```Cypher
+Match (n) return count(n)
+```
+
+
+You can also explore *what node labels* you have in the graph by using the ***labels*** function.
+
+```Cypher
+Match (n) return distinct labels(n)
+```
+
+Output:
+```shell
+["Supplier"]
+["Category"]
+["Product"]
+...
+```
+
+The `distinct` keyword ensures that the returned labels are not repeated. 
+
+
+ If you want to count the number of nodes that have a specific label, say, the ones with an `order` label, you can specify the label name inside the match pattern, like match n colon order, then return count n. 
+```Cypher
+Match (n:Order) return count(n)
+```
+ 
+ Output:
+```shell
+99
+```
+
+ You see that the graph contains 99 order nodes. You can also explore the properties associated with each node type by calling the `properties` function on the node variable in the return statement. 
+
+```Cypher
+Match (n:Order) return Properties(n)
+```
+This statement returns the properties for all order nodes. 
+
+
+You can ***limit*** the number of results using the `limit` keyword. So here I'll specify that I want the properties of the first node. 
+
+```Cypher
+Match (n:Order) return Properties(n) limit 1
+```
+
+Output:
+```shell
+{
+	"shipCity": "Reims",
+	"orderID": "10248",
+	...
+}
+```
+
+
+
+In all the examples you've seen so far, we explored the information about the nodes in the graph, but **you can also explore the information about the edges or the relationships between those nodes.** You can use square brackets to *denote a **relationship**.* Then, inside the brackets, you can specify a variable so you can reference relationships. 
+
+```Cypher
+
+```
+
+Now, since a relationship exists **between two nodes,** the way you can relate a relationship `r` to its source and target nodes is like this. 
+
+```Cypher
+(source_node)-[r]->(target_node)
+```
+
+
+Let's say you want to count *all* the directed paths that exist in this graph. You can write a Match statement like this where you're looking for any relationship `r` that goes from any source node to any target node. Then you can return count `r`. 
+
+```Cypher
+Match ()-[r]->() return count(r)
+```
+
+Since I don't need to reference the nodes in the return statement, I don't have to specify any variable for the nodes in the parentheses. 
+
+You can see that there are 518 directed relationships in the graph and you can modify the return statement to see the *distinct* **types** of relationships in the graph. 
+
+```Cypher
+Match ()-[r]->() return distinct type(r)
+```
+
+You can also specify the type of relationship that you want to investigate by specifying the label for the relationship. 
+
+For example, I can specify the orders label after the relationship variable r. 
+
+
+```Cypher
+Match ()-[r:ORDERS]->() return AVG(r.quantity*r.unitPrice) as average_price
+```
+
+- Now, instead of just returning the *count* or *type* of relationship, you can also return its ***properties***. 
+- So for the ORDERS relationship, say you want to find the average price for orders, 
+- you can return the average of the order price which you can get by multiplying the quantity property by the unit price property. 
+- If you want to more easily refer to the return value, you can use the `as` keyword to create an alias for the return value. So here I'll label the return value as `average_price`. 
+
+
+Now let's say instead of getting the average price for all orders, you want to get the average price for all orders **grouped by product category**. 
+
+```Cypher
+Match ()-[r:ORDERS]->()-[part:PART_OF]->(c:Category) return c.categoryName, AVG(r.quantity*r.unitPrice) as average_price
+```
+- In the previous query, you can add another path to the MATCH statement to get the node category. 
+- So, the pattern this query matches includes all orders relationships denoted by `r` that are a part of a specific category denoted by `c`. 
+- Then in the return statement you can add `c.categoryName` name, which is a list of names representing each category. 
+
+
+
+The last type of statements that I'd like to cover are filtering statements. You can ***filter*** the results using the "***where***" statement, which is similar to the SQL where statement. 
+
+So let's say you want to retrieve the product name and product unit price of all products that belong to the category "Meat/Poultry". First, you need to specify the path where a product node is part of a category node. 
+
+```Cypher
+Match (p:Product)-[:PART_OF]->(c:Category) where c.categoryName="Meat/Poultry"
+return p.productName, p.unitPrice
+```
+
+- Note that I assign variables to the product and category nodes, but not to the part of relationship. This is because I need to reference these nodes but not the relationship in the rest of the query statements. 
+- Next, you need to specify the condition you want to filter by, which is where the categoryName property equals Meet/Poultry. 
+- And finally, you need to specify the properties of the products that you want to be returned. In this case, I'll specify the product name and its unit price. 
+
+Instead of specifying a desired node property in a where statement, you can instead clarify the property inside the node parentheses. 
+
+```Cypher
+Match (p:Product)-[:PART_OF]->(c:Category {categoryName:"Meat/Pultry"})
+return p.productName, p.unitPrice
+```
+- So in this case, in the category node, you can use curly brackets like this to specify the category name you want to filter by. 
+
+
+Now, let's say you want to retrieve the product name of all products ordered by the customer with customerID `QUEDE`. 
+
+```Cypher
+Match (c1:Customer {customerID:"QUEDE"})-[:PURCHASED]->()-[:ORDERS]->(p:Product) return p.productName
+```
+
+- You'll start with a customer node which ill give it a variable name of c1 and specify that the customerID is QUEDE. 
+- Then you'll chain the PURCHASED and ORDERS relationship to reach the `product` node. 
+- And finally I'll return the `productName`s. 
+- Note that for the PURCHASED relationship I didn't have to specify a variable for the target order node because I don't need to reference that variable in the rest of the query statement. 
+
+So here are the products ordered by the customer QUEDE. 
+
+
+Now let's say that for the same customer QUEDE, you want to get the ID of other customers who ordered the same products as QUEDE. 
+
+```Cypher
+Match (c1:Customer {customerID:"QUEDE"})-[:PURCHASED]->()-[:ORDERS]->(p:Product) <-[:ORDERS]-()<-[:PURCHASED]-(c2:Customer) return c2.customerID
+```
+
+- So, again, I'll start with the customer `QUEDE`, then ***chain*** the two PURCHASED and ORDERS relationships to get the `product` node. 
+- Now, I'll specify the path ***in reverse*** by *chaining the orders and purchase relationships* using the **left arrow** to go from the product node to another customer node. 
+- I'll use a variable `c2` to represent this customer who ordered the same products as QUEDE. 
+- And then finally I'll return the customer id of the second customer. 
+
+ 
+ 
+Let's do one more search over this graph. Let's say you want to retrieve **the orders that contain at most two products.** 
+
+Let's think about this step by step. 
+
+First, let's get the total number of products for each order. 
+```Cypher
+Match (o:Orders)-[:ORDERS]->(p:Product) return o.orderID as ID, count(p) as countProd
+```
+
+- I'll start by specifying the ORDERS relationship from `Orders` nodes to `Product` nodes, 
+- then I'll return the `orderID` and the count of products. 
+- This statement is equivalent to using the SQL `GROUP BY`statement to group the orderIDs, then counting the number of products for each orderID. 
+
+Next, I need to add a `where` statement to filter the orders that have at most two products. 
+```Cypher
+Match (o:Orders)-[:ORDERS]->(p:Product) with o.orderID as ID, count(p) as countProd
+where countProd <= 2
+return ID, countProd
+```
+
+- To do this, ill replace the `return` statement with a `with` statement which allows you to access the id and count prod **outputs**. 
+- After the `with` statement, I'll add the filter statement `where` and filter on when countprod is less than or equal to 2. 
+- Then finally ill return the filtered results. 
+
+### Links to Data and Cypher Instructions
+
+The graph example shown in the video was created using the CSV files of the [Northwind dataset](https://github.com/neo4j-documentation/developer-resources/tree/gh-pages/data/northwind) and the instructions in this file:
+
+[neo4j_importer_cypher_script_2024-04-24](https://d3c33hcgiwev3.cloudfront.net/pgpKDZwQTtqVimph1IHwog_cdd08f6d0f104646b5e60c0a67aa74f1_neo4j_importer_cypher_script_2024-04-24.cypher?Expires=1767260603&Signature=YPsuuQSiocTT5v9u7vRzXbrpZP4yQY1sEk8kHpV-X1xAlS~9QYdTP1QZX14iq3GQl0qqcLSn1wga0pxi4xj9296Z6BI5kXn-R6~q1HGavb6I8qiUXUdmoDlabPhRYypTSEh5veEAW7qkLpxHn8lsbtidgM6yc8FW4TEz4SsxfOA_&Key-Pair-Id=APKAJLTNE6QMUY6HBC5A)
+
+**Reference**:
+- [Tutorial: Import data from a relational database into Neo4j](https://neo4j.com/docs/getting-started/appendix/tutorials/guide-import-relational-and-etl/)
+
+
+---
+
