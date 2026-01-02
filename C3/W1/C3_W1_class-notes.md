@@ -1542,3 +1542,11 @@ The graph example shown in the video was created using the CSV files of the [Nor
 
 ---
 
+## Optional Readings
+
+- Chapters 6 of [Fundamentals of Data Engineering](https://go.redpanda.com/fundamentals-of-data-engineering)
+- [Designing Data-Intensive Applications](https://www.amazon.com/Designing-Data-Intensive-Applications-Reliable-Maintainable/dp/1449373321/ref=asc_df_1449373321?tag=bingshoppinga-20&linkCode=df0&hvadid=80195682971964&hvnetw=o&hvqmt=e&hvbmt=be&hvdev=c&hvlocint=&hvlocphy=&hvtargid=pla-4583795260799043&psc=1) (chapters 3, 4, 5 and 6)
+- [Database Internals](https://www.amazon.com/Database-Internals-Deep-Distributed-Systems/dp/1492040347)
+- [The Design and Implementation of Modern Column-Oriented Database Systems](https://stratos.seas.harvard.edu/files/stratos/files/columnstoresfntdbs.pdf)
+- [Short course: Knowledge Graphs for RAG](https://www.deeplearning.ai/short-courses/knowledge-graphs-rag/)
+- [Short course: Building applications with vector databases](https://www.deeplearning.ai/short-courses/building-applications-vector-databases/)
