@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "C3/W2/C3_W2_class-notes.md",
+                "file": "Tools-Training/Cypher.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "C3_W2_class-notes"
+              "title": "Cypher"
             }
           },
           {
@@ -27,15 +27,16 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "C3/W1/C3_W1_class-notes.md",
+                "file": "Tools-Training/Cypher.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "C3_W1_class-notes"
+              "title": "Cypher"
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -183,10 +184,14 @@
       "bases:Create new base": false
     }
   },
-  "active": "12400ebcd2ea9a8b",
+  "active": "858458ebf33c3d68",
   "lastOpenFiles": [
-    "assets/Screenshot 2026-01-02 at 18.15.09.png",
+    "C3/W1/C3_W1_class-notes.md",
+    "Tools-Training/Cypher.md",
+    "C3/W1/C3_W1_Ass-1.md",
+    "C3/W1/C3_W1_Lab-1.md",
     "C3/W2/C3_W2_class-notes.md",
+    "assets/Screenshot 2026-01-02 at 18.15.09.png",
     "assets/Screenshot 2026-01-02 at 18.54.16.png",
     "assets/Screenshot 2026-01-02 at 18.53.38.png",
     "assets/Screenshot 2026-01-02 at 18.51.40.png",
@@ -196,10 +201,6 @@
     "assets/Screenshot 2026-01-02 at 18.47.57.png",
     "assets/Screenshot 2026-01-02 at 18.45.51.png",
     "assets/Screenshot 2026-01-02 at 18.45.10.png",
-    "assets/Screenshot 2026-01-02 at 18.42.39.png",
-    "C3/W1/C3_W1_class-notes.md",
-    "C3/W1/C3_W1_Ass-1.md",
-    "C3/W1/C3_W1_Lab-1.md",
     "C3/W1/columnstoresfntdbs.pdf",
     "C3/W1/05-compression.pdf",
     "README.md",

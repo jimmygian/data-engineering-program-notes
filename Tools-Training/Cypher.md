@@ -1,11 +1,12 @@
 
-In this lab, you will use the Cypher query language to query highly connected data in the graph database Neo4j. Relationships between data entities can be just as important as the data itself, and graph databases are designed to answer questions about the relationships. You will also leverage the graph database to perform vector search: a method of information retrieval where data points are represented as vectors. One can perform a similarity search between data points by comparing their vector representations.
-
-When using Cypher to query your graph database, you need to understand the difference between nodes, relationships, and paths. Let's take a closer look at these components.
-
 ### 2.1 - Introduction to Cypher 
 
-Cypher is a declarative query language designed for expressing queries across graph databases. It provides a concise and intuitive syntax for performing operations such as creating, updating, retrieving, and deleting data within graph structures. It reuses syntax from SQL and mixes it with ASCII elements to represent graph elements. OpenCypher, on the other hand, is an open standard for graph query languages inspired by Cypher. It aims to standardize the Cypher query language across different graph database implementations. Alongside Cypher, Gremlin and SPARQL are the most popular Graph Query Languages.
+Cypher is a declarative query language designed for expressing queries across graph databases. It provides a concise and intuitive syntax for performing operations such as creating, updating, retrieving, and deleting data within graph structures. It reuses syntax from SQL and mixes it with ASCII elements to represent graph elements. 
+
+OpenCypher, on the other hand, is an open standard for graph query languages inspired by Cypher. It aims to standardize the Cypher query language across different graph database implementations. 
+
+Alongside Cypher, Gremlin and SPARQL are the most popular Graph Query Languages.
+
 
 #### Nodes
 
@@ -21,6 +22,7 @@ A node is used to capture a data item, usually an entity, like a customer, an or
 
 - `n.code`: You can access a specific property using this syntax, in this case, the **code** from the node denoted by **n**.
 
+
 #### Relationships / Edges
 
 A relationship or edge is used to describe a **connection** between two nodes.
@@ -35,6 +37,7 @@ A relationship or edge is used to describe a **connection** between two nodes.
 
 - `[r:Route*..4]`: This syntax is used to match a pattern where the relationship **r** with the label **route** can be repeated between 1 to 4 times. In other words, it matches paths where the **route** relationship occurs consecutively at least once and at most four times.
 
+
 #### Paths
 
 A path is used to capture the graph structure.
@@ -47,9 +50,9 @@ A path is used to capture the graph structure.
 
 - `(a:Airport)-[:Route]-(b:Airport)-[:Route]-(c:Airport)`: A path can chain multiple relationships and any of them can be directional.
 
-You will see more about nodes, relationships and paths in the next exercises while exploring the syntax of the language.
 
 The **variables** will appear by naming parts of the patterns or a query to reference them. You will see the examples below.
+
 
 #### Pattern Matching Syntax
 
@@ -75,8 +78,9 @@ To find more information about Cypher/OpenCypher, you can visit these resources:
 - [LearnXinYminutes Cypher](https://learnxinyminutes.com/docs/cypher/)
 
 
-## SIMPLE QUERIES
+## Simple Queries
 
+#### MATCH 
 `MATCH` statements in Cypher are used to retrieve data from the graph by specifying patterns of nodes and relationships. These patterns define the structure of the data you want to retrieve or manipulate. The `MATCH` statement is used to specify patterns of nodes and relationships to match in the graph. It is the primary way to retrieve data from the graph. The `RETURN` keyword is used to specify what data to include in the query result. It specifies the properties of nodes and relationships to return, as well as any computed values. The `LIMIT` keyword limits the number of returned values. Run each of the following cells to better understand how `MATCH` statements work.
 
 **Match all nodes**: Let's get some nodes, limited only to 20 values. Note that you are using `(n)` to get a *node* referred to the variable **n**, as mentioned in an earlier section
@@ -94,7 +98,7 @@ MATCH (n) RETURN DISTINCT labels(n), count(n)
 ```
 
 
-## RELATIONSHIPS
+## Relationships
 
 Now explore the **relationships between the nodes**. 
 
@@ -291,4 +295,14 @@ This query will return the shortest path assuming all routes are the same, but t
 Vector search is a powerful technique in information retrieval, it relies on data representations as vectors in a high-dimensional space. These vectors capture the semantic relationships and similarities between the data points. By leveraging embeddings, which are dense vector representations learned from data, vector search enables efficient and accurate retrieval of relevant information. 
 
 **Neo4j** can integrate vector search capabilities by storing embeddings as properties of graph nodes or relationships. This integration empowers Neo4j to perform advanced similarity searches, recommendation systems, and other Machine Learning tasks within the context of graph data structures, enhancing its utility in various domains such as recommendation engines, fraud detection, and knowledge graphs.
+
+
+### Links to Data and Cypher Instructions
+
+The graph example shown in the video was created using the CSV files of the [Northwind dataset](https://github.com/neo4j-documentation/developer-resources/tree/gh-pages/data/northwind) and the instructions in this file:
+
+[neo4j_importer_cypher_script_2024-04-24](https://d3c33hcgiwev3.cloudfront.net/pgpKDZwQTtqVimph1IHwog_cdd08f6d0f104646b5e60c0a67aa74f1_neo4j_importer_cypher_script_2024-04-24.cypher?Expires=1767260603&Signature=YPsuuQSiocTT5v9u7vRzXbrpZP4yQY1sEk8kHpV-X1xAlS~9QYdTP1QZX14iq3GQl0qqcLSn1wga0pxi4xj9296Z6BI5kXn-R6~q1HGavb6I8qiUXUdmoDlabPhRYypTSEh5veEAW7qkLpxHn8lsbtidgM6yc8FW4TEz4SsxfOA_&Key-Pair-Id=APKAJLTNE6QMUY6HBC5A)
+
+**Reference**:
+- [Tutorial: Import data from a relational database into Neo4j](https://neo4j.com/docs/getting-started/appendix/tutorials/guide-import-relational-and-etl/)
 
