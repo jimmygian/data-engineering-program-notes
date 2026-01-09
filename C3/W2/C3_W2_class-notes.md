@@ -374,5 +374,101 @@ As you've seen, the technical architectures of Cloud data warehouses and data 
 
 
 ## Lakehouse Architecture on AWS
+
+It's common for organizations to start with a simple data lake and then evolve over time to use a more mature solution like a data lake house. 
+
+Now it's time to discuss how you can architect a data lake house using AWS services, including "AWS lake formation", and "Amazon Redshift Spectrum". 
+
+### AWS Lake Formation
+At its core, AWS lake formation is designed to simplify the process of building and managing data lakes. 
+
+Traditionally, setting up a data lake or lake house involves a lot of manual steps, 
+- defining storage,
+- setting up access controls, 
+- cataloging data, 
+- and managing permissions to data assets. 
+
+This can be complex and time consuming, and lake formation automates some of these tasks, making it simpler for you to get started. 
+![[Screenshot 2026-01-09 at 18.07.54.png]]
+
+Here's how it works: 
+
+- You start by *identifying your **existing data sources*** (like Amazon S3 or relational and NoSQL databases). ![[Screenshot 2026-01-09 at 18.10.14.png]]
+
+- Then, you can use **"*Lake Formation*"** to move that data into your data lake. ![[Screenshot 2026-01-09 at 18.11.31.png]]
+
+- After that, you again use lake formation to 
+	- ***crawl* through the data** (with `Crawler`)
+		- catalog it, and (with `AWS Glue Data Catalog`)
+		- get it ready for analytics (`Metadata`)
+	![[Screenshot 2026-01-09 at 18.12.54.png]]
+
+
+- Finally, you can give your users secure self service access to this data with their preferred analytics tools. ![[Screenshot 2026-01-09 at 18.14.56.png]]It's a streamlined way to make sure everyone in your organization can easily find and use the data they need. 
+
+
+You may recognize some of these tasks as things you've done before with AWS Glue, and that is because lake formation is *actually* built **on top of AWS Glue and IAM**, so, it's using features of Glue you are already familiar with like: 
+- glue jobs,
+- workflows, and 
+- crawlers 
+to perform these tasks. 
+![[Screenshot 2026-01-09 at 18.16.05.png]]
+
+
+When you're using lake formation, you can create things like **workflows**, but also manage these features directly in the Glue console. ![[Screenshot 2026-01-09 at 18.17.07.png]]
+
+### Managing Permissions
+With a typical data lake or lake house, there are ***many AWS services interacting with each other*** and with *end users* accessing different datasets. Along with that, comes a fair amount of overhead for managing permissions, and so, a main feature of AWS LakeFormation helps automate the creation of data lake by managing complex fine grained permissions.![[Screenshot 2026-01-09 at 18.17.57.png]]
+
+Lake formation also provides fine grained access control on the data stored in S3, and the metadata in the data catalog. You can **centrally** manage permissions and IAM policies to streamline the process of governing and sharing your data internally and externally for both analytics and machine learning applications. 
+![[Screenshot 2026-01-09 at 18.20.17.png]]
+
+
+### Example Diagram of a data LakeHouse Architecture on AWS
+
+Now that you've got a high level understanding of lake formation, let's review a diagram of an example of data lake house architected with AWS services. We'll dive deeper into various aspects of this architecture as we go along. 
+
+![[Screenshot 2026-01-09 at 18.28.14.png]]
+#### Data Sources
+First, you have the data sources, which from a data engineer's perspective, are often *out of your control*. These are things like databases, file shares, SAS applications, and more. 
+
+#### Ingestion Mechanisms / Ingestion Layer
+Then you have the **ingestion mechanisms**, which would ingest data into the data lake house. 
+
+As you have learned in previous courses, there are various services you can use for data ingestion, including: 
+- Amazon Kinesis Data Streams, 
+- Amazon Data Firehose, 
+- AWS Data Sync, 
+- AWS database migration service, and 
+- Amazon AppFlow. 
+- Also, AWS lake formation can manage some data ingestion tasks through AWS Glue. 
+
+#### Storage Layer
+All that ingested data needs to be stored somewhere, so n ext to the ingestion layer, there is the storage layer that uses **Amazon Redshift** and **Amazon S3**. 
+
+#### Processing Layer
+Above that, sits the **processing layer,** where you would read data from the Lake house storage layer and transform it for downstream consumers. You would use services like 
+- Amazon EMR or 
+- AWS Glue, 
+- Amazon manage service for Apache Flink, or 
+- SQL data processing on Amazon Redshift. 
+
+#### Catalog Layer
+Then there's the **catalog layer** that uses lake formation to provide a central catalog to store and manage metadata for all datasets hosted in the storage layer. 
+
+In this layer, you can also use lake formation to manage permissions and provide fine grained access control. 
+
+#### Consumption Layer
+Then finally, the rightmost layer here for the lake house architecture is the c**onsumption layer**, which provides AWS services you may use to **consume** the data, including but not limited to 
+- Amazon Sage maker for machine learning use cases, 
+- Amazon QuickSite for business intelligence and data visualizations, and 
+- Amazon Athena and 
+- Amazon Redshift Spectrum for querying data in the lake house. 
+
+We will spend more time exploring A**mazon Redshift Spectrum** in the next section. Since you have already learned a lot about data sources and ingestion use cases, I won't focus on those more right now. But I would like for you to join me in the next section for a closer look at the storage, processing, catalog, and consumption layers of these data lake house architecture. I'll see you there.
+
+
+## Implementing a Lakehouse on AWS
+
 [TBC]
 
