@@ -138,7 +138,7 @@ FROM table1
 LIMIT 1;
 ```
 
-
+###  Logical Operators
 ##### WHERE
 The `WHERE` clause is used to filter data based on a condition. In the end, the query will return the rows which satisfy the condition.
 
@@ -146,6 +146,43 @@ The `WHERE` clause is used to filter data based on a condition. In the end, the 
 SELECT *
 FROM table_name
 WHERE column1 = 'value1';
+```
+
+
+
+`WHERE` clause is used to filter data based on a condition. If you want to use multiple conditions you will need to use logical operators.
+
+The `AND` operator returns the records for those that meet all the conditions applied in the operator.
+
+```sql
+SELECT
+    *
+FROM table_name
+WHERE
+    column1 = 'value1'
+    AND column2 < 'value2'
+    AND column3 > 'value3';
+```
+
+The `OR` operator returns the records for those that meet **at least one of** the conditions applied in the operator.
+
+```sql
+SELECT
+    *
+FROM table_name
+WHERE
+    column1 = 'value1'
+    OR column2 < 'value2'
+    OR column3 > 'value3';
+```
+
+The `NOT` operator is used in a condition to reverse its result.
+
+```sql
+SELECT
+    *
+FROM table_name
+WHERE NOT column1 = 'value1';
 ```
 
 
@@ -205,7 +242,7 @@ WHERE staff.active = 1;
 
 ##### GROUP BY
 
-The `GROUP BY` SQL statement groups rows that have the same values in specified columns into summary rows. It is often used with aggregate functions (`COUNT`, `MAX`, `MIN`, `SUM`, `AVG`) to perform calculations on each group of data. So you can use it to help answer questions like "What is the average film length by film release year?".
+The `GROUP BY` SQL statement groups rows that have **the same values in specified columns** into summary rows. It is often used with aggregate functions (`COUNT`, `MAX`, `MIN`, `SUM`, `AVG`) to perform calculations on each group of data. So you can use it to help answer questions like "What is the average film length by film release year?".
 
 ```sql
 SELECT
@@ -247,7 +284,7 @@ ORDER BY film_counts;
 ```
 
 
-# Advanced SQL Queries 
+## Advanced SQL Queries 
 
 Let's go through these advanced SQL statements. 
 ![[Screenshot 2026-01-11 at 10.39.33.png]]
@@ -266,7 +303,7 @@ The other surrounding dimension tables contain more detailed information about 
 To walk you through these advanced eQL statements, I'll only be focusing on the rental fact table and the dimension tables for the customer, staff, film, and film category. 
 ![[Screenshot 2026-01-11 at 10.43.04.png]]
 
-
+#### `EXPLAIN` a query
 Let's say that I sort this data in a *PostgreSQL* database, and I want to select all records from the customer table. 
 
 ```PostgreSQL
@@ -339,35 +376,23 @@ SELECT DISTINCT fact_rental.staff_id, fact_rental.customer_id
 FROM fact_rental
 ```
 
-#### String Manipulation Functions
-
-Now, let's include the first and last name of the staff member, which you can find in the staff dimension table. I'll `JOIN` the `fact_rental` table with the `dim_staff` table based on the `staff_id` column. I'll add the staff first name and staff last name to the select statement here. 
-
-```MySQL
-SELECT DISTINCT fr.staff_id, fr.customer_id, 
-CONCAT(staff.first_name, ' ', staff.last_name) AS staff_name
-FROM fact_rental AS fr
-JOIN dim_staff AS staff ON fr.staff_id = staff.staff_id;
-```
-
-You can concatenate the first and last names into one string. 
-
->	Depending on the database management server, the syntax for string concatenation might look different. Here I'm working with a MS SQL database where I can use the `CONCAT()` function to combine the first and last names. 
-
-Other than concatenating two strings, you could also apply other string manipulation functions such as `LOWER()` to convert the string to lower case or `UPPER()` to convert it to uppercase. 
-
-You can also use the `SUBSCTRING()` function to extract a part of a string. For example, to return *the first letter of the last name*, I'll apply the `SUBSTRING()` function to the staff last name. 
-```MySQL
-SELECT DISTINCT fr.staff_id, fr.customer_id, 
-CONCAT(staff.first_name, ' ', SUBSTRING(staff.last_name, 1, 1)) AS staff_name
-FROM fact_rental AS fr
-JOIN dim_staff AS staff ON fr.staff_id = staff.staff_id;
-```
-> This function expects two arguments, the start position and the number of characters to extract. 
-
-
 
 #### `CASE` Statement
+
+The CASE statement works like an `if` statement in programming. It will evaluate some conditions and return a value when the first condition is met. If no conditions are met it will return the value used in the `ELSE` clause.
+
+```sql
+SELECT
+    CASE
+        WHEN column1 < 0 THEN 'value1'
+        WHEN column1 > 0 THEN 'value2'
+        ...
+        ELSE 'value3'
+    END
+    column2
+FROM table_name;
+```
+
 Now, let's say you want to check whether a customer made an on-time payment, meaning that they paid for the DVD rental **before** they actually returned the DVD. 
 
 In the `fact_rental` table, you could **compare** the `payment_date` and `return_date` columns for individual records. But to make this easier, let's use the SQL `CASE` statement to create a column that contains a `1` if the payment date is before the return date and a `0` otherwise. 
@@ -468,6 +493,393 @@ So far, we have discovered
 - some **SQL string functions**, 
 - Boolean expressions, 
 - and the case statement.
+
+
+### Common Table Expressions (CTEs)
+
+A **Common Table Expression (CTE)** is used to create a temporary result set that can be referenced in another query. It only exists during the execution of a query.
+
+```sql
+WITH temp_results AS (
+    SELECT
+        column1,
+        column2
+    FROM table1
+    WHERE column2 = 'value1'
+)
+SELECT
+    *
+FROM table2
+INNER JOIN temp_results
+ON temp_results.column1 = table2.column1;
+```
+
+Deeper dive:
+
+We have these two queries from previously:
+
+```MySQL
+SELECT DISTINCT
+fr.staff_id,
+CONCAT (staff.first_name,' '. staff.last_name) AS staff_name,
+fr.customer_id
+FROM fact_rental as fr
+JOIN dim_staff as staff
+ON fr.staff_id = staff.staff_id
+```
+
+```MySQL
+SELECT fr.customer_id, fr.rental_id,
+(CASE 
+	WHEN payment_date < return_date THEN 1
+	ELSE 0
+END) AS on_time_payment
+FROM fact_rental as fr
+JOIN dim_customer as c
+ON c.customer_id = fr.customer_id
+WHERE c.country IN ("United States", "Canada")
+AND (fr.rental_date BETWEEN "2005-05-24" AND "2005-07-26")
+```
+
+Let's say you want to perform some additional computations on top of each of the above two queries. 
+
+- In the first example, you might need to know the total number of customers that were served by each staff member, 
+- In the second example, you might want to compute for each customer the average of the on-time payment column to get the percentage of on-time payments for each customer. 
+
+In both examples, I don't want to store these results in a separate table. I just need to be able to reference these ***temporary results*** to perform my computations. To do that, you can use **common table expressions or "CTE"s** to define these **temporary result sets** that can be referenced elsewhere in the query. 
+
+Let's take a look at the first example and compute the total number of customers that were served by each staff member. 
+
+```MySQL
+WITH <result_table> AS (
+	<EXPRESSION_TO_GET_RESULT_TABLE>
+) 
+SELECT <whatever>
+FROM <result_table>
+GROUP BY ...
+LIMIT ...
+```
+
+
+```MySQL
+WITH staff_customer_pairs AS (
+	SELECT DISTINCT
+	fr.staff_id,
+	CONCAT (staff.first_name,' '. staff.last_name) AS staff_name,
+	fr.customer_id
+	FROM fact_rental as fr
+	JOIN dim_staff as staff
+	ON fr.staff_id = staff.staff_id
+)
+SELECT staff_name, COUNT(customer_id)
+FROM staff_customer_pairs
+GROUP BY staff_name
+```
+
+- To define the CTE, you start `WITH` the with keyword. 
+- Then you specify a variable `<name>` for the CTE, which we'll call `staff_customer_pairs`, followed by `AS` keyword and the **query that represents the temporary results** *enclosed* between two parentheses. 
+- Within these parentheses, I'll write the query you saw above that gets us the unique staff and customer pairs. 
+- Once you define your CTE, you can query it in the same way you query any table. 
+	- I'll write a regular query to select the staff name and count the customer IDs from the staff customer pairs CTE and then `GROUP BY` the staff name. 
+![[Screenshot 2026-01-14 at 14.19.03.png]]
+
+You can see that there are only two staff members, and they both served the same number of customers. 
+
+
+Now, let's move on to the second example to compute the percentage of on-time payments for each customer. 
+
+```MySQL
+WITH customer_payment_info AS (
+	SELECT fr.customer_id, fr.rental_id,
+	(CASE 
+		WHEN payment_date < return_date THEN 1
+		ELSE 0
+	END) AS on_time_payment
+	FROM fact_rental as fr
+	JOIN dim_customer as c
+	ON c.customer_id = fr.customer_id
+	WHERE c.country IN ("United States", "Canada")
+	AND (fr.rental_date BETWEEN "2005-05-24" AND "2005-07-26")
+), customer_percent_on_time_payment AS (
+	SELECT customer_id, AVG(on_time_payment) AS percent_on_time_payment
+	FROM customer_payment_info
+	GROUP BY customer_id
+)
+SELECT MAX(percent_on_time_payment)
+FROM customer_percent_on_time_payment
+
+```
+- Here, I am creating another CTE out of the first one.
+
+```plaintext
+SELECT <something> FROM <resulting table from query2 that came from computing on top of resulting table of query1> FROM <resulting table from query2>
+```
+
+
+With CTEs, you saw that you can define your temporary results using the with keyword and you can query from the CTE similarly to how you would from any table. 
+
+
+### Subqueries
+
+You can also incorporate some temporary results within your main query using **subqueries**. 
+
+A **subquery** is a query nested inside another query. The inner queries will be executed first and their results will be passed into the outer queries in order to be executed.
+
+```sql
+SELECT
+    *
+FROM table1
+WHERE column1 > (
+    SELECT AVG(column1)
+    FROM table1
+);
+```
+
+Let's focus on the film dimension table. 
+![[Screenshot 2026-01-14 at 14.56.51.png]]
+
+You can see that each film has a certain `length`, and let's say you're interested in getting the IDs of the films that have length greater than the average length. 
+
+You can start by getting the average length of the film by selecting average length from dim film. 
+
+```MySQL
+SELECT AVG(length) FROM dim_film
+```
+
+This query returns a single number, which represents the average of the film length. 
+
+You can then incorporate this query as a **subquery** within the main query to return the IDs of the film with length greater than this average. 
+
+```MySQL
+SELECT film_id, length 
+FROM dim_film 
+WHERE length > (
+	SELECT AVG(length) FROM dim_film
+)
+```
+- I can get this average by writing the subquery that returns the average length of the films and enclose it within parentheses. 
+
+
+## SQL Window Functions
+
+The last type of query I'd like to go over are **SQL window functions.** 
+
+>	*A "SQL Window Function" is type of query that allows you to apply an aggregate or ranking function over a particular window or set of rows.* 
+
+Window functions **aggregate the query results** *without* reducing the number of rows returned by the query.
+
+Considering data from the sales department, let's say you want to get the maximum amount of units sold for every month without grouping the rows. For example, you have the following data.
+
+| **id** | **month** | **units** |
+| ------ | --------- | --------- |
+| 1      | 1         | 1         |
+| 2      | 1         | 2         |
+| 3      | 1         | 3         |
+| 4      | 2         | 2         |
+| 5      | 2         | 4         |
+| 6      | 2         | 6         |
+| 7      | 3         | 4         |
+| 8      | 3         | 8         |
+| 9      | 3         | 12        |
+| 10     | 4         | 8         |
+| 11     | 4         | 16        |
+| 12     | 4         | 24        |
+| ...    | ...       | ...       |
+
+If you apply this query to get the desired result:
+
+```sql
+SELECT
+    id,
+    month,
+    units,
+    MAX(units) OVER (
+        PARTITION BY month
+    ) AS units_maximum
+FROM sales;
+```
+
+Then you should get the following output.
+
+| **id** | **month** | **units** | **units_maximum** |
+| ------ | --------- | --------- | ----------------- |
+| 1      | 1         | 1         | 3                 |
+| 2      | 1         | 2         | 3                 |
+| 3      | 1         | 3         | 3                 |
+| 4      | 2         | 2         | 6                 |
+| 5      | 2         | 4         | 6                 |
+| 6      | 2         | 6         | 6                 |
+| 7      | 3         | 4         | 12                |
+| 8      | 3         | 8         | 12                |
+| 9      | 3         | 12        | 12                |
+| 10     | 4         | 8         | 24                |
+| 11     | 4         | 16        | 24                |
+| 12     | 4         | 24        | 24                |
+| ...    | ...       | ...       | ...               |
+
+It's similar to performing **aggregation** using `GROUP BY` but instead of considering all rows at once, it applies the aggregation **to a subset of rows**, and it also doesn't group rows into a single output row. Each row remains separate. 
+
+#### RANKING_FUNCTIONS
+Let's start with a ranking function. 
+
+##### `RANK()` and `ROW_NUMBER()`
+
+```MySQL
+SELECT column_name1, ranking_function() OVER (
+	PARTITION BY column_name1
+	ORDER BY column_name3
+) AS new_column
+FROM table_name;
+```
+
+To define the window, you use the `OVER` clause, which expects two pieces of information: 
+1. The column you want to partition the rows by, 
+2. and the column you want to rank the rows by. 
+
+To rank each row in each window, you can choose from **several ranking functions** such as: 
+- `rank()` 
+- `row_number()` 
+
+Let's go over an example. 
+![[Screenshot 2026-01-14 at 15.08.35.png]]
+First, I need a query that I can use as a CTE to apply the window function. Let's write a query that computes the average duration and days that a customer spent on a film category. I'll focus on the rental fact table and the category dimension tables. 
+
+```MySQL
+WITH customer_info AS (
+	SELECT
+	fr.cutomer_id,
+	c.name,
+	AVG(datediff(return_date, rental_date)) AS average_rental_days
+	FROM fact_rental AS fr
+	JOIN dim_category AS c
+	ON fr.category_id = c.category_id
+	GROUP BY fr.customer_id, c.name
+	ORDER BY fr.customer_id, average_rental_days DESC
+)
+SELECT customer_id, name, average_rental_days,
+rank() OVER (PARTITION BY customer_id ORDER BY average_rental_days DESC)
+AS rank_category
+FROM customer_info
+ORDER BY customer_id, rank_category
+```
+
+
+- The `rank()` function assigns the same rank to the rows where there's a tie. 
+- The `row_number()` function, on the other hand, assigns different ranks when there's a tie. 
+
+For the same window function, if instead of the rank function you use any aggregate function such as the sum of the average rental days, it will return the running sum over each window. In the results here, you can see that you have the customer IDs and the category names like before, but now the running sum column shows the total average rental days for this film category along with all the film categories before it. There are other window functions such as lead and lag that you can check out in the optional part of this lab. Now it's your turn to try out the lab. After that, join me in the next series of videos to see how some of these SQL statements are processed behind the scenes and explore strategies you can use to improve their performance.
+
+#### `LAG()`
+
+The `LAG` function is a window function used to get the value of a row that comes before the current row at a given offset. Have a look at the example:
+
+
+```sql
+SELECT
+    id,
+    column1
+    LAG(column1) OVER (ORDER BY id) AS prev_column1
+FROM table_name;
+```
+
+Query result:
+
+| **id** | **column1** | **prev_column1** |
+| ------ | ----------- | ---------------- |
+| 1      | a           |                  |
+| 2      | b           | a                |
+| 3      | c           | b                |
+| ...    | ...         | ...              |
+The `LAG` function can also take an optional second parameter which specifies the offset from the current row. By default, this offset is 1, but you can set it to any integer value. For example, `LAG(column1, 2) OVER (ORDER BY id)` would return the value from two rows before the current row.
+
+
+
+## Pivot Tables
+
+A **pivot table** is a term used to describe a rotated table with one or more categories as columns used to aggregate the items by a specific value.
+
+For example, let's say you want to pivot the following table by `category` while adding the `value`.
+
+| **id** | **category** | **value** |
+| ------ | ------------ | --------- |
+| 1      | category1    | 1.0       |
+| 1      | category1    | 1.5       |
+| 1      | category2    | 1.0       |
+| 1      | category2    | 1.5       |
+| 2      | category1    | 2.0       |
+| 2      | category1    | 2.5       |
+| 2      | category2    | 2.0       |
+| 2      | category2    | 2.5       |
+| 3      | category1    | 3.0       |
+| 3      | category1    | 3.5       |
+| 3      | category2    | 3.0       |
+| 3      | category2    | 3.5       |
+| ...    | ...          | ...       |
+
+Then you should get the following result.
+
+| **id** | **category1** | **category2** |
+| ------ | ------------- | ------------- |
+| 1      | 2.5           | 2.5           |
+| 2      | 4.5           | 4.5           |
+| 3      | 6.5           | 6.5           |
+| ...    | ...           | ...           |
+
+
+## SQL Functions
+
+Depending on the [Database Management System (DBMS)](https://www.ibm.com/docs/en/zos-basic-skills?topic=zos-what-is-database-management-system) that you use, there can be some differences with the function names to handle things.
+
+For this section we are going to explore MySQL's functions -- other databases should have similar functions to handle these things.
+
+### Date Manipulation Functions
+
+#### `EXTRACT()`
+
+The `EXTRACT` function is used to get the year, month, week, and other date information from a date or time value. Other DBMS such as PostgreSQL have the `DATE_PART` function for the same purpose.
+
+Example:
+
+```MySQL
+SELECT
+    EXTRACT(SECOND FROM TIMESTAMP '2022-03-04 01:02:03') AS second_value,
+    EXTRACT(MINUTE FROM TIMESTAMP '2022-03-04 01:02:03') AS minute_value,
+    EXTRACT(DAY FROM TIMESTAMP '2022-03-04 01:02:03') AS day_value,
+    EXTRACT(YEAR FROM TIMESTAMP '2022-03-04 01:02:03') AS year_value;
+```
+
+#### `TIMEDIFF()`
+
+
+## String Manipulation Functions
+
+Now, let's include the first and last name of the staff member, which you can find in the staff dimension table. I'll `JOIN` the `fact_rental` table with the `dim_staff` table based on the `staff_id` column. I'll add the staff first name and staff last name to the select statement here. 
+
+```MySQL
+SELECT DISTINCT fr.staff_id, fr.customer_id, 
+CONCAT(staff.first_name, ' ', staff.last_name) AS staff_name
+FROM fact_rental AS fr
+JOIN dim_staff AS staff ON fr.staff_id = staff.staff_id;
+```
+
+You can concatenate the first and last names into one string. 
+
+>	Depending on the database management server, the syntax for string concatenation might look different. Here I'm working with a MS SQL database where I can use the `CONCAT()` function to combine the first and last names. 
+
+Other than concatenating two strings, you could also apply other string manipulation functions such as `LOWER()` to convert the string to lower case or `UPPER()` to convert it to uppercase. 
+
+You can also use the `SUBSCTRING()` function to extract a part of a string. The `SUBSTRING` function is used to get part of a string value by defining a start position and a length. 
+
+For example, to return *the first letter of the last name*, I'll apply the `SUBSTRING()` function to the staff last name. 
+```MySQL
+SELECT DISTINCT fr.staff_id, fr.customer_id, 
+CONCAT(staff.first_name, ' ', SUBSTRING(staff.last_name, 1, 1)) AS staff_name
+FROM fact_rental AS fr
+JOIN dim_staff AS staff ON fr.staff_id = staff.staff_id;
+```
+> This function expects two arguments, the start position and the number of characters to extract. 
+
+
 
 
 ## References

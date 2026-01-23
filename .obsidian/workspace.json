@@ -47,7 +47,8 @@
               "title": "C3_W3_slides"
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -195,24 +196,26 @@
       "bases:Create new base": false
     }
   },
-  "active": "858458ebf33c3d68",
+  "active": "08590df6dea7efb1",
   "lastOpenFiles": [
-    "C3/W3/C3_W3_slides.pdf",
+    "assets/Screenshot 2026-01-23 at 14.37.11.png",
+    "assets/Pasted image 20260123143543.png",
+    "Untitled.md",
     "C3/W3/C3_W3_class-notes.md",
-    "assets/Screenshot 2026-01-11 at 09.39.30.png",
-    "assets/Screenshot 2026-01-11 at 10.43.04.png",
+    "assets/Screenshot 2026-01-23 at 18.19.53.png",
+    "assets/Screenshot 2026-01-23 at 18.18.39.png",
+    "assets/Screenshot 2026-01-23 at 18.17.49.png",
+    "assets/Screenshot 2026-01-23 at 18.17.09.png",
+    "assets/Screenshot 2026-01-23 at 18.15.35.png",
+    "assets/Screenshot 2026-01-23 at 18.13.22.png",
+    "assets/Screenshot 2026-01-23 at 18.11.06.png",
+    "assets/Screenshot 2026-01-23 at 17.56.58.png",
+    "C3/W3/C3_W3_slides.pdf",
     "Tools-Training/SQL.md",
-    "assets/Screenshot 2026-01-11 at 10.41.08.png",
-    "assets/Screenshot 2026-01-11 at 10.39.33.png",
-    "assets/Screenshot 2026-01-11 at 10.03.42.png",
-    "assets/Screenshot 2026-01-11 at 10.01.17.png",
-    "assets/Screenshot 2026-01-11 at 09.49.47.png",
-    "assets/Screenshot 2026-01-11 at 09.49.13.png",
-    "assets/Screenshot 2026-01-11 at 09.42.43.png",
+    "C3/W2/C3_Ass-1_SQL.md",
     "C3/W2/C3_W2_slides.pdf",
     "C3/W2/C3_W2_Ass.md",
     "Tools-Training/AWS/AWS LakeFormation.md",
-    "assets/Screenshot 2026-01-10 at 19.09.14.png",
     "C2/W3/C2_W3_class-notes.md",
     "Tools-Training/Terraform.md",
     "C2/W3/Lab_1_Terraform.md",
@@ -238,9 +241,7 @@
     "C1.md",
     "C2/W1/C2_W1_class-notes.md",
     "C3/W1/C3_W1_slides.pdf",
-    "C3/W4/C3_W4_class-notes.md",
     "C3/W4",
-    "C3/W3",
-    "Tools-Training/Airflow.md"
+    "C3/W3"
   ]
 }
