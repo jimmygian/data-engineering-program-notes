@@ -39,7 +39,7 @@ The processor has two main components, 
 ##### Query Parser
 
 The Query Parser:
-- Breaks down the query into **query tokens**, which are the basic building blocks of the SQL query, including *keywords* like `SELECT` and from, `FROM`and *attribute names, operators,* and so on. 
+- Breaks down the query into **query tokens**, which are the basic building blocks of the SQL query, including *keywords* like `SELECT` and `FROM`and *attribute names, operators,* and so on. 
 - Checks for **proper syntax** 
 - **Validates the query** by ensuring that all table and attribute names referenced in the query *actually* exist in the database.
 - It also performs **Control Checks** to ensure that you or whoever ran the query have the appropriate access to these attributes. ![[Screenshot 2026-01-11 at 09.49.13.png]]
@@ -435,11 +435,11 @@ The last method is the ***hash-join method***. This method uses a **hash functi
 
 ![[Screenshot 2026-01-23 at 17.54.24.png]]
 
-With this method, the database first scans all rows of the smaller table, which is the `customers` table in this case, and sends each row to a particular bucket. For example, we could have a hash function that maps Row 1 from the customer's table to the first bucket, Rows 2 and 3 to the second bucket, and Row 4 to the last bucket. 
+With this method, the database first **scans all rows of the smaller table**, which is the `customers` table in this case, and **sends each row to a particular bucket**. For example, we could have a hash function that maps Row 1 from the customer's table to the first bucket, Rows 2 and 3 to the second bucket, and Row 4 to the last bucket. 
 
 ![[Screenshot 2026-01-23 at 17.55.02.png]]
 
-Then the database scans through the rows of the larger orders table, sending each row to a bucket based on the same hash function. 
+Then the database **scans through the rows of the larger orders table**, sending each row to a bucket based on the same hash function. 
 
 ![[Screenshot 2026-01-23 at 17.56.58.png]]
 
@@ -512,4 +512,485 @@ Understanding how joins or process can help you design more efficient join quer
 
 ## Aggregate Queries
 
-[TBC]
+When building a system for analytical workloads, you have to support **aggregating large datasets**. 
+
+>	*Aggregate queries are used to compute a summary value of a column, such as the sum, average, maximum, minimum, and count of the values in that column.* 
+
+Here's a query where you select the min price from the orders table. 
+
+```MySQL
+SELECT MIN(price) FROM orders;
+```
+
+- In role oriented databases, aggregate queries like this one can be computed by a full table scan, where you scan each row in the table, looking for the row with the minimum value in the price column. 
+
+- Or you can speed up this query by using an index structure if it's available. 
+
+So, for example, if you have a B tree index on the `price` column, the query optimizer can decide to use the index and traverse this tree to reach the leftmost leaf node to return the minimum price. 
+
+![[Screenshot 2026-01-24 at 09.43.39.png]]
+
+###### `GROUP BY`
+
+When working with aggregate queries, you can also use a `GROUP BY `clause to group query results by specific columns and return the summary values within each group. 
+
+So, for example, you can add `GROUP BY country` to your query to get the minimum price for orders placed in each country:
+
+```MySQL
+SELECT MIN(price) FROM orders
+GROUP BY country;
+```
+
+- In this case, the table must be first **partitioned** into groups where each group includes just one country. 
+- Then the minimum price is computed for each group.
+
+![[Screenshot 2026-01-24 at 09.46.03.png]]
+
+- The partitioning is usually executed using a **sorting algorithm or a hash function**, 
+- Or this could be avoided if an **index** exists on the grouping attribute, which is the `country` column in this case. 
+
+>	*In any case with aggregate queries, you are performing operations on columns rather than rows.* 
+
+###### Row vs Column for analytical queries
+
+![[Pasted image 20260124094839.png]]
+
+Remember that with **row oriented databases**, you store all the values within the same row next to each other on disk. This means that to get the `price` value from each row, you have to transfer all the rows in their entirety from disk to memory, so you end up transferring more data than you need to execute the analytical query. This could work just fine with small data sets, but with large data sets, performing analytical queries and role oriented storage becomes much slower. 
+
+On the other hand, **columnar storage** stores all the values within the same column next to each other on disk. So in this case, if you needed all the values from the price column, you just need to transfer the data from the first price value through the last price value that's stored on disk. So performing analytical queries on columnar storage is much more efficient because you only need to transfer the relevant columns of data for your analytical query from disk to memory. 
+
+
+## Amazon Redshift Cloud Data Warehouse
+
+You've been learning about queries, indexes, and various strategies and tips for writing efficient SQL queries. 
+
+Now, let's talk about some **architectural factors** that affect query performance for data warehousing workloads running on **Amazon Redshift**. Here, we'll look at how 
+- Redshift queries data 
+- and some considerations to keep in mind for table design that can optimize query performance. 
+
+![[Screenshot 2026-01-24 at 09.52.32.png]]
+![[Screenshot 2026-01-24 at 09.53.41.png]]
+Redshift is designed to be a **highly-efficient data warehousing solution**, and it achieves this through a combination of different internal architectural features, including:
+- columnar data storage, 
+- massively parallel processing, and 
+- data compression encoding schemes. 
+![[Screenshot 2026-01-24 at 09.54.26.png]]
+
+Redshift is a **columnar database**, which means that it stores data column-by-column together on disc rather than row-by-row. This storage method is particularly efficient for 
+- analytical queries and 
+- OLAP workloads 
+that require aggregating data over many rows, but only need to access a few columns for any particular query. 
+
+By storing data in this columnar way, Redshift can quickly scan and retrieve the necessary data, significantly speeding up query performance. This is part of the reason why Redshift is especially well suited for ***data warehousing*** and ***large-scale data analytics***, where fast query performance over large data sets, and cost efficiency are important. 
+
+###### Data Compression / De-compression on Redshift
+Columnar storage also allows for **better data compression**. When you run a query: 
+- Redshift reads the compressed data into memory 
+- and decompresses it as needed, 
+- which means it can use more memory for actually analyzing the data, thus your queries can run faster. 
+
+![[Screenshot 2026-01-24 at 09.57.05.png]]
+
+- This way you can *save on storage space* 
+- and *cut down on the amount of data being read* from the disc. 
+
+###### MPP on Redshift
+Redshift also uses **"massively parallel processing"** or **MPP**. 
+
+Redshift is made up of a cluster that has multiple compute nodes and a leader node. 
+![[Pasted image 20260124100054.png]]
+
+
+Data associated with a workload is distributed across these compute nodes, and each node is responsible for storing a portion of the data, as well as processing queries on that data. 
+![[Screenshot 2026-01-24 at 10.01.39.png]]
+![[Screenshot 2026-01-24 at 10.02.01.png]]
+![[Screenshot 2026-01-24 at 10.02.22.png]]
+
+
+Compute nodes are partitioned into what are called ***slices***. 
+A slice uses ***a portion of** the compute node's memory and disc space* to process ***a portion of** the data assigned to that node*. 
+![[Pasted image 20260124100313.png]]
+
+###### Data Retrieval
+With MPP, these compute nodes **work together** to handle query processing with each slice running the query on different portions of the data. 
+
+When you submit a query to Redshift, the leader node: 
+- parses the query, 
+- develops execution plans, and generates a series of necessary steps. 
+- It then compiles the code needed to perform the task and distributes it to the compute nodes for execution. 
+
+Each slice processes its assigned portion of the data ***in parallel***. 
+
+![[Pasted image 20260124100645.png]]
+
+Once a compute node is done with the work, it sends the results back to the leader node, which then aggregates the results into the final result set. 
+![[Pasted image 20260124100710.png]]
+
+>	*This parallel approach ensures that queries are executed quickly. However, the performance of your queries may also depend on the **number of nodes** or **node types** you have in the cluster.* 
+
+
+### Table Design
+
+All that being said, to optimize for efficiency and performance, you can't rely on these built in factors alone. There are multiple key factors to consider related to ***table design.*** When you create your table, you can optionally define a *"sort key"* and *"distribution style"*, which will heavily influence overall query performance. 
+
+##### Distribution Style
+Let's dive into the details around distribution style first. I've alluded to this one already when we talked about how MPP works with Redshift. 
+
+The data gets divided amongst the compute nodes, and how that division happens is controlled by defining a distribution style for the table. 
+
+![[Screenshot 2026-01-24 at 10.09.44.png]]
+
+There are **two main goals** when defining an appropriate distribution style. 
+
+1. **Uniform / Even distribution**
+The first is to have a **uniform or even distribution** of the data across the nodes. 
+
+Uneven distribution, otherwise known as **"data distribution skew"**, may result in some nodes doing a lot more work than other nodes. Since your query would be waiting on one node to churn through a large amount of data, it can lead to poor performance. ![[Screenshot 2026-01-24 at 10.11.08.png]]
+
+Having an uneven distribution of data like this means that you can't take full advantage of the massively parallel processing capabilities Redshift offers. 
+
+
+2. **Minimise Data Movement**
+The other goal is to minimise data movement across the nodes. If a query running on a node involves joining tables or aggregating data that is distributed across multiple other compute nodes, some of the data may need to be redistributed between nodes over the network. ![[Screenshot 2026-01-24 at 10.13.21.png]]
+![[Pasted image 20260124101410.png]]
+
+This *cross-node* data movement can result in increased network traffic, which in turn may slow down query performance and increase your query cost. 
+
+To minimize this, it's important to **carefully select a *distribution style* for your tables**. 
+
+A reasonable data distribution across the nodes ensures that *related data is collocated on the same node:
+![[Screenshot 2026-01-24 at 10.15.44.png]]
+
+Thus, reducing the need for this cross node communication. 
+![[Pasted image 20260124101629.png]]
+
+This optimization helps balance the workload and improve query efficiency by keeping as much processing as possible localized to each compute node. 
+
+When you create your table, you can choose from the distribution styles: 
+- AUTO 
+- EVEN 
+- KEY 
+- ALL 
+
+###### "KEY" distribution style
+KEY will let you choose a specific column, and then use that columns values to distribute the rows of data among the nodes. The leader node will distribute rows with the same key value to the same node. 
+![[Pasted image 20260124101835.png]]
+
+You may be tempted to define a specific key for every table you create. But this requires some *thorough analysis* of the dataset, and you might not know exactly which column would make the most sense. 
+
+In this case, you may instead want to use AUTO. 
+
+###### "AUTO" distribution style
+AUTO which will let Redshift assign an optimal distribution style based on the size of the table data. 
+
+If you can't provide a value for distribution style, it will default to AUTO
+
+Alternatively, you can use the EVEN distribution style. Redshift will have the leader node distribute the rows across the nodes using a **round-robin approach**, regardless of the values in any particular column. 
+
+>	*Even distribution is most appropriate when a table won't really need to have joins run against the dataset.* 
+
+###### "ALL" distribution style
+Then there is also the ALL option. With ALL, a ***full*** copy of the entire table is distributed to every node. When using even or key, Redshift places a portion of the table's row on each node. But when you use all, Redshift ensures that every row is collocated for every join that the table participates in. ![[Screenshot 2026-01-24 at 10.29.41.png]]
+
+> *This is nice for cases where you frequently join smaller tables with much larger tables.* 
+
+By having a full copy of the small tables on every node, you eliminate the need for data shuffling across nodes during join operations. 
+
+**GOTCHA**: However, the all distribution *multiplies* the storage required to store the table data by the number of nodes in the cluster. It takes much longer to load, update, or insert data into multiple tables. For this reason, Using the ALL distribution is really only appropriate for relatively ***slow-moving tables***. 
+
+##### Sort Keys
+
+Now let's move on to sort keys and how that impacts Query performance. 
+
+>	*Redshift stores your data on disc **in sorted order according to what you define as the sort key.*** 
+
+When you submit a query to Redshift, the query optimizer uses the **"sort order"** to determine the most optimal query plans. The sort key you choose for a table impacts query performance because it determines how the data is *physically* organized on disc. 
+
+When your queries filter or join data based on sort key, Redshift can more efficiently locate the relevant data, reducing the amount of data that needs to be scanned from disc. 
+
+Choosing an appropriate sort key can: 
+- minimize disc read operations and 
+- speed up overall query execution. 
+
+
+
+For example, if you frequently query a `sales` table by `order date,` defining the order date as the **sort key** allows Redshift to efficiently scan only the necessary portions of the table that match the date range in your query.
+
+![[Screenshot 2026-01-24 at 10.42.39.png]]
+
+Similarly, if you often filter by `customer_id`, setting customer ID as a sort key can optimize those queries. 
+
+>	You can think of this like how OLTP databases use indexes to speed up queries. 
+>	In a similar way, OLAP databases like Redshift, use sort keys to speed up queries. 
+
+Those are some considerations to keep in mind for table design. 
+
+
+## Additional Query Strategies
+
+In addition to knowing how queries are processed behind the scenes, understanding strategies for working with complex queries, such as **query caching** and **common table expressions**, as well as other database maintenance techniques like **vacuuming** can help you improve the performance of your queries. 
+
+#### Leverage Query Caching
+
+Let's assume you're working with the DVD rental database you saw in the previous course, and you want to calculate the total amount spent on three film categories, the family, drama and comedy categories. 
+
+```MySQL
+SELECT category.name, SUM(payment.amount) AS amount
+FROM payment
+JOIN rental ON rental.rental_id = payment.rental_id
+JOIN inventory ON inventory.inventory_id = rental.inventory_id
+JOIN film ON film.film_id = inventory.film_id
+JOIN film_category ON film_category.film_id = film.film_id
+JOIN category ON category.category_id = film_category.category_id
+WHERE category.name IN ('Family', 'Drama', 'Comedy')
+GROUP BY category.name
+ORDER BY amount;
+```
+
+For this query to be possible we need to join multiple tables.
+
+Running this query frequently on a large database containing this data could be **very costly**. 
+
+>	*To avoid rerunning the same query repeatedly and incurring significant charges, many databases, especially Cloud OLAP databases, allow you to **cache query results** to make them available for instant retrieval later on.* 
+
+By leveraging **"query caching"**, you can reduce a load on your database and enhance the user experience for queries that are executed frequently. 
+
+#### Readable Queries
+
+Another piece of advice for writing complex queries is to prioritize **readability**, just like you would with any code. Readable queries are less likely to contain errors, simpler to debug and easier to collaborate on. You can enhance the readability of your queries by using **Common Table Expressions** or CTEs to create a temporary result set that you can reference elsewhere in your query. This is a concept you practiced in the first lab of this week. 
+
+Let's consider these two identical queries:
+
+```MySQL
+SELECT actor.first_name, actor.last_name
+FROM actor
+WHERE actor.actor_id IN (
+	SELECT actor_id
+	FROM film_actor
+	WHERE film_id = (
+		SELECT film_id
+		FROM film
+		WHERE title = 'Rocky War'
+		)
+	)
+```
+
+```MySQL
+WITH selected_film AS (
+	SELECT film_id
+	FROM film
+	WHERE title = 'Rocky War'
+),
+film_actors_id AS (
+	SELECT actor_id
+	FROM film_actor
+	WHERE film_id IN selected_film
+)
+SELECT actor.first_name, actor.last_name
+FROM actor
+WHERE actor_id IN film_actors_id;
+```
+
+
+#### Vacuuming (Database Resources)
+
+Along with optimizing the queries themselves, you also want to optimize the use of DBMS resources to execute the query as efficiently and quickly as possible. 
+
+Certain databases are designed to allow *concurrent access to data* while the data is being updated. When you delete or update a record in these databases, they create new records while physically retaining on disc the outdated data as pointers to the last state of the database. 
+![[Screenshot 2026-01-25 at 13.42.35.png]]
+
+This can also help the transaction ***roll back*** to its previous date in case of any failure. 
+
+However, as these outdated records accumulate and are no longer needed to be referenced, they can lead to table bloat. 
+
+![[Pasted image 20260125134628.png]]
+- This is where the data space occupied on the physical disc far **exceeds the actual data size**. 
+- In addition to the wasted disc space, the database has to **skip over many blocks** to retrieve the required data, slowing down queries. 
+- Since a query optimizer relies on the internal statistics of the data on disk to generate query execution plans, **outdated records can also lead to suboptimal or inaccurate plans**. 
+- Similarly, **indexes can also become inefficient** as they accumulate entries for outdated data. 
+
+
+###### Vacuuming
+
+And so to free up space for new records and allow for better query and index performance, you should remove these dead records using a process called **vacuuming**. 
+
+![[Screenshot 2026-01-25 at 13.47.35.png]]
+![[Screenshot 2026-01-25 at 13.48.01.png]]
+- You can vacuum a single table, multiple tables, or all tables in a database. 
+- Vacuuming is more critical for relational databases, such as Postgres and MySQL, because large numbers of transactional operations can cause a rapid accumulation of dead records. 
+- When you work in these systems, you need to familiarize yourself with the details and impact of vacuuming. 
+
+With that, you now have more strategies to optimize the performance of equeries. 
+
+
+
+## Quering Streaming Data
+
+So far, we've been discussing how to query batch data, but as streaming data becomes more prevalent, you might find yourself needing to aggregate and join together streaming data as well. 
+
+>	*When querying your streaming data, you must adopt query patterns that reflect the real-time nature of this data.* 
+
+Let's say you want to ingest data from this streaming system and process a stream of data as soon as you receive it. You can use **stream processing systems**, such as **"Apache Flink"** and **"Apache Spark Streaming"**, which enable you to apply SQL queries, even complex ones, continuously over your stream of data. Streaming platforms such as **"Kafka"** also support querying data in Kafka streams. 
+
+![[Screenshot 2026-01-25 at 14.26.30.png]]
+#### Windowed query
+
+With these systems, you can continuously aggregate the streaming data by applying something called a ***windowed query***, 
+
+>	*Windowed queries allow you to bound your queries using a window and then apply operations (such as aggregation, adding, or removing data) over that window.* 
+
+Let's take a look at three common types of windows: session, fixed time, and sliding windows. 
+
+#### Session Window
+A session window is ideal for handling events that arrive at **irregular times**. 
+
+![[Pasted image 20260125142910.png]]
+- It groups events that occur at similar times 
+- and filters out periods of time when there are no events. 
+
+
+When using this type of window, you need to specify the **maximum time gap allowed** between events to identify when one session ends and another one begins. 
+
+**Example**
+Let's say you're analyzing *website clicks* for each user and decide to set the time gap of inactivity to be 5 minutes or more between your session windows. 
+
+![[Screenshot 2026-01-25 at 14.30.02.png]]
+
+In here, you'll have three session windows because they are each separated by 5 minutes or more of user inactivity. 
+
+![[Pasted image 20260125143216.png]]
+
+Note that session windows are unique to each key, so in this example, each user gets their own set of session windows. Doing analytics on these windows could, for example, allow an analyst to do something like follow-up with an email that has a coupon for a product that was viewed by the user in their last session window. 
+
+#### Session Boundaries
+To determine the session boundaries:
+- the processing system starts with a new session window **when the first event occurs**. In this case, the first website clicked by a user. ![[Screenshot 2026-01-25 at 14.35.25.png]]
+- Then the system continues to accumulate arriving events for that user (as long as no events happen within 5 minutes of the previous one). ![[Screenshot 2026-01-25 at 14.35.47.png]]
+- Once there's a 5 minute inactivity period, the system **closes the window**, sends the consumer any specified aggregations like max, min, or average values, and then flushes the data. ![[Screenshot 2026-01-25 at 14.36.18.png]]
+- If no events for the user arrive later, the system starts a new session window. ![[Screenshot 2026-01-25 at 14.36.40.png]]
+
+And so with session windows, the windows can extend to be of **any size** as long as events keep on arriving close to each other.
+![[Screenshot 2026-01-25 at 14.44.00.png]]
+
+|Event Time|Time Since Previous|Session Status|
+|---|---|---|
+|14:00|—|Session starts|
+|14:03|3 min|Session continues|
+|14:07|4 min|Session continues|
+|14:13|6 min|Session closes, new session starts|
+
+
+#### Fixed-Time Window
+Alternatively, you could aggregate the data for events over windows of fixed size, known as ***fixed time*** or ***tumbling windows***. 
+
+For example, here you have 3 fixed-time windows, each lasting 20 seconds. The system processes all data arriving within each window, and then sends the aggregations as soon as the window is closed. This can be useful if you like to compute, for example, the total number of clicks that happen every 20 seconds. This is similar to traditional batch ETL processing, where you might run a data update job every day or every hour. However, the streaming processing system allows you to generate windows more frequently and deliver results with lower latency. With session and fixed time windows, the windows are non-overlapping. But with sliding windows, you can group events into windows of fixed time length that can overlap. 
+
+For example, here you have three 60-second overlapping windows generated every 30 seconds. 
+
+![[Screenshot 2026-01-25 at 14.48.56.png]]
+
+>	*The system processes all data arriving within each window, and then sends the aggregations as soon as the window is closed.* 
+
+This can be useful if you like to compute, for example, the total number of clicks that happen every 20 seconds. 
+
+This is similar to traditional **batch ETL processing**, where you might run a data update job every day or every hour. 
+
+However, the streaming processing system allows you to generate windows more frequently and deliver results with lower latency. 
+
+
+#### Sliding Windows
+With session and fixed time windows, the windows are **non-overlapping**. But with sliding windows, you can group events into **windows of fixed time length that can overlap**. 
+
+For example, here you have three 60-second overlapping windows generated every 30 seconds. 
+![[Screenshot 2026-01-25 at 14.52.52.png]]
+
+This type of windowing can help you calculate things like a **moving average within a time interval.** 
+
+### Joining Data Streams
+
+In addition to aggregating streams of data, you can also:
+- **join multiple streams**, 
+- or **combine a stream with batch historical data**. 
+
+##### Conventional Way
+The conventional way of joining multiple data streams is to *transform each stream into a table* and then *join the tables in the database*.
+![[Screenshot 2026-01-25 at 14.55.15.png]]
+
+##### Stream-to-Stream
+But streaming processing systems are increasingly supporting direct **stream-to-stream joining.** So for example, you might want to join a stream of "web browsing" data with streaming data from an "ad platform". Since those streams can be produced **at different event rates** and have **different latencies**, typical streaming join architectures rely on **streaming buffers that can retain those events for a certain period of time.**  Events from the streams get joined in the buffer and are eventually emitted after the buffer's retention period passes. 
+
+![[Screenshot 2026-01-25 at 14.56.41.png]]
+
+
+##### Enrich with batch data
+Aside from joining two streams of data, you might also want to join streaming data with batch historical data that's stored in a database or object storage in order to produce an enriched stream of events. 
+
+For example, you might want to enrich product browsing events from an e-commerce website with product details and user demographic information. 
+
+To do this, you might use a ***serverless function*** or a ***processing system*** to look up the product and user information in an in-memory database or object storage, then add the required information to the event, and finally output the enhanced events to another stream. 
+
+![[Screenshot 2026-01-25 at 15.02.12.png]]
+
+
+## Deploying an Application with Amazon Managed Service for Apache Flink
+
+When you're looking to run Apache Flink with AWS, you have multiple options to choose from. 
+
+- You can run Apache Flink on **Amazon EMR** as a YARN application. 
+- Or you can self host Apache Flink in a **containerized environment** using ***Amazon Elastic Kubernetes service*** or ***Amazon Elastic Container*** service. 
+
+These are what you might call the do-it-yourself options.
+
+![[Screenshot 2026-01-25 at 15.09.13.png]]
+
+but you can also choose to use a managed service like Amazon managed service for Apache Flink. And that's what I'm going to talk about here.
+![[Screenshot 2026-01-25 at 15.11.42.png]]
+
+- **Amazon managed service for Apache Flink** runs Apache Flink on AWS. 
+- It provides the underlying infrastructure for your Apache Flink applications and creates a hosted, serverless environment for them to run in. 
+- It handles a lot of the heavy lifting for you, including provisioning, compute, setting up and managing AZ failover for resilience, automated scaling, and application backups. 
+
+I wanted to pause for a moment to just say a bit more about how Flink is working behind the scenes. The way Flink was able to connect to the Kinesis data stream and write to S3 was by using what are called **connectors**. 
+
+![[Screenshot 2026-01-25 at 15.25.54.png]]
+
+Connectors provide code for interfacing with various systems, which include things like databases, message queues, and cloud storage services. 
+
+For instance, you can connect to Amazon DynamoDB for working with NoSQL data, or use Amazon Kafka for stream processing with Apache Kafka topics. Flink connectors also support relational databases via JDBC, which allows for integration with databases like MySQL or PostgresQL running on Amazon RDS. 
+
+![[Pasted image 20260125152712.png]]
+
+These connectors enable Flink to interact with different data sources and destinations. Helping you with the creation of real-time data processing pipelines across different platforms and services. 
+
+In the Amazon Managed Service for Apache Flink you can use blueprints to quickly create the deployment of your system. In the real world though, you would need to: 
+- specify the AWS Glue database that contains your connection information to your data sources and destinations. 
+- Then when you want to access your data sources and destinations, you would specify the relevant Glue tables contained in the database. 
+- And the tables provide access to the Glue connections that define the locations, schemas, and parameters for your data sources and destinations. 
+
+![[Screenshot 2026-01-25 at 15.34.51.png]]
+
+
+## Week 3 Questions
+
+1. How is an index implemented in a database?
+	It divides data into doubly-linked blocks stored in a balanced B-tree structure.
+
+2. True or False: In general, querying a B-tree index is more efficient when the index is defined on a column with lots of repeated values. --> True
+
+3. Which are the best practices to query?
+	Cache results, use CTE, use WHERE, specify only columns you need
+
+
+## Optional Readings
+
+- Chapter 8 of [Fundamentals of Data Engineering](https://go.redpanda.com/fundamentals-of-data-engineering)
+- [Database internals](https://www.amazon.com/Database-Internals-Deep-Distributed-Systems/dp/1492040347)
+- [Use the index luke](https://use-the-index-luke.com/sql/table-of-contents)
+- Redshift query resources:
+    - [https://docs.aws.amazon.com/redshift/latest/dg/t_Sorting_data.html](https://docs.aws.amazon.com/redshift/latest/dg/t_Sorting_data.html)
+    - [https://docs.aws.amazon.com/redshift/latest/dg/r_EXPLAIN.html](https://docs.aws.amazon.com/redshift/latest/dg/r_EXPLAIN.html)
+    - [https://docs.aws.amazon.com/redshift/latest/dg/c-query-performance.html](https://docs.aws.amazon.com/redshift/latest/dg/c-query-performance.html)
+    - [https://docs.aws.amazon.com/redshift/latest/dg/c_designing-tables-best-practices.html](https://docs.aws.amazon.com/redshift/latest/dg/c_designing-tables-best-practices.html)
+    - [https://docs.aws.amazon.com/redshift/latest/dg/c_designing-queries-best-practices.html](https://docs.aws.amazon.com/redshift/latest/dg/c_designing-queries-best-practices.html)
+    - [https://docs.aws.amazon.com/redshift/latest/dg/c_best-practices-sort-key.html](https://docs.aws.amazon.com/redshift/latest/dg/c_best-practices-sort-key.html)
+    - [https://docs.aws.amazon.com/redshift/latest/dg/c_best-practices-best-dist-key.html](https://docs.aws.amazon.com/redshift/latest/dg/c_best-practices-best-dist-key.html)

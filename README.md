@@ -7,9 +7,11 @@ These are my notes from DeepLearning.AI's and AWS's official **Data Engineering 
 	* See certification [here](https://github.com/jimmygian/data-engineering-program-notes/blob/main/C1/Coursera%20A25I8TW0YTAN.pdf).
 * Course 2: Source Systems, Data Ingestion, and Pipelines ✅
 	- See certification [here](https://github.com/jimmygian/data-engineering-program-notes/blob/main/C2/Coursera%20E7TKQ4UOJ5XR.pdf).
-* Course 3: Data Storage and Queries - _IN PROGRESS_
-* Course 4: Data Modeling, Transformation, and Serving
-=
+* Course 3: Data Storage and Queries  ✅
+	* See certification here (TBC).
+* Course 4: Data Modeling, Transformation, and Serving 
+	* *IN PROGRESS*
+
 
 The notes have been taken while watching the Course's lectures, videos, and Labs. They are meant to track my progress and help me refresh my knowledge when needed. 
 
@@ -20,59 +22,59 @@ They are best viewed using [Obsidian](https://obsidian.md/).
 
 ## **Program Outline**
 
-This certification program is structured as 4 courses.
+This certification program comprises 4 courses.
 
 [**Course 1 - Introduction to Data Engineering**](https://www.coursera.org/learn/intro-to-data-engineering/home/welcome)
 
 This course consists of 4 weeks of content and covers these main learning objectives:
 
-- Identify key upstream and downstream collaborators and stakeholders for data engineers
-- Articulate a mental framework for building data engineering solutions
-- Identify some of the necessary considerations for requirements gathering at the start of a new project
-- Describe the structure of the data engineering lifecycle and its undercurrents, and how to think about data engineering problems through this lens
-- Identify some of the key technologies that can be employed in different stages of the data engineering lifecycle
-- Evaluate technologies and tools against the context of requirements and good data architecture
+- Identify key **upstream and downstream collaborators and stakeholders** for data engineers
+- Articulate a **mental framework** for building data engineering solutions
+- Identify some of the necessary considerations for **requirements gathering** at the start of a new project
+- Describe the **structure of the data engineering lifecycle and its undercurrents**, and how to think about data engineering problems through this lens
+- Identify some of the **key technologies** that can be employed in different stages of the data engineering lifecycle
+- Evaluate technologies and tools against the context of requirements and **good data architecture**
 - Design a data architecture on AWS based on stakeholder requirements
-- Implement a batch and streaming pipeline on AWS to support a product recommendation system
+- Implement a **batch and streaming pipeline** on AWS to support a product recommendation system
 
 
 [**Course 2 - Source Systems, Data Ingestion, and Pipelines**](https://www.coursera.org/learn/source-systems-data-ingestion-and-pipelines/home/welcome)
 
 This course consists of 4 weeks of content and covers these main learning objectives:
 
-- Identify different data formats and determine appropriate source systems for generating each type of data
-- Explain at a high level how data is generated, stored, and retrieved in various source systems, including relational databases, NoSQL databases, object storage, and streaming systems
-- Explain the basics of cloud networking
+- Identify different data formats and **determine appropriate source systems** for generating each type of data
+- Explain at a high level **how data is generated, stored, and retrieved** in various source systems, including relational databases, NoSQL databases, object storage, and streaming systems
+- Explain the **basics of cloud networking**
 - Troubleshoot database connection errors
-- Explain the difference between batch and streaming ingestions and identify uses cases for each pattern
-- Differentiate between the two batch ingestion patterns: Extract-Transform-Load (ETL) and Extract-Load-Transform (ELT)
-- Create a script to ingest data from a REST API
-- Describe the basic components of an event-streaming platform
+- Explain the difference between **batch and streaming ingestions** and identify uses cases for each pattern
+- Differentiate between the two batch ingestion patterns: Extract-Transform-Load (**ETL**) and Extract-Load-Transform (**ELT**)
+- Create a script to **ingest data from a REST API**
+- Describe the basic **components** of an **event-streaming platform**
 - Interact with an event streaming platform as a source system and as an ingestion tool
-- Use Terraform to provision AWS resources for your data pipeline
-- Identify tools for monitoring your data systems and data quality
+- Use **Terraform** to provision AWS resources for your data pipeline
+- Identify tools for **monitoring your data systems** and data quality
 - Identify and monitor relevant data quality metrics
-- Explain how orchestration can be applied to a data pipeline, and list its benefits
-- Build data pipelines with DAGs in Airflow using features such as Taskflow API, operators, XCom variables, etc.
+- Explain how **orchestration** can be applied to a data pipeline, and list its benefits
+- Build data pipelines with **DAGs in Airflow** using features such as Taskflow API, operators, XCom variables, etc.
 
 [**Course 3 - Data Storage and Queries**](https://www.coursera.org/learn/data-storage-and-queries/home/welcome)
 
 This course consists of 3 weeks of content and covers these main learning objectives:
 
-- Explain how data is physically stored on disk and in memory
-- Compare how data is stored and queried in object, block, and file storage systems
-- Explain how data is stored in row-oriented vs column-oriented databases
-- Explain how graph and vector databases store and retrieve data
-- Explain the key architectural features of data warehouses, data lakes, and data lakehouses
+- Explain how **data** is **physically stored on disk and in memory**
+- Compare how data is stored and queried in **object, block, and file storage systems**
+- Explain how data is stored in **row-oriented vs column-oriented databases**
+- Explain how **graph** and **vector** databases store and retrieve data
+- Explain the key **architectural features** of data warehouses, data lakes, and data lakehouses
 - Implement a data lake using AWS Glue
-- Implement a data lakehouse with a medallion-like architecture using Lake Formation and Iceberg
-- Explain the stages of the life of a query
-- Implement advanced SQL queries
+- Implement a data **lakehouse** with a medallion-like architecture using Lake Formation and Iceberg
+- Explain the **stages of the life of a query**
+- Implement **advanced SQL queries**
 - Explain the role of of an index and its impact on query performance
-- Summarize approaches for processing aggregate and join queries
+- Summarize approaches for **processing aggregate and join queries**
 - Compare the execution times of aggregate queries between row and columnar storage
-- List some strategies for enhancing query performance
-- Aggregate and join streaming data
+- List some **strategies for enhancing query performance**
+- Aggregate and join **streaming data**
 
 [**Course 4 - Data Modeling, Transformation, and Serving**](https://www.coursera.org/learn/data-modeling-transformation-serving/home/welcome)
 
