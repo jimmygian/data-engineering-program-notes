@@ -8,9 +8,9 @@ These are my notes from DeepLearning.AI's and AWS's official **Data Engineering 
 * Course 2: Source Systems, Data Ingestion, and Pipelines ✅
 	- See certification [here](https://github.com/jimmygian/data-engineering-program-notes/blob/main/C2/Coursera%20E7TKQ4UOJ5XR.pdf).
 * Course 3: Data Storage and Queries  ✅
-	* See certification here (TBC).
+	* See certification [here](https://github.com/jimmygian/data-engineering-program-notes/blob/main/C3/Coursera%20VH1Z1LY6YF5O.pdf).
 * Course 4: Data Modeling, Transformation, and Serving 
-	* *IN PROGRESS*
+	*   --*IN PROGRESS*--
 
 
 The notes have been taken while watching the Course's lectures, videos, and Labs. They are meant to track my progress and help me refresh my knowledge when needed. 
