@@ -39,16 +39,15 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "README.md",
+                "file": "C4/W1/C4_W1_class-notes.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "README"
+              "title": "C4_W1_class-notes"
             }
           }
-        ],
-        "currentTab": 2
+        ]
       }
     ],
     "direction": "vertical"
@@ -196,10 +195,23 @@
       "bases:Create new base": false
     }
   },
-  "active": "b98b0c7b36e5c251",
+  "active": "08590df6dea7efb1",
   "lastOpenFiles": [
-    "C4/W1/C4_W1_slides.pdf",
+    "C4/W4/scarlett-2i2_3quart-right_hr_1.webp",
     "C4/W1/C4_W1_class-notes.md",
+    "Screenshot 2026-01-28 at 18.13.22.png",
+    "C4/W1/C4_W1_Lab_1_Data_Normalization.md",
+    "Screenshot 2026-01-28 at 18.17.44.png",
+    "README.md",
+    "C4/W1/C4_W1_slides.pdf",
+    "assets/Screenshot 2026-01-28 at 14.09.22.png",
+    "assets/Pasted image 20260128145844.png",
+    "assets/Screenshot 2026-01-28 at 16.26.40.png",
+    "assets/Screenshot 2026-01-28 at 16.10.06.png",
+    "assets/Screenshot 2026-01-28 at 16.08.30.png",
+    "assets/Screenshot 2026-01-28 at 15.57.00.png",
+    "assets/Screenshot 2026-01-28 at 15.55.14.png",
+    "assets/Screenshot 2026-01-28 at 15.54.45.png",
     "C4/W4/C4_W4_class-notes.md",
     "C4/W4/C4_W4_slides.pdf",
     "C4/W4/Unconfirmed 674673.crdownload",
@@ -214,16 +226,6 @@
     "C4/W1",
     "C4",
     "Tools-Training/Apache Flink.md",
-    "assets/Screenshot 2026-01-25 at 15.09.13.png",
-    "assets/Screenshot 2026-01-25 at 15.34.51.png",
-    "Pasted image 20260125152712.png",
-    "assets/Screenshot 2026-01-25 at 15.25.54.png",
-    "assets/Screenshot 2026-01-25 at 15.19.09.png",
-    "assets/Screenshot 2026-01-25 at 15.15.54.png",
-    "assets/Screenshot 2026-01-25 at 15.14.51.png",
-    "assets/Screenshot 2026-01-25 at 15.13.06.png",
-    "assets/Screenshot 2026-01-25 at 15.11.42.png",
-    "assets/Screenshot 2026-01-25 at 15.09.47.png",
     "C3/W3/C3_W3_Lab-1.md",
     "Tools-Training/Postrade SQL.md",
     "Tools-Training/SQL.md",
@@ -240,8 +242,6 @@
     "\"Tools-Training/AWS/AWS.md",
     "Tools-Training/AWS/AWS.md",
     "C3/W2/C3_W2_Lab-1.md",
-    "Tools-Training/Cypher.md",
-    "C3/W1/C3_W1_class-notes.md",
-    "C3/W1/C3_W1_Ass-1.md"
+    "Tools-Training/Cypher.md"
   ]
 }
