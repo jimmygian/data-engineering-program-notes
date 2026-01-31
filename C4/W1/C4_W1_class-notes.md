@@ -664,4 +664,43 @@ In recent years, an approach known as **"one big table"** has emerged to model
 
 
 ## One Big Table
-[TBC]
+
+The modeling approaches we've looked at so far this week, in particular, Kimball and Inmon were developed when data warehouses were expensive, on premises, and heavily resource constrained with tightly coupled compute and storage. 
+
+While batch data modeling has traditionally been associated with one of these strict approaches, more relaxed approaches such as what's known as **one big table**, or **obt** for short, are becoming more common. 
+
+With one big table, you throw all your data into a single wide table, which is exactly what it sounds like, a very wide collection of many columns typically created in a columnar database. 
+
+![[Screenshot 2026-01-31 at 11.25.40.png]]
+- A wide table can potentially have **thousands of columns** 
+- and a column may be a single value or contain nested data. 
+So, wide tables with one big table are highly denormalized and flexible. 
+
+Here's an example of a wide table, which is the denormalized table you saw in an earlier video. This is just a small example, and the wide tables you'll encounter with one big table can have way more columns, and as you can see, this table combines various data types and each row represents a customer order. 
+![[Screenshot 2026-01-31 at 11.27.53.png]]
+
+
+You can think of one big table as the denormalize extension to Kimball's approach, where you have facts and dimensions represented in the same table. 
+
+![[Screenshot 2026-01-31 at 11.28.35.png]]
+- By doing so, you can free the data analyst from performing any complex joins, or any joins for that matter. 
+- Moreover, you can run the same analytical queries **faster** on wide tables than on highly normalized data, or even on data modeled as a star schema, where you might still need to join dimension tables with the fact table. 
+- The wide table simply contains all of the data you would otherwise need to join together in a more rigorous modeling approach, which can have a huge impact on scan performance. 
+
+This one big table approach is becoming more common because of the low cost of cloud storage. Also, many organizations are choosing to design flexible schemas in their source and analytical systems by using nested data. And with one big table, you can store this nested data all together in one table without having to worry about the optimum weight represented in storage. 
+
+![[Screenshot 2026-01-31 at 11.32.06.png]]
+
+ I suggest using a wide table when you have a lot of data that needs more flexibility than a traditional data modeling approach might provide. When it comes to modeling your data, there's no one size fits all solution, so make sure you understand the trade offs between the possible approaches when it comes to flexibility, data integrity, and ease of use by downstream stakeholders to choose the best approach for your use case. 
+
+## Quiz 
+
+![[Screenshot 2026-01-31 at 18.14.24.png]]
+
+
+**Optional reading and reference material:**
+- Chapter 8 of [Fundamentals of Data Engineering](https://go.redpanda.com/fundamentals-of-data-engineering)
+- [Building the data warehouse](https://www.amazon.com/Building-Data-Warehouse-W-Inmon/dp/0764599445), by Bill Inmom.
+- [The data warehouse toolkit](https://www.amazon.com/Data-Warehouse-Toolkit-Definitive-Dimensional/dp/1118530802), by Ralph Kimball, Margy Ross
+- [Building a Scalable Data Warehouse with Data Vault 2.0](https://www.oreilly.com/library/view/building-a-scalable/9780128026489/), by Daniel Linstedt, Michael Olschimke
+- [Data Vault 2.0 Modeling Basics](https://vertabelo.com/blog/data-vault-series-data-vault-2-0-modeling-basics/)
