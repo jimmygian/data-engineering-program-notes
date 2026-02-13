@@ -426,6 +426,12 @@ The spark job created by the "action", holds all of our transformations.
 ## Code Example
 
 ```Python
+from pyspark.sql import SparkSession
+from pyspark.sql.functions import *
+from pyspark.sql.types import *
+```
+
+```Python
 data = [
     ("Alice", 25, "New York"),
     ("Bob", 30, "Los Angeles"),
@@ -442,4 +448,346 @@ schema = StructType([
 
 df = spark.createDataFrame(data, schema=schema)
 ```
+
+Now, let's say I want to filter this data
+
+```Python
+## Applying a filter
+
+df = df.filter(
+    col('city') == 'New York'
+)
+```
+
+Notice that when you run the cell, nothing really happens (as we said above - due to the Lazy Evaluation. It's simply stored in the "plan"). To run the above filter, do the action "display":
+
+```Python
+# Action
+display(df)
+```
+
+Output:
+![[Screenshot 2026-02-13 at 17.18.20.png]]
+
+This created a 3 spark jobs and then run them in spark's preferred order. We'll dive deeper into jobs later in the course.
+
+
+## Query plans and DAGs
+
+Let's say we now run two transformations:
+
+```Python
+df_new = df_new.filter(
+    col('city') == 'New York'
+)
+```
+
+```Python
+df_new = df_new.select('city')
+```
+
+Although we are running two separate transformations, spark cleverly joins these two. To know what Spark is doing, we can run:
+
+```Python
+df_new.explain()
+```
+
+Output:
+```
+== Physical Plan ==
+*(1) Project [city#23]
++- *(1) Filter (isnotnull(city#23) AND (city#23 = New York))
+	+- *(1) Scan ExistingRDD[name#21, age#22, city#23]
+```
+
+We should read this output "Bottom to Top".
+
+- It added "isnotnull" on its own for better optimization. 
+- It also performed AND operator to connect our two transformations into one.
+
+Whenever we run our transformations, Spark creates a DAG for us (Directed Acyclic Graph). A DAG is basically the flow of the job.
+
+
+# Partitions
+
+What are "partitions" in spark?
+
+
+Let's say we have this data (dataframe):
+![[Screenshot 2026-02-13 at 17.40.58.png]]
+
+Let's say this dataframe contains 1 million of this kinds of records.
+
+A partition means that our data is being distributed. How is our data partitioned though?
+Spark is partitioning our data in order to be distributed amond the executors.
+
+![[Screenshot 2026-02-13 at 17.43.03.png]]
+
+But how can we partition our data? We can't partition our data, we can only create "logical partitions".
+
+## RDD
+In order to understand Logical Partitions we need to understand another topic: RDD.
+
+RDD is the backbone of Apache Spark. It stands for "Resillient Distributed Dataset".
+RDD is one of the datatypes we have in Apache Spark. It's a kind of list - a list of logical partitions of our data. The specialty of this list is that it can be distributed to our executors ( worker machines).
+
+![[Screenshot 2026-02-13 at 17.47.23.png]]
+
+So, basically, RDD is the collection of logical partitions of our dataframe.
+
+Why is it  called "resilliant"? Let's take the previous example, in which we did two transformations to a single dataframe. 
+
+
+```Python
+df_new = df_new.filter(
+    col('city') == 'New York'
+)
+```
+
+```Python
+df_new = df_new.select('city')
+```
+
+Although we are changing the same variable, behind the scenes, this creates two separate RDDs.
+- RDD1
+- RDD2
+
+In case RDD1 fails, it will read the DAG it created for RDD1 and then try and rerun RDD2.
+That's what's makes it resillient.
+
+
+# Transformations
+
+We have different types of transformations in Spark. These are:
+- Narrow transformations
+- Wide transformations
+
+![[Screenshot 2026-02-13 at 17.56.38.png]]
+
+## Narrow Transformations
+
+- filter
+- select
+
+Let's say, this is your dataframe's partitions:
+
+![[Screenshot 2026-02-13 at 17.58.08.png]]
+
+If we want to apply a `filter` transformation on just the first one, and then just on the second one, we don't need any "reference" information from one or the other.
+
+To understand this better. Let's imagine our data is:
+
+"name", "age", "occupation", "city" of people.
+
+If partition 1 holds half the the data (let's say nemes starting from A to P) and partition 2 holds the other half, and the "filter" we apply is "find all people who's age is 20", partition 1 doesn't need to know what partition 2 holds and vice versa. Each partition will output their own result.
+
+That's a "narrow" transformation.
+
+![[Screenshot 2026-02-13 at 18.34.25.png]]
+
+
+
+
+## Wide Transformations
+
+Examples is "GroupBy"
+
+Let's take the previous example. Now, we want to aggregate data based on the "city". For example, count number of cities where bla bla..
+
+Now, we can't apply this transformation on each partition seperately, because we need the "city"
+from all partitions (in our case both partitions 1 and 2).
+
+Spark will understand the need to "shuffle" the data from the partitions in a way that makes sense for this query - in this case, it will shuffle it based on the city, so, each partition will have the data that corresponds to a specific city.
+
+![[Screenshot 2026-02-13 at 18.42.51.png]]
+
+By default, Spark creates 200 partitions in cases of WIDE transformations (we'll explore that later on).
+
+As we said, it applied hash aggregation to our data.
+![[Screenshot 2026-02-13 at 19.08.54.png]]
+
+When we see "exchange" means the data has been shuffled.
+![[Screenshot 2026-02-13 at 19.09.24.png]]
+
+
+# Repartition VS Coalesce
+
+This is another concept we need to understand, in order to deeply understand how jobs are run in Spark.
+
+## Repartition
+
+Let's say we have a table that initially only has two partitions
+
+
+![[Screenshot 2026-02-13 at 19.15.23.png]]
+
+These partitions were created automatically and by default they are 128Mb each.
+
+>	NOTE: 128Mb is the default partition and block size.
+
+If our total data is 200Mb, we are going to end up with 2 partitions
+- 1st partition: 128Mb
+- 2nd partition: 72Mb
+
+For some reason we want to increase the number of partitions and create 10 partitions. To do so, we can create something called "repartition". 
+
+When we perform repartition, data obviously needs re-shuffling.
+
+![[Screenshot 2026-02-13 at 19.20.11.png]]
+
+
+We can also use `repartition` for DEcreasing the number of partitions, but that's not recommended.
+
+
+## Coalesce
+
+If we want to decrease the number of partitions, we use something called `coalesce`
+
+In coalesce, it usually does not perform shuffling. Sometime's it does though.
+
+
+
+![[Screenshot 2026-02-13 at 19.22.39.png]]
+
+If we have 1 executor and two partitions, when performin `coalesce` , it will simply pull the two partitions and perform this process.
+
+But if we have 2 executors, each partition will handle one partiiton.
+![[Screenshot 2026-02-13 at 19.24.13.png]]
+
+In this scenario, it needs to shuffle the data so that coalesce succeeds
+![[Screenshot 2026-02-13 at 19.24.52.png]]
+
+
+```Python
+df_2.rdd.getNumPartitions()
+
+df = df.repartition(3)
+df = df.coalesce(1)
+```
+
+
+# Reading  data
+
+To read Spark data, we need to use the `spark.read` api.
+
+```Python 
+
+df = spark.read.format('csv')\
+			.option("header", True)\
+			.option("inferSchema", True)\
+			.load("path/to/file.csv")
+```
+
+- `option`: With options, we can specify the configurations that we want.
+	- E.g. we know that our CSV has a header.
+	- We also need to define our schema, but in many cases we can infer it using the option `inferSchema`. This will predict the best schema for our dataframe.
+- `load`: This loads the file.
+
+When you run this cell, jobs are created. Why? 
+- When we create a df without a file it is not an action
+- When we read from file, using `.read()` method, it is.
+![[Screenshot 2026-02-13 at 20.08.06.png]]
+
+Why are we seeing two spark jobs though?
+
+```Python
+df = spark.read.format('csv')\            # Action-1
+			.option("header", True)\
+			.option("inferSchema", True)\ # Action-2
+			.load("path/to/file.csv")
+```
+
+InferSchema checks the record files and then predicts the schema. Because it actually looks at your data, it's an extra action.
+
+
+
+# Jobs, Stages, and Tasks
+
+When we run a Spark action it creates multiple Jobs, and each of these jobs contains Stages and each stage contains tasks. Let's dive into this and understand what's happening.
+
+![[Screenshot 2026-02-13 at 19.41.33.png]]
+
+- Whenever we hit "action", a job is created for us.
+- This job contains multiple stages.
+- Each stage contains multiple tasks.
+
+### Stages
+
+Who is deciding these stages?
+Stages are the individual transformations of your job.
+
+Let's say, we apply `filter`, `select`,  and `groupBy` to a spark DataFrame.
+
+The job will determine which transformations are similar to each other and bucket those together. In our example, filter and select will be STAGE 1, and groupBy will be STAGE 2.
+
+
+### Tasks
+
+Within each stage we can have multiple tasks. 
+
+> Tasks are associated with the number of partitions.
+
+So, for example, `groupBy` creates 200 partitions. This means we'll have 200 tasks.
+
+
+## Example
+
+When you run this cell, jobs are created. Why? 
+
+
+```Python
+df = spark.read.format('csv')\            # Action-1
+			.option("header", True)\
+			.option("inferSchema", True)\ # Action-2
+			.load("path/to/file.csv")
+```
+
+
+- When we create a df without a file it is not an action
+- When we read from file, using `.read()` method, it is.
+
+![[Screenshot 2026-02-13 at 20.08.06.png]]
+
+Why are we seeing two spark jobs though?
+
+```Python
+df = spark.read.format('csv')\            # Action-1
+			.option("header", True)\
+			.option("inferSchema", True)\ # Action-2
+			.load("path/to/file.csv")
+```
+
+InferSchema checks the record files and then predicts the schema. Because it actually looks at your data, it's an extra action.
+
+Now, why are we seeing stages? Stages should be for transformations but we didn't apply any transformation when reading the data.
+
+![[Screenshot 2026-02-13 at 20.11.14.png]]
+
+This is because:
+
+>	1 Job = (AT LEAST) 1 Stage + 1 Task 
+
+
+Now, let's perform some transformations..
+
+![[Screenshot 2026-02-13 at 20.36.48.png]]
+
+Stage20 is our two narrow transformations, then Stage 21 is our  Wide transformation.
+
+The exchange means that partitions are being shuffled. 
+- Because we change from narrow to wide transformation, stage 1 needs to write this data to the next stage. This type of exchange is called "Write Exchange"
+- Stage21 is reading this exchange (that's why it's on the top). This type of exchange is called "Read Exchange".
+
+![[Screenshot 2026-02-13 at 20.31.21.png]]
+
+
+Because by default, groupBy creates 200 partitions (and we have disabled AQE), we have 200 jobs. But if you count the skipped ones, only 1 is being run, with the other 199 skipped.
+![[Screenshot 2026-02-13 at 20.37.56.png]]
+
+
+# JOINS in Spark
+
+
+
+
 
