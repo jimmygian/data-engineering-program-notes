@@ -120,3 +120,84 @@ Those are several ways you can serve data for analytics and machine learning. 
 
 ## Views and Materialized Views
 
+When you give downstream stakeholders direct access to a database, in addition to serving the data as tables, you can also serve data using table-like objects such as views and materialized views. 
+
+You can create these objects during the **transformation stage** in your data pipeline or before you serve the data to your end users in the **data consumption layer.** 
+
+>	*A view is just a query that you can store in your database to give you and your stakeholders easier access to common queries, and it can also help simplify the process of writing complex queries.* 
+
+Here's an example of how you can create a view. You first type the keywords `CREATE VIEW` followed by the name of the view along with the `AS` keyword. 
+
+```MySQL
+CREATE VIEW customer_info AS
+SELECT
+	first_name,
+	last_name,
+	email,
+	phone,
+	city,
+	postal_code,
+	country
+FROM
+	customer
+	JOIN address ON ..
+```
+
+
+The view represents a ***virtual table***, not a physical table that you or the end users can select from, just like any other table. 
+
+When you select from a view
+- the database creates a new query that combines the view with the query that referenced it, 
+- and then the query optimizer optimizes and runs the full query. 
+
+Suppose that a marketing analyst needs to ***frequently run a query*** on the results from joining the customer address, city and country tables. 
+
+![[Screenshot 2026-02-15 at 22.09.30.png]]
+
+When you create this customer info view, you are joining together the four tables into a wide table. 
+
+![[Screenshot 2026-02-15 at 22.09.46.png]]
+
+And so the marketing analyst can simply write queries that filter and perform aggregations on top of this view, rather than having to write a query to join these tables together themselves every time. 
+
+### Views for Security Principles
+
+You can also use *views* to apply security principles when serving your data.
+
+For example, you can create a view that selects **only specific columns and rows.** Then, when you serve your downstream stakeholders with this view, you are effectively *restricting* their data access to only the data that they need. 
+
+![[Screenshot 2026-02-15 at 22.11.31.png]]
+
+### CTE VS Views
+
+CTE or common table expressions that you learned back in Course 3 is a SQL concept that's similar to views. 
+
+Remember that you can create a CTE using the with clause followed by the name of the CTE and then a query enclosed in parentheses. But that query represents some temporary results that you want to reference in a subsequent SQL query, so both CTEs and views help organize the code by making it cleaner and easier to follow. 
+
+- However, CTEs only exist *within the scope of the main query* where they're referenced, so once the main query is executed, the CTE is discarded and cannot be referenced in other queries. 
+- On the other hand, a view is an actual database object that can be accessed by external database users. 
+
+So the body of the query that represents the view ***is actually stored in the database disk***, and it can persist in the database until you explicitly drop it. So views can be referenced and used by your end users across different sessions and queries. 
+
+
+### Materialized Views
+
+Now, with views, **you can't perform and store any pre-computation**, meaning that the query represented by the view **needs to be executed every time the view is referenced**. So using a view to store a complex query that your end users need to run frequently can be ***extremely expensive***. 
+
+A **"*materialized view*"**, on the other hand, does some or all the view computations in advance. It then caches the query results and allows you to refresh the data periodically. 
+
+Here's an example of how you can create a materialized view. 
+
+![[Screenshot 2026-02-15 at 22.16.54.png]]
+
+- You start with the `CREATE MATERIALIZED VIEW` keywords. 
+- Then you give the materialized view a name followed by the `AS` keyword. I'll call this materialized view rental_by_category. 
+- Then you specify the query you want to represent with this materialized view. 
+- For this example, I want to `JOIN` together the payment, rental, inventory, film, film category, and category tables. 
+- Then I'm going to `SELECT` the `category.name` and the `sum` of the payments. 
+- Then `GROUP BY` the categories, the query is executed, **and the results of the six table joins are saved and cached.** 
+
+Then, when a user references this rental by category materialize view, they're querying from the ***prejoined data***. 
+
+A materialize view is useful when you can tolerate **some amount of latency** between the refreshes. 
+
