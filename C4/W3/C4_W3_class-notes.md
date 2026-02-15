@@ -1003,3 +1003,66 @@ Choosing the right coding approach for batch transformation is about balancing�
 
 Choosing the right tool for batch transformation depends on the size of the data you want to transform and the specification of the hardware on which you're running your code. Make sure to understand the trade off between these different approaches. Now that we've talked about batch transformations, join me in the next lesson to learn about streaming transformation and how a streaming processing tool can affect the latency of your system.
 
+
+## Streaming Processing
+
+Back in Course 3, we discussed how you can apply queries to streaming data, and you practice writing those queries using `flank`. Those streaming queries can help your stakeholders perform real time analytics on streaming data, but you can also use those queries to apply transformations to your streaming data. 
+
+![[Screenshot 2026-02-15 at 20.52.20.png]]
+
+***Streaming transformations*** aim to prepare data for downstream consumption by converting a *stream of events **into** another stream* by enriching it with additional information or joining it with another stream. 
+
+For instance, you might have an incoming stream carrying events from an IOT source. These IOT events carry a device ID and event data, and you might want to dynamically enrich these events with the device metadata stored in a separate database. 
+
+![[Screenshot 2026-02-15 at 20.53.59.png]]
+
+You can use a ***stream processing engine*** to query the separate database containing this metadata. Then you can generate a new stream of events by adding this metadata to the existing IOT events. 
+
+In fact, you already have some experience with this. In one of the previous labs, you applied a streaming ETL to transform a stream of user session events by enriching each event with a timestamp, representing the processing time and some additional metrics that you computed from the data of each user session. 
+
+![[Screenshot 2026-02-15 at 20.54.56.png]]
+
+As another example of streaming transformation, you can use ***window queries*** to dynamically compute roll up statistics on windows and then send the output to a target stream. 
+
+![[Screenshot 2026-02-15 at 20.55.39.png]]
+
+In terms of joining two streams, you could, for example, use streaming transformation to combine a stream containing website click stream data with another stream containing IOT data to get a unified view of the user activities. 
+
+![[Screenshot 2026-02-15 at 20.56.03.png]]
+
+All of these examples, events are typically streamed to you by a streaming platform such as 
+- Kinesis Data Streams or 
+- Kafka, 
+and then you can process these events using a stream processor. 
+
+![[Screenshot 2026-02-15 at 20.56.51.png]]
+
+Similar to batch processing, there are distributed stream processing tools like `Spark streaming` and `Flink` that you can use when you have large datasets. Both of these tools are open source and allow you to write Python code or SQL queries to process large streams of data. 
+
+When choosing a streaming processing tool, it's important to understand your use case, the latency requirements, and the performance capabilities of the framework in question. 
+- Some of these tools, like ***Spark streaming***, process your data in a microbatch way, providing near real-time performance. It accumulates small batches of input data anywhere from two minutes to seconds. Then processes each batch in parallel using a distributed collection of tasks similar to the execution of a batch job in Spark. 
+- On the other hand, true streaming systems, such as ***Flink*** are designed to process *one event at a time*. Each node in the system is continuously listening to messages from other nodes and outputting new updates to its dependent nodes. 
+	- True streaming systems can deliver the process events at a ***lower latency*** than the microbatch processing systems. However this comes with significant **overhead**. 
+![[Screenshot 2026-02-15 at 20.59.23.png]]
+Depending on your use case and the acceptable latency, you may choose one over the other. 
+
+>	*If you're collecting sales metrics published every few minutes, micro batches are probably just fine as long as you set an appropriate microbatch frequency. On the other hand, if your ops team is computing metrics every millisecond to detect malicious attacks, you might need true streaming.* 
+
+
+
+**Optional reading and reference material:**
+
+- Chapter 8 of [Fundamentals of Data Engineering](https://go.redpanda.com/fundamentals-of-data-engineering)
+- [Spark the definitive guide](https://learning.oreilly.com/library/view/spark-the-definitive/9781491912201/)
+- [Learning Spark](https://pages.databricks.com/rs/094-YMS-629/images/LearningSpark2.0.pdf)
+- [Spark vs Flink](https://aws.amazon.com/blogs/big-data/a-side-by-side-comparison-of-apache-spark-and-apache-flink-for-common-streaming-use-cases/)
+- [Using Scala UDFs in PySpark](https://medium.com/wbaa/using-scala-udfs-in-pyspark-b70033dd69b9)
+- [PySpark UDF](https://datanoon.com/blog/pyspark_udf/)
+- [Should I transform data in my sql query?](https://bertwagner.com/posts/should-i-transform-my-data-in-my-sql-query/) 
+- [Dataframes-vs-Sparksql](https://www.confessionsofadataguy.com/dataframes-vs-sparksql-which-one-should-you-choose/)
+- [PySpark API Reference](https://spark.apache.org/docs/3.5.1/api/python/reference/index.html) 
+- [PySpark Installation](https://spark.apache.org/docs/latest/api/python/getting_started/install.html)
+- [Download Apache Spark](https://spark.apache.org/downloads.html) 
+- [MapReduce: Simplified Data Processing on Large Clusters](https://static.googleusercontent.com/media/research.google.com/en//archive/mapreduce-osdi04.pdf)
+- [The Google File System](https://static.googleusercontent.com/media/research.google.com/en//archive/gfs-sosp2003.pdf)
+
