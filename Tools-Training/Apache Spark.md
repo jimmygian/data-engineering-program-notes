@@ -1,4 +1,4 @@
-Training: https://www.youtube.com/watch?v=FNJze2Ea780
+Side-Course for Training: https://www.youtube.com/watch?v=FNJze2Ea780
 
 # Basics
 
@@ -786,6 +786,821 @@ Because by default, groupBy creates 200 partitions (and we have disabled AQE), w
 
 
 # JOINS in Spark
+
+Joins are a fundamental operation in Spark, enabling you to combine data from multiple DataFrames based on a common key. Understanding how Spark handles joins, especially at scale, is crucial for writing efficient and correct data processing pipelines.
+
+---
+## Partitioning and Executors
+
+Suppose you have a dataset of **450MB**. In many Spark SQL/file-read scenarios, Spark will create partitions around **128MB** each by default (this is configurable, and the actual number depends on file layout and settings such as `spark.sql.files.maxPartitionBytes`). So **450MB might become ~4 partitions** based on the default configuration. For our example, we'll suppose that's the case.
+
+
+![[Screenshot 2026-02-14 at 12.44.35.png]]
+
+Let's say we have 2 executors.  And let's suppose that:
+- The first one will take partitions 1 and 2
+- The second one will take partitions 3 and 4
+(that's oversimplified for teaching purposes)
+
+Let's also suppose that each executor has 4 cores. Cores are responsible for paraller processing. Each core can perform a task, so 4 cores can perform 4 parallel tasks.
+
+---
+### Joining Two DataFrames
+
+Now, imagine you want to join your original DataFrame (`df_1`) with a new DataFrame (`df_2`) of 460MB, which is also split into 4 partitions.
+
+![[Screenshot 2026-02-14 at 14.57.35.png]]
+
+When you perform a `JOIN` operation, Spark treats this as a **wide transformation** if it requires data movement (i.e., a shuffle). In Spark SQL/DataFrames, shuffle-based joins typically use a configured number of shuffle partitions: 
+
+- `spark.sql.shuffle.partitions` (default is often `200`, but configurable). 
+
+In our case we'll suppose that the shuffling process will create 200 partitions. So, for a shuffle-based join, Spark will repartition/shuffle data into ~200 shuffle partitions (by default), even if you started with only 4 + 4 input partitions.
+
+![[Screenshot 2026-02-14 at 14.59.59.png]]
+
+> 	NOTE: As we'll see later on, Note: Spark may also avoid shuffling entirely for some joins (e.g., broadcast joins), depending on sizes and settings.
+
+---
+### How Spark Handles Joins
+
+Joins in Spark are performed on a common key (e.g., `item_id`). However, the data for a given key may be spread across different executors and partitions. For example:
+
+- `df_1`'s data with `item_id = 5` might be in executor 1.
+- `df_2`'s data with `item_id = 5` might be in executor 2.
+
+![[Screenshot 2026-02-14 at 15.03.23.png]]
+
+To correctly join these rows, Spark must **repartition** the data so that all rows with the same key end up in the same partition. This process is called **shuffling**.
+
+---
+### The Shuffling Process
+
+Spark determines the new partition for each row using a **hash-based partitioning** approach (conceptually):
+
+```
+partition_number = positiveHash(join_key) % num_shuffle_partitions
+```
+- For string keys (and generally all key types), Spark hashes the key to produce an integer-like value, then applies modulo.
+- For multi-column join keys, Spark hashes the **combination** of those columns.
+
+
+After shuffling, all rows with the same join key are grouped together in the same partition. This reorganized data is referred to as the **Shuffled State**.
+
+![[Screenshot 2026-02-14 at 15.23.11.png]]
+![[Screenshot 2026-02-14 at 15.24.50.png]]
+
+So, long story short: 
+
+**"SAME JOINING KEY ON THE SAME PARTITION"** (for shuffle-based joins)
+
+The post-shuffle layout is commonly referred to as "**shuffle output" / "post-shuffle partitions**" (but we can also call it “Shuffled State” in your notes).
+
+![[Screenshot 2026-02-14 at 15.46.59.png]]
+
+---
+### The Shuffled State  (post-shuffle partitions)
+
+The **Shuffled State** is the result of Spark's shuffling process:
+
+- Data is repartitioned based on the join key.
+- All rows with the same key are now together, ready for the join operation.
+- This state is crucial for ensuring correctness and efficiency in joins.
+
+---
+### Sorting Before the Join
+
+After shuffling, the data is ***not necessarily*** sorted.
+- Spark will sort within each partition **only for join strategies that require sorting**, most notably **Sort-Merge Join**.
+
+Let's focus on Partition-1 as an example:
+
+![[Screenshot 2026-02-14 at 15.53.28.png]]
+
+Before the actual join, Spark sorts the data to optimize the join process. There are two main join strategies:
+
+#### 1. Shuffle Sort Merge Join
+
+- Spark shuffles both DataFrames (if needed) so matching keys land in the same partition count.
+- Spark sorts each DataFrame within each partition by the join key(s).
+- Sorting enables efficient merging of rows with the same key.
+![[Screenshot 2026-02-14 at 15.55.00.png]]
+#### 2. Shuffle Hash Join
+
+- Spark shuffles both sides by the join key (so matching keys are in the same partition).
+- Spark builds a hash table for the **smaller side per partition**, then probes it with the larger side.
+- This avoids sorting but requires the ***per-partition hash*** table to fit in memory.
+
+![[Screenshot 2026-02-14 at 16.15.03.png]]
+
+> NOTE: When creating hash tables, we should make sure that the table is small enough to fit into memory.
+> 
+> NOTE 2: The hash table will be created for EACH partition.
+
+
+## Broadcast JOINs
+
+df_pink = 540MB
+
+![[Screenshot 2026-02-14 at 17.18.31.png]]
+
+df_green = 5 MB
+![[Screenshot 2026-02-14 at 17.18.51.png]]
+
+
+The whole df_green table fits in one executor / partition.
+
+In this case, shuffling (which is an expensive transformation) doesn't need to happen. What's going to happen is that the whole "yellow" table is going to be broardcasted into all other partitions instead (which is way less computationally expensive).
+
+![[Screenshot 2026-02-14 at 17.21.23.png]]
+
+
+But how does this broadcasting happens?
+
+The "Driver" node will take the broadcasted table temporariliy, then broadcast it to all the executors so that they can easily apply a JOIN. That's why the table should be small enough so that this can happen.
+
+![[Screenshot 2026-02-14 at 17.22.01.png]]
+
+## Code Implementation
+
+#### Suffle Sort Merge Join (the default)
+```Python
+df_join = df1.join(
+  df2, 
+  df1['id']==df2['id'],
+  'left'
+  )
+```
+
+In most cases, that's the best option that spark also chooses by default.
+
+#### Broadcast Join
+```Python
+df_join = df1.join(
+  broadcast(df2), 
+  df1['id']==df2['id'],
+  'left'
+  )
+```
+
+
+# Spark SQL Engine
+
+![[Screenshot 2026-02-14 at 17.52.11.png]]
+
+We need to understand the entire flow, and how Spark optimizes the plan and sends that to the executors.
+
+Let's say we are writing our code as a Data engineer. The totality of our code transformations is called the "Unresolved Logical Plan".
+
+In Spark we have something called "Catalog". Catalog contains all the objects registered:
+- Catalog names
+- Database names
+- Table names
+- Column names
+
+Whenever we are reading data, it will create an **"Unresolved Logical Plan",** and it will make sure that whatever metadata we are using will be verified. It basically performs a small analysis on top of our unresolved logical plan. 
+
+If in our code we have an error, the analysis will catch it and throw us an **"analysis exception"**.
+
+Once all columns are verified/approved, it will then proceed in created in the Resolved Logical Plan. This is basically the plan that's verified. This plan could be run but it's not yet optimized.
+
+Last step is to create the **"Optimized Logical Plan"**. This is the plan that will be used (and it's the one we see when we `explain()` an action.)
+
+
+So what happens when the Optimized Logical Plan is created?
+
+![[Screenshot 2026-02-14 at 18.02.24.png]]
+
+The Optimized Logical Plan will be converted to Physical Plans. To understand the difference, we can think of:
+- Optimized Logical Plan says "Perform a JOIN"
+- Physical Plan translates that to "Perform a specific type of JOIN (e.g. broadcast)"
+
+
+### Cost Model
+
+There are many physical plans created out of the Optimized Logical Plan. The cost model will calculate the cost for each one, and pick the least expensive one.
+
+This model outputs the "best physical plan". That will be the plan that will be sent to the executors.
+
+
+# Driver Memory Management
+
+- The Driver in Spark is the master process that coordinates all tasks
+- It holds metadata, task scheduling infol DAGs, and more.
+- Driver Memory => Memory allocated to the Driver process when the spark job runs
+- If Driver runs out of Memory ==> job fils with `OutOfMemorryError`.
+
+Driver is the "heart" of the whole spark framework. 
+
+Driver memory has two main components:
+- JVM HEAP MEMORY
+- OVERHEAD MEMORY
+
+![[Screenshot 2026-02-14 at 18.11.01.png]]
+
+### JVM HEAP Memory
+
+That's for JVM tasks, and stores things like: DAG, Metadata, Broadcast Variables, Task scheduling info.
+
+
+### Overhead Memory
+
+It's responsible for all non-JVM tasks.
+
+
+Whenever we want to request driver's memory, we are saying that we need `spark.driver.memory`. We will also get 10% extra of Overhead memory.
+
+![[Screenshot 2026-02-14 at 18.14.06.png]]
+
+So, in total will be getting 10% more than what we are requesting OR 384MB (whatever is higher).
+
+![[Screenshot 2026-02-14 at 18.15.53.png]]
+
+
+## Driver Out-Of-Memory (OOM) Error
+
+Driver's heap memory will broadcast the broadcast variables/data.
+
+If we're broadcasting data that's more than the heap memory, this will create a DriverOutOfMemory (OOM) error.
+
+The other time this can happen is when we run command such as `df.collect()`
+
+When we do `df.show()` or `display(df)`, the data is sent to the driver. The way is done, is one partition is sent back to the driver to give the command.
+
+![[Screenshot 2026-02-15 at 09.45.07.png]]
+
+But with `df.collect()` you're requesting all data collected to a list. In this scenario it will collect all the partitions to the driver.
+
+![[Screenshot 2026-02-15 at 09.46.38.png]]
+
+If these partitions are small enough that's fine. But if that data is more than the Driver's JVM memory, then we'll get the error.
+
+`df.collect` should be used with caution.
+
+# Executor Memory Management
+
+This is really important to understand. (Especially for interviews)
+
+![[Screenshot 2026-02-15 at 09.49.55.png]]
+
+Executor memory is divided into 4 major parts.
+
+- **JVM Heap Memory**: Similar to Driver's heap memory, Executor's HEAP memory is for JVM tasks, and stores things like: DAG, Metadata, Broadcast Variables, Task scheduling info.
+- **Off-Heap Memory:** Off-Heap memory in executor by default is `0`. We rarely use it, but sometimes it comes in handy.
+- This is not managed by the JVM, we need to manage it.
+- **Overhead Memory**: Similar to the Driver's overhead memory, we get 10% of this from what we requested from the JVM Heap Memory.
+- **PySpark Memory**: This is again 0. We rarely use it
+
+
+So, these are the most important parts of the memory that we always use with the executors:
+
+![[Screenshot 2026-02-15 at 09.58.20.png]]
+
+
+### Executor's HEAP memory
+
+The OG though is the executor's JVM Heap Memory. It has its own hierarchy.
+
+![[Screenshot 2026-02-15 at 09.58.36.png]]
+
+Let's say, we requested some heap memory (~10Gb) from the resource manager (for our executor).
+
+![[Screenshot 2026-02-15 at 10.01.49.png]]
+
+As we said, we are also getting 10% of the Overhead Memory:
+
+![[Screenshot 2026-02-15 at 10.02.51.png]]
+
+In the executor, we need to understand what's happening here. So let's expand the heap memory of our executor:
+
+![[Pasted image 20260215101204.png]]
+
+Let's unpack the above image.≈
+- GREY area: Our total 10Gb of the memory requested.
+- Reserved Memory: Always a Fixed amount of 300MB for our spark engine.
+- Spark Memory Pool: By default, that's 60% of our Total memory. Our total memory is `10Gb - Reserved Memory (300Mb)`. 
+	- You can finetune this using `spark.memory.fraction`
+- User Memory: This is the remaining memory (so, the rest 40% in case we reserved 60% for Spark Memory Pool).
+	- This is allocated for UDFs (User-Defined Functions). So, for whatever functions we customly create.
+
+Let's calculate the exact memory allocation based on the above (for 10Gb of requested memory with the default allocation percentages):
+
+- Reserved Memory = 300MB
+- Spark Memory Pool (60%) = 0.60 \* (9.7) = 5.82GB or 5820MB
+- User Memory (40%) = 0.40 \* (9.7) = 3.88GB or 3880MB
+
+### Expanding Spark Memory Pool
+
+We have already explained what Reserved and User memories are for. Now, let's understand the Spark Memory Pool.
+
+This is where the following is happening:
+- Spark Functions (Transformations)
+- Cached data
+- more
+
+This is the Spark Memory Pool, expanded:
+
+![[Screenshot 2026-02-15 at 10.20.36.png]]
+
+Let's take another example now and say that 5GB was allocated for the Spark Memory Pool (just to make maths simpler).
+
+- **Storage Memory** is used for Caching (Long Term Memory). We store the data that we need to refer to later in the code. They are not elimitated.
+- **Executor Memory** is used for the transformation processes (JOINs, Aggregations, etc..)
+
+![[Screenshot 2026-02-15 at 10.46.42.png]]
+
+This 50% allocation between the two types is being defined automatically, but we can change that by using `spark.memory.storageFraction`
+
+Now, we need to understand the boundary behaviour:
+
+![[Screenshot 2026-02-15 at 10.48.20.png]]
+
+
+This boundary that separates storage from executor memory is not a "hard" boundary. It's flexible.
+
+Even if we define that we want 50%, still this boundary can move up and down. That's where the concepts of "allocation" and "borrowing" come into play.
+
+If Spark runs out of the memory we defined, it will automatically scale one or the other to fit what's needed.
+
+
+### Unified Memory Management
+
+![[Screenshot 2026-02-15 at 10.51.19.png]]
+
+Unified Memory is another name for "Spark Pool Memory", in which we have these two types of memories:
+- Executor/execution Memory (for performing Transformations)
+- Storage Memory (for caching data)
+- Seperator
+
+Let's understand how the boundary (in green) is changing based on needs.
+
+**Scenario 1** 
+Executor Memory ran out but there's available Storage Memory left.
+
+![[Screenshot 2026-02-15 at 10.58.50.png]]
+
+Solution: Executor Memory will occupy the storage memory without any problems.
+
+
+**Scenario 2** 
+Executor Memory needs even more space
+
+The executor memory will check which are the "Least Used Cached Data", and it will occupy those using the LRU method.
+
+![[Screenshot 2026-02-15 at 11.02.11.png]]
+
+Executor Memory has this authority -- it's prioritised because it needs to actually process the data by performing the transformations.
+
+
+**Scenario 3** 
+Storage Memory ran out but there's available Executor Memory left.
+
+![[Screenshot 2026-02-15 at 11.03.57.png]]
+
+In this case, Storage Memory can occupy Executor Memory
+
+![[Screenshot 2026-02-15 at 11.04.25.png]]
+
+**Scenario 4**
+Executor Memory needs even more space
+
+![[Screenshot 2026-02-15 at 11.04.55.png]]
+
+In the scenario that We run out of Storage Memory but Executor doesn't have free space, there's no way Storage can occupy Executor Memory. Executor Memory is always prioritised.
+
+Instead, Storage Memory will occupy more of its OWN memory, using the LRU approach - meaning, it will check which are the "Least Used Cached Data", and it will occupy that space using the LRU method.
+
+![[Screenshot 2026-02-15 at 11.08.10.png]]
+
+
+## Executor Out-Of-Memory (OOM) Error
+
+![[Screenshot 2026-02-15 at 11.30.17.png]]
+
+Let's say our dataframe has ID and Product Category. Let's say this data has millions of rows.
+
+Our executor is processing the data (for simplicity let's suppose we only have 1 executor).
+
+We also have a disk that's associated with our executor.
+
+![[Screenshot 2026-02-15 at 11.31.57.png]]
+
+
+---
+***Side-knowledge: Scattered VS Skewed Data***
+- **Scattered data:** Evenly spread, symmetrical, mean ≈ median.
+	- **Definition:** Scattered data refers to values that are spread out across the range of possible values, often without any clear pattern or concentration. In a dataframe, this means the data points are distributed fairly evenly, and there is no strong clustering or *bias* toward any particular value.
+	- **Scenario:** Suppose you have a dataframe of **random test scores** evenly distributed between 0 and 100.
+- **Skewed data:** Concentrated at one end, asymmetrical, mean ≠ median.
+	- **Definition:** Skewed data refers to a distribution where values are concentrated toward one end of the range, creating an asymmetry. In a dataframe, this means most data points are clustered near either the lower or upper end, with fewer values at the opposite end.
+	- **Scenario:** Suppose you have a dataframe of customer wait times, where most people wait a short time, but a few wait much longer (right-skewed).
+
+- **Scattered data** is often easier to analyze and model, as many statistical methods assume normality.
+- **Skewed data** can affect statistical tests, regression, and machine learning models. You may need to transform (e.g., log, Box-Cox) or handle outliers.
+---
+
+
+Let's say we are doing a `GroubBy` operation in the product category column. As we've seen already, this will create partitions for each product category e.g. one for `food`, another for `shoes`, `dairy`, and so on.
+
+So, if we have normally-scattered data, usually we don't have problems. E.g. We see 3 product categories in this picture, and three partitions in the executor. Tha's fine. Each partition (300MB each) will be allocated to a partition within the executor:
+
+![[Screenshot 2026-02-15 at 11.49.30.png]]
+
+Now, what will happen if we have more data? e.g. Imagine have a new category called "plants".
+
+#### Data Spill
+Now there's no available space in that executor ( that executor ran out of space). That's when "Data Spill" happens. 
+
+![[Screenshot 2026-02-15 at 11.54.47.png]]
+
+The data that's being transferred to the disk is data that's already computed. Whenever it needs this data, it will go grab it from the disk.
+
+> 	NOTE: You can only shift the whole partition (from memory to disk) or no partition at all. You can't partition the partition basically.
+
+This is the concept of spillin, and it's allowed -- no errors! So, why do we sometimes get the "OOM" error (out of memory) if we have so much available disk space?
+
+If our data is "skewed" (not evenly distributed) we may have problems. Let's say: 
+
+The product "FOOD" has data that are a total of 800MB 
+
+![[Screenshot 2026-02-15 at 11.59.42.png]]
+
+This creates a partition that's 800MB for the food category. Which means, the other two categories won't fit, and so they will be written on disk:
+
+![[Screenshot 2026-02-15 at 12.00.22.png]]
+
+Let's say now, our store only sells food products for some reason (the other products are low qualitiy and customers don't buy them). This will make the data even more skewed, with a lod of rows having "food" as a product category. 
+
+![[Screenshot 2026-02-15 at 12.04.19.png]]
+
+When applying GroupBy, we know that the "food" data will need to be under the same partition but now that's not possible because executor size is 1GB. This data will be spilled in the disk though.
+
+![[Screenshot 2026-02-15 at 12.05.45.png]]
+
+This data though is not processed. In order for this data to be processed, it needs to go to memory. So basically this wiill give us the error OOM.
+
+Here we have two options:
+1. Expand the available memory of our executor. This is a foolish approach though cause data will keep growing so we will always need to increase the memory overtime (expensive)
+2. "Salt" the skewed data. Salting is an approach of eliminating Skeweness.
+
+## Salting in PySpark
+
+The way to fix the skeweness of data is by "salting" that data.
+
+![[Screenshot 2026-02-15 at 12.09.47.png]]
+
+We can add a new column called "salt".
+
+![[Screenshot 2026-02-15 at 12.10.52.png]]
+
+We know that our skewed data (food column) is let's say 1.5GB as per previous example.
+
+Let's say we decide to split this data into 4 which would give us ~375MB per partition.
+
+we can create an array of 4 numbers `[1, 2, 3, 4]` and assign these randomly into all food product categories. 
+
+We now make 4 partitions for the food column.
+
+![[Screenshot 2026-02-15 at 12.13.45.png]]
+
+So now it can fit into the executor memory for transformations.
+
+# Caching
+
+It's one of the most used methods.
+
+Why do we need caching? 
+
+Let's say we do the following:
+
+df1 = read()
+df2 = df1.filter()
+df3 = df2.groupBy()
+
+This will create 3 DAGs, one by one.
+
+`df1` will be stored in the Executor Memory.
+![[Screenshot 2026-02-15 at 12.29.22.png]]
+
+The moment we start creating `df2`, the previous one will be removed from the Executor Memory because , as we said, it's a short-term memory.
+
+But, wait a second! `df2` needs `df1` to be computed as we see (`df2 = df1.filter())`. But we just said that `df1` will be removed.. So, df2 would need to recompute df1 and then also filter it. The same would happen with df3, which would need to compute df1 and df2 and then group df2 by.
+
+This is a waste of compute.
+
+But, what IF we could store df1 in long-term memory and we don't need to recompute it? That would save a lot of compute. This is what's called "caching".
+
+### Coding Example
+
+```Python
+from pyspark.sql import SparkSession
+from pyspark.sql.functions import *
+from pyspark.sql.types import *
+
+
+# Create first DataFrame
+data1 = [
+    (1, "Alice"),
+    (2, "Bob"),
+    (3, "Charlie"),
+    (4, "David"),
+    (5, "Eva")
+]
+df1 = spark.createDataFrame(data1, ["id", "name"])
+
+# We add a new column 'flag = "Yes"'
+df1 = df1.withColumn('flag', lit("Yes"))
+
+# we are CACHING data from df1
+df1.cache()
+
+# This will used the cached data from df1
+# So, it won't re-create the "YES" flag
+df2 = df1.filter(col('id')==1)
+
+```
+
+>	NOTE: We should only cache small data otherwise OOM errors will be coming our way.
+>	
+>	Do that if your dataframes are small enough, and also if you are reusing them multiple times in your code.
+
+
+## Persist()
+
+Caching is actually a special case of "persist()". 
+
+We can prioritize where we want to store our data.
+
+Caching is not an independent thing. IT's kind of special case of "persist.". Previously, everything was done via `persist()` and we had a lot of options to choose from. One of these options is the following:
+
+
+![[Screenshot 2026-02-15 at 12.58.44.png]]
+
+`df.persist(StorageLevel.MEMORY_AND_DISK`) is the same as `df.cache()`.
+
+This flavor of persisting data prioritizes memory, and when there's no memory left, it spills the rest of the data to disk. 
+
+But there are more ways to create persisting data. Let's see:
+
+1. MEMORY_ONLY: Doesn't spill the data to disk -- the rest of the data will be recomputed.
+
+![[Screenshot 2026-02-15 at 13.01.55.png]]
+
+2. DISK_ONLY
+
+This is nice because we don't need to worry about memory usage. But it's also the slowest way of caching data.
+
+![[Screenshot 2026-02-15 at 13.03.44.png]]
+
+3. MEMORY_ONLY_2
+
+This is the same as MEMORY_ONLY, but the data is replicated 2 times. That's for fault tolerance.
+
+4. OFF_HEAP (Experimental)
+
+![[Screenshot 2026-02-15 at 13.16.32.png]]
+Sometimes you can use off-heap memory (outside JVM heap) to store your data.
+
+This is enabled by `spark.memory.offHeap.enabled=True`
+
+This is maintained by us (not by Spark).
+
+#### Code Example
+
+```Python
+from pyspark.storageLevel import StorageLevel
+
+df1.persist(StorageLevel.MEMORY_ONLY)
+```
+
+
+Unpersisting data:
+
+```Python
+df1.unpersist()
+```
+
+
+
+# EDGE Node
+
+![[Screenshot 2026-02-15 at 13.21.04.png]]
+
+So far, we were imagining that we, as developers, are directly communicating to the cluster / resource manager.
+
+But if we are a Senior Engineer, would we want to allow a Junior Engineer to talk directly to the resource manager?
+
+That's why we have EDGE nodes.
+
+We have two "teams": CLIENT and CLUSTER.
+
+CLIENT can be any machine (physical or virtual) that acts as our Edge Node. This machine has access to the CLUSTER (RESOURCE MANAGER).
+
+We can log in to that Edge node and talk to the resource manager.
+
+This concept gives birth to the concept:
+
+### Cluster mode VS Client Mode
+
+These are two different types of "deployment nodes".
+
+![[Screenshot 2026-02-15 at 13.26.26.png]]
+
+### Client Mode
+If we deploy our application in "client mode", let's see what happens
+
+In this case, Cluster (Resource) Manager will create the Driver Node on the CLIENT machine.
+
+### Cluster Mode
+That's what used in most cases. 
+
+In this mode, Driver will be created on one of the machines, and worker nodes in the others.
+
+![[Screenshot 2026-02-15 at 13.28.43.png]]
+
+### When are we using one vs the other?
+
+If we turn off the "client" machine in a "client mode" app, the whole app will break.
+
+Good things of "client mode":
+- We write code and see output on our own machine.
+- When working in "dev", it's really handy.
+
+Bad things:
+- Network latency will be high.
+- Not good for production
+
+Cluster is best for "production".
+
+
+# Partition Pruning
+
+Our executor will be writing the data in a destination (e.g. datalake). Instead of writing everything in one folder, we will create partitions in that storage space.
+
+E.g.
+ - IT data
+ - Finance data
+ - HR data
+
+![[Screenshot 2026-02-15 at 13.38.36.png]]
+
+This type of partition is not to be confused with memory partitions (that we talked about previously). This is when writing data to a destination.
+
+So why do we not just save everything under one folder? This is because of optimization.
+
+Let's take the example that we are fetching data from "HR" only. If we don't have these partitions, Spark would need to read ALL data. After reading all that data, it will then need to apply transformations to that data.
+
+But with partitions, Spark will go to the relevant folder directly. so we are saving a lot of processing.
+
+That is making the Spark Jobs really optimized. This is called "partition pruning". Because we are not fetching all data, we are pruning the data.
+
+
+### Writing data using partitions
+
+```Python
+
+from pyspark.sql import SparkSession
+from pyspark.sql.functions import *
+from pyspark.sql.types import *
+
+
+# Create first DataFrame
+data1 = [
+    (1, "HR", "Alice"),
+    (2, "IT", "Bob"),
+    (3, "FIN", "Charlie"),
+    (4, "HR", "David"),
+    (5, "IT", "Eva")
+]
+cols = ["id", "department", "name"]
+df1 = spark.createDataFrame(data1, cols)
+
+
+
+
+
+```
+
+
+```Python
+# STEP: Write DataFrame using partitioning
+output_path = "/Volumes/workspace/stream/partitions/OutputData"
+
+df1.write \
+    .mode("overwrite") \
+    .partitionBy("department") \
+    .parquet(output_path)
+```
+
+Paritions in "catalog":
+![[Screenshot 2026-02-15 at 16.23.11.png]]
+
+```Python
+
+# STEP: Write DataFrame without partitioning
+output_path_2 = "/Volumes/workspace/stream/partitions/OutputDataNoPartitions"
+
+df1.write \
+    .mode("overwrite") \
+    .parquet(output_path_2)
+```
+
+![[Screenshot 2026-02-15 at 16.24.01.png]]
+
+> 	NOTE: The number of partitions depends on the number of cores of the executor
+
+![[Screenshot 2026-02-15 at 16.25.21.png]]
+
+
+### Reading data using Pruning
+
+Now that we have written this data, we can read them directly from the storage:
+
+```Python
+# Data that was partitioned
+df_withpart = spark.read.format("parquet") \
+                .load("/Volumes/workspace/stream/partitions/OutputData")
+
+display(df_withpart)
+```
+>	This code will still read ALL data, because we are NOT using pruning.
+
+This can be verified if you had databricks full account and could go to the following:
+Job > SQL / DataFrame > Scan Partitions
+
+![[Screenshot 2026-02-15 at 16.32.22.png]]
+
+```PYTHON
+# Data that was partitioned
+df_withpart = spark.read.format("parquet") \
+                .load("/Volumes/workspace/stream/partitions/OutputData") \
+                .filter(col('department') == 'HR')
+```
+
+![[Screenshot 2026-02-15 at 16.34.47.png]]
+
+Because we filtered in the same way the files were partitioned, we are "pruning" the result.
+
+
+# Dynamic Partition Pruning
+
+That's one step ahead of partition pruning.
+
+
+
+We previously saw that we needed to apply `filter` to our partitioned data to use pruning. What if there was a way to apply pruning to non-filtered data? That's what Dunamic Partition Pruning is about.
+
+Scenario:
+
+```Python
+df_1 = [
+    (1, "HR", .., "Alice"),     # 1GB of Data
+    (2, "IT", .., "Bob"),       # 1GB of Data
+    (3, "FIN", .., "Charlie"),  # 1GB of Data
+    (4, "HR", .., "David"),     # 1GB of Data
+    (5, "IT", .., "Eva")        # 1GB of Data
+]
+```
+
+We have two DFs --> `df1` and `df2`
+- df1 = Big Table (fact)
+	- Let's say we have partitioned our data based on the "department" column for this table.
+	- Let's say that each department contain ~1GB of data.
+- df2 = Smaller table (dim)
+	- Non-partitioned table. Cause it doesn't make sense to create partitions for this one.
+
+![[Screenshot 2026-02-15 at 16.36.37.png]]
+
+Now, let's say we apply a JOIN:
+
+`df1.join(df2)` <-- This gets data only for HR
+
+Now, according to what we said before, `df1` should still read ALL partitions because we are not directly applying filter to `df1`. But what if I said, Spart will still only read the data for `HR`.
+
+- Spark, before applying filescan, it will do a "Broadcast Exchange". 
+- It will forward the query of `df2` whose filter is on "HR", and this will act as a dynamic filter, referenced from another query.
+- The JOIN key used should be the column that the partition was applied to.
+
+The only thing to note is:
+
+***When we want pruning (even dynamic pruning) to be applied, we need to filter according to the way we have partitioned the data on disk.***
+
+
+# Adaptive Query Execution (AQE)
+
+That's a game-changer in Apache Spark. It's an automatic optimization technique. Before that, Data Engineers would have to do all optimizations manually.
+
+So, Adaptive Query Execution (AQE) does the following:
+- Dynamically Coalesce the partitions every time it finds the opportunity to do so
+	- Whenever we apply Wide Transformations, it says "every time you're creating 200 partitions, why?". It will then coalesce these partitions in a way that makes sense.![[Screenshot 2026-02-15 at 16.55.25.png]]
+- It also distributes data evenly
+	- Instead of creating 200 partitions with 195 empty ones, it will not create these 195, and it will also coalesce the four small partitions into one bigger one ![[Screenshot 2026-02-15 at 16.57.52.png]]![[Screenshot 2026-02-15 at 16.59.05.png]]
+- It Optimizes Join Strategy during RunTime
+	- IT does that by calculating the "Query Statistics"
+- It dynamically optimizes the skeweness of the data (it's an alternative to Salting, although we should still  use Salting because we have way more flexibility)
+
+
+PySpark Course (practical): https://www.youtube.com/watch?v=94w6hPk7nkM
 
 
 
