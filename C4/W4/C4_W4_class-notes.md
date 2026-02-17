@@ -201,3 +201,99 @@ Then, when a user references this rental by category materialize view, they're 
 
 A materialize view is useful when you can tolerate **some amount of latency** between the refreshes. 
 
+
+## Summary of the Program Concepts
+
+
+In this program, we've covered a lot of ground in the fundamentals of data engineering. We've walked through the stages of the data engineering life cycle and its undercurrents and explored technologies and best practices for building data solutions on the Cloud. 
+
+You've got hands-on practice with each of these data engineering concepts in the lab exercises, and now you're ready to bring it all together. 
+
+In this section, I'll quickly recap the major themes and concepts you've been learning about in these courses, and after that, we'll dive into the final capstone labs of these courses, where you'll be applying everything you know. 
+
+
+### Thinking Like a Data Engineer
+We started this program by taking a look at a framework for thinking like a data engineer. 
+
+![[Screenshot 2026-02-17 at 20.44.03.png]]
+
+- When you start a new data project, you should always work backward by first identifying the needs of your stakeholders and how they will derive value from the data you serve them. 
+- You can then **translate** those **needs** **into system requirements** and then choose the appropriate tools and technologies that can help you meet those requirements. 
+- Only then can you start building and iterating on your data systems. When you focus on your end users and their data needs, you'll be well on your way to adding value for your organization. 
+
+### Ingesting Data
+![[Screenshot 2026-02-17 at 20.48.01.png]]
+
+When building your data system, you will typically start by ingesting data from source systems. 
+
+How you'll ingest your data will always depend on the type of source system you're working with, for example, a database, a file residing in a file system or object storage, or streaming system or an API. 
+
+#### Streaming VS Batch Ingestion
+You can ingest historical data from a file or a database by following a batch ingestion pattern, or you can use streaming ingestion to ingest data from streaming systems in real time. 
+![[Screenshot 2026-02-17 at 20.46.31.png]]
+
+Although batch and streaming ingestion are often discussed as separate paradigms, they actually *exist along a continuum* that ranges from infrequent large batch data ingestion to real time streaming of individual messages as are generated. ![[Screenshot 2026-02-17 at 20.46.49.png]]
+In between, you have a wide range of batch, micro-batch, and streaming approaches. 
+
+>	The ingestion approach you take should be guided by your stakeholders needs and your system's requirements. 
+
+#### ETL vs ELT
+Both batch and streaming ingestion can serve as the "***extract***" phase in an ETL, as well as an ELT process. 
+
+- With **ETL**, you apply some in-flight transformations to data before loading it into the target system. 
+- Or you could follow an **ELT** process where you apply the data transformations after you load the data into your target system. 
+
+![[Screenshot 2026-02-17 at 20.47.12.png]]
+>	The choice between these two patterns will depend on what transformations you want to apply to the data, the hardware specification of your processing tool and your target system, and the size of your data. 
+
+
+### Transforming Data
+![[Screenshot 2026-02-17 at 20.52.15.png]]
+
+Transforming the data encompasses 
+- ***cleaning and combining data from multiple sources***, as well as 
+- ***converting the data into a target schema***. 
+
+The target schema depends on the data ***model*** you or your team has created. 
+
+#### Types of models
+- If you're serving data for analytics, then you might choose to model your data on a **star schema** or **one big table**. 
+![[Screenshot 2026-02-17 at 20.53.50.png]]
+>	These models can help your end users more easily and efficiently write analytical queries. 
+
+- If you're serving data for **data science** or **machine learning**, *how much* you process the data will depend on your organization and whether end users want to explore the data, use data to train a machine learning model, make predictions, or something else. 
+
+- To apply transformations, you could issue simple SQL queries or write flexible and modular code in a non declarative language like Python. 
+- Depending on the size of your data, you could process your data using a non-distributed processing tool, such as **Pandas**, or a distributed framework, such as **Spark**. 
+- You also learned that for analytical use cases, you could process large amounts of data inside a Cloud data warehouse to leverage the massively parallel processing power of Cloud computing. Transformation tools, such as DBT, also facilitate data modeling inside a data warehouse. 
+
+### Storing / Serving Data
+![[Screenshot 2026-02-17 at 20.56.49.png]]
+
+Like relational databases, a ***"data warehouse"*** expects structured datasets with a well-defined schema. When your end users issue analytical queries to your data warehouse, its query optimizer looks for the best execution plan and then returns the results based on this plan. 
+
+- "**Data warehouses**" are more suitable for **analytical workloads** because they're based on **columnar storage**, which makes it more efficient at aggregating queries than transactional databases that are role-oriented. 
+- On the other hand, you can use a **"data lake"** built on top of low-cost ***object storage*** to support applications, such as machine learning and big data processing that require massive amounts of structured and unstructured data. 
+	- To prevent data lakes from becoming unusable data swamps, you can create a ***data catalog*** to track and manage data stored in your data lake. 
+- You also learned about the **"data lakehouse"** architecture, which combines the low cost and scalable storage of data lakes with the superior structured querying performance and data management features of data warehouses to provide a unified platform for serving both low latency analytics and machine learning. 
+
+![[Screenshot 2026-02-17 at 20.59.59.png]]
+
+>	*As data warehouses adapt lake-like features, and data lakes incorporate warehouse-like capabilities, the alliance between data warehouses, data lakes, and data lakehouses are blurring.* 
+
+
+### Undercurrents of Data Engineering
+- In terms of the data engineering undercurrents, you use IAM to ensure the security of your data systems on the Cloud by preventing unauthorized users from accessing your data and resources. Networking concepts such as VPCs, route tables, network ACLs, and security groups can also help secure your resources. 
+- You practice good data management by modeling your data, using data catalogs, and properly organizing your data storage to make your data easier to find by your end users. 
+	- Your end users also need to trust your data. By testing and monitoring the quality of your data, using tools like **Great Expectations** and **Glue Data Quality** throughout your data pipeline, you ensure that you're serving data that can deliver value to your stakeholders. 
+- You also apply the automation pillar of DataOps, by using infrastructure as code tools like **Terraform** to automate the creation and management of your data pipeline resources, and use **Airflow** to orchestrate entire data pipelines. 
+
+You now know how to design and build data engineering solutions that encompass each stage of the data engineering life cycle and incorporate the key undercurrents of data engineering. 
+
+
+**Optional reading and reference material:**
+
+- [Fundamentals of Data Engineering](https://go.redpanda.com/fundamentals-of-data-engineering)
+- [Joe's thoughts on what's happening with Data Engineering](https://joereis.substack.com/p/data-engineering-in-2024-what-im)
+- [Start data engineering posts](https://www.startdataengineering.com/post/) (this link includes Data Engineering educational content so you can durther deepen your knowledge as well as ideas for projects)
+- [Ideas for data engineering projects](https://www.theseattledataguy.com/7-data-engineering-projects-to-put-on-your-resume/#page-content)
