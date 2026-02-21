@@ -1,9 +1,9 @@
 # Data Engineering Professional Certificate Program
 
-Official Certification: 
+Official Certification:
 https://www.coursera.org/account/accomplishments/professional-cert/9G5ZWH3AA8XU
 
-![[professional_certification.png]]
+![Image of the Certification of Completion](./assets/professional_certification.png)
 
 These are my notes from DeepLearning.AI's and AWS's official **Data Engineering Certificate Program**, comprising 4 courses:
 
@@ -17,9 +17,9 @@ These are my notes from DeepLearning.AI's and AWS's official **Data Engineering 
 	*   See certification [here](https://www.coursera.org/verify/N6XAIKMW10VT).
 
 
-The notes have been taken while watching the Course's lectures, videos, and completing Labs and Assignments. They are meant to track my progress and help me refresh my knowledge when needed. 
+The notes have been taken while watching the Course's lectures, videos, and completing Labs and Assignments. They are meant to track my progress and help me refresh my knowledge when needed.
 
->	*These notes are best viewed using [Obsidian](https://obsidian.md/).* 
+>	*These notes are best viewed using [Obsidian](https://obsidian.md/).*
 
 ---
 
@@ -98,4 +98,3 @@ This course consists of 4 weeks of content and covers these main learning object
 - Describe the purpose of a semantic layer that sits on top of the data model
 - Create views and materialized views
 - Describe the benefits and drawbacks of serving data using views and materialized views
-
