@@ -132,3 +132,319 @@ After you run Terraform, you'll be able to query the data from the S3 bucket a
 They're organized similar to the medallion architecture, where the landing zone represents the bronze zone, the transformation zone represents a silver zone, and the serving zone represents the gold zone. 
 ![[Screenshot 2026-02-17 at 21.31.21.png]]
 
+
+
+# Capstone Project Part 1 - ETL and Data Modeling
+
+During this capstone project, you will develop a data pipeline as part of a new project in the company DeFtunes. You will put into practice all the tools you have been using during the whole specialization.
+
+## 1 - Introduction
+
+DeFtunes is a new company in the music industry, offering a subscription-based app for streaming songs. Recently, they have expanded their services to include digital song purchases. With this new retail feature, DeFtunes requires a data pipeline to extract purchase data from their new API and operational database, enrich and model this data, and ultimately deliver the comprehensive data model for the Data Analysis team to review and gain insights. Your task is to develop this pipeline, ensuring the data is accurately processed and ready for in-depth analysis.
+
+Here is the diagram with the main requirements for this project:
+
+![[Screenshot 2026-02-21 at 10.59.58.png]]
+
+
+1. The pipeline has to follow a medallion architecture with a landing, transform and serving zone.
+2. The data generated in the pipeline will be stored in the company's data lake, in this case, an S3 bucket.
+3. The silver layer should use Iceberg tables, and the gold layer should be inside Redshift.
+4. The pipeline should be reproducible, you will have to implement it using Terraform.
+5. The data should be modelled into a star schema in the serving layer, you should use dbt for the modelling part.
+
+Before starting, you will need to import some required libraries and modules for the capstone development.
+
+## 2 - Connect to the sources
+
+Connect to the API / Database following instructions.
+
+## 3 - Exploratory Data Analysis
+
+To better understand the data sources, start analyzing the data types and values that come from each source. You can use the `pandas` library to perform **Exploratory Data Analysis (EDA)** on samples of data.
+
+```Python
+songs_result = %sql SELECT *FROM deftunes.songs LIMIT 5
+songs_df = songs_result.DataFrame()
+songs_df.head()
+```
+
+<span style="font-size:16px"><b>3.2.</b></span> Use Pandas `info()` method to print out a summary of information about the dataframe, including information about the columns such as their data types.
+
+```Python
+print(songs_df.info())
+```
+
+Output:
+```shell
+<class 'pandas.core.frame.DataFrame'>
+RangeIndex: 5 entries, 0 to 4
+Data columns (total 14 columns):
+ #   Column              Non-Null Count  Dtype  
+---  ------              --------------  -----  
+ 0   track_id            5 non-null      object 
+ 1   title               5 non-null      object 
+ 2   song_id             5 non-null      object 
+ 3   release             5 non-null      object 
+ 4   artist_id           5 non-null      object 
+ 5   artist_mbid         5 non-null      object 
+ 6   artist_name         5 non-null      object 
+ 7   duration            5 non-null      float64
+ 8   artist_familiarity  5 non-null      float64
+ 9   artist_hotttnesss   5 non-null      float64
+ 10  year                5 non-null      int64  
+ 11  track_7digitalid    5 non-null      int64  
+ 12  shs_perf            5 non-null      int64  
+ 13  shs_work            5 non-null      int64  
+dtypes: float64(3), int64(4), object(7)
+memory usage: 692.0+ bytes
+None
+```
+
+<span style="font-size:16px"><b>3.3.</b></span> Use the `describe() `method to generate a summary of statistics about the numerical columns in the DataFrame. The `describe()` method can also generate descriptive statistics for the categorical columns but by default only numerical columns are returned.
+
+```Python
+songs_df.describe()
+```
+
+Output:
+```Shell
+         duration  artist_familiarity  artist_hotttnesss         year  \
+count    5.000000            5.000000           5.000000     5.000000   
+mean   251.318404            0.455652           0.289056   799.600000   
+std     72.768888            0.077219           0.166088  1094.898306   
+min    146.494250            0.344062           0.000000     0.000000   
+25%    226.428920            0.413199           0.322483     0.000000   
+50%    268.224850            0.485472           0.334074     0.000000   
+75%    269.478730            0.495502           0.367294  1997.000000   
+max    345.965270            0.540027           0.421430  2001.000000   
+
+       track_7digitalid  shs_perf  shs_work  
+count      5.000000e+00       5.0       5.0  
+mean       5.410676e+06      -1.0       0.0  
+std        2.922813e+06       0.0       0.0  
+min        2.775420e+06      -1.0       0.0  
+25%        3.164205e+06      -1.0       0.0  
+50%        3.957236e+06      -1.0       0.0  
+75%        8.562838e+06      -1.0       0.0  
+max        8.593681e+06      -1.0       0.0  
+```
+
+![[Screenshot 2026-02-21 at 11.12.06.png]]
+
+<span style="font-size:16px"><b>3.4.</b></span> Convert JSON objects `sessions_json` and `users_json` into pandas dataframes, and display the first few rows.
+
+```Python
+session_df = pd.json_normalize(sessions_json)
+session_df.head()
+
+user_df = pd.json_normalize(users_json)
+user_df.head()
+```
+
+<a id='4'></a>
+## 4 - ETL Pipeline with AWS Glue and Terraform
+
+Now you will start creating the required resources and infrastructure for your data pipeline. Remember that you will use a **medallion architecture**.
+
+The pipeline will be composed by the following steps:
+- An **extraction job** to get the data from the **PostgreSQL Database**. This data will be stored in the landing zone of your Data Lake.
+- An **extraction job** to get the data from the two **API endpoints**. This data will be stored in the landing zone of your Data Lake in JSON format.
+- A **transformation job** that takes the raw data extracted from the PostgreSQL Database, casts some fields to the correct data types, adds some metadata and stores the dataset in Iceberg format.
+- A **transformation** that takes the JSON data extracted from the API endpoints, normalizes some nested fields, adds metadata and stores the dataset in **Iceberg format**.
+- The creation of some schemas in your Data Warehouse hosted in **Redshift**.
+
+
+<a id='4-1'></a>
+### 4.1 - Landing Zone
+
+For the landing zone, you are going to create three Glue Jobs: 
+- one to extract the data from the PostgreSQL database 
+- and two to get the data from each API's endpoint. 
+
+You are going to create those jobs using **Terraform** to guarantee that the infrastructure for each job will be always the same and changes can be tracked easily. Let's start by creating the jobs and then creating the infrastructure.
+
+
+`extract-songs-job.py` :
+
+```Python
+import sys
+from datetime import date
+
+from awsglue.context import GlueContext
+from awsglue.job import Job
+from awsglue.transforms import *
+from awsglue.utils import getResolvedOptions
+from pyspark.context import SparkContext
+
+# See the parameters that it receives in the `args` object. 
+# Apart from the `"JOB_NAME"`, this script requires the RDS connection and the name of the S3 bucket that will be used as Data Lake.
+args = getResolvedOptions(
+    sys.argv,
+    [
+        "JOB_NAME",
+        "rds_connection",
+        "data_lake_bucket"
+    ],
+)
+sc = SparkContext()
+glueContext = GlueContext(sc)
+spark = glueContext.spark_session
+job = Job(glueContext)
+job.init(args["JOB_NAME"], args)
+
+rds_connection = args["rds_connection"]
+data_lake_bucket = args["data_lake_bucket"]
+
+# Script generated for node Relational DB
+# Complete the parameters to create the dynamic frame
+source_node = glueContext.create_dynamic_frame.from_options(
+    # Set `connection_type` to `"postgresql"`
+    connection_type="postgresql",
+    # Set `connection_options`
+    connection_options={
+        "useConnectionProperties": "true",
+        # Set `"dbtable"` to `"deftunes.songs"`
+        "dbtable": "deftunes.songs",
+        # Set `"connectionName"` to the `rds_connection` object that has already been defined
+        "connectionName": rds_connection,
+    },
+    transformation_ctx="source_node",
+)
+# Set `ingest_day` to `date.today()`.
+ingest_day = date.today()
+s3_path = (
+    "s3://{}/landing_zone/db_songs/ingest_on={}"
+).format(data_lake_bucket, ingest_day.strftime("%Y_%m_%d"))
+# Script generated for node Amazon S3
+# Prepare the `target_node` object
+target_node = glueContext.write_dynamic_frame.from_options(
+    # Set `frame` to the `source_node` object
+    frame=source_node,
+    # Set `connection_type` to `"s3"`
+    connection_type="s3",
+    # Set the output `format` to `"csv"`
+    format="csv",
+    # In `connection_options` set the `"path"` to the provided `s3_path` string and leave the partition keys as an empty list
+    connection_options={"path": s3_path, "partitionKeys": []},
+    transformation_ctx="target_node",
+)
+
+job.commit()
+```
+
+`api-extract-job.py`:
+
+```Python
+import json
+import sys
+from datetime import datetime
+
+import requests
+from awsglue.context import GlueContext
+from awsglue.job import Job
+from awsglue.transforms import *
+from awsglue.utils import getResolvedOptions
+from pyspark.context import SparkContext
+from pyspark.sql import SparkSession, SQLContext
+from pyspark.sql.functions import col
+
+# In this job, you will use pure pyspark dataframes syntax to extract the data
+# Initialize Glue context and Spark session
+# Take a look at the parameters that it requires: 
+# a target path where data will be stored, 
+# the API endpoint URL and a start and end date that are required by each API endpoint
+args = getResolvedOptions(
+    sys.argv,
+    [
+        "JOB_NAME",        
+        "target_path",
+        "api_url",
+        "api_start_date",
+        "api_end_date",
+    ],
+)
+sc = SparkContext()
+glueContext = GlueContext(sc)
+spark = glueContext.spark_session
+job = Job(glueContext)
+job.init(args["JOB_NAME"], args)
+
+
+# Function to fetch data from API
+# This function requires an `api_url` string with the endpoint 
+def fetch_data_from_api(api_url: str):
+    # Use the `requests.get()` method to perform a GET request to the `api_url` endpoint
+    response = requests.get(api_url)
+    # See that when the response status code is 200 is the moment in which the data is actually retrieved
+    if response.status_code == 200:
+        return response.json()
+    else:
+        print(f"Response status code: {response.status_code}")
+        response.raise_for_status()
+
+# Replace with your API URLs
+api_url = args["api_url"]
+request_start_date = args["api_start_date"]
+request_end_date = args["api_end_date"]
+target_path = args["target_path"]
+current_timestamp = datetime.now().strftime("%Y-%m-%d")
+print(f"Current Timestamp: {current_timestamp}")
+
+# Create the `request_api_url` string by passing the `request_start_date` and `request_end_date` to the `start_date` and `end_date` endpoint parameters
+# See that those values come from the parameters that are passed to the glue job
+request_api_url = (
+    f"{api_url}?start_date={request_start_date}&end_date={request_end_date}"
+)
+print(f"request_api_url: {request_api_url}")
+
+
+# Fetch data from API
+# Pass the `request_api_url` to the `fetch_data_from_api()` function
+request_data = fetch_data_from_api(request_api_url)
+
+# Complete the transformation of the data into a spark dataframe
+# Inside the `sc.parallelize` method there is a list. In this list, use the `json.dumps()` method applied over the `request_data` object
+# The `json.dumps()` method should convert the Python dictionary (or more precisely list of dictionaries) `request_data` into a JSON-formatted string
+api_data_df = spark.read.json(sc.parallelize([json.dumps(request_data)]))
+
+# Coalesce dataframes to a single partition: this helps to avoid having empty files due to parallelization  
+api_data_df = api_data_df.coalesce(1)
+
+# Show dataframe schema
+api_data_df.printSchema()
+
+# Write dataframe to S3
+api_data_df.write.mode("overwrite").json(f"{target_path}/{current_timestamp}/")
+
+# Commit job
+job.commit()
+```
+
+
+In a later section, you will run the Glue Jobs. Note that data in the landing zone of your Data Lake will be stored in subfolders **named according to the ingestion date**, which defaults to the server's current date in Pacific Time (UTC -7). This ensures consistent date alignment with the server timezone used for job scheduling and data partitioning.
+
+```shell
+Outputs:
+
+glue_api_users_extract_job = "de-c4w4a1-api-users-extract-job"
+glue_rds_extract_job = "de-c4w4a1-rds-extract-job"
+glue_role_arn = "arn:aws:iam::939154735575:role/de-c4w4a1-glue-role"
+glue_sessions_users_extract_job = "de-c4w4a1-api-sessions-extract-job"
+```
+
+```Shell
+coder@fa3806c8f57f:~/project/terraform$ JOB_NAME=de-c4w4a1-api-users-extract-job
+coder@fa3806c8f57f:~/project/terraform$ aws glue start-job-run --job-name $JOB_NAME | jq -r '.JobRunId' || echo "$?"
+jr_9d28fe8c775d2039d5f8edd0023e9ecc296c38281d0245de34328601e65f6248
+
+
+coder@fa3806c8f57f:~/project/terraform$ JOB_NAME=de-c4w4a1-api-sessions-extract-job
+coder@fa3806c8f57f:~/project/terraform$ aws glue start-job-run --job-name $JOB_NAME | jq -r '.JobRunId' || echo "$?"
+jr_4ad30da30ecc683bbfa7b4347fe9f3d744a33e89d907de29ee86e789fd2253f8
+
+
+coder@fa3806c8f57f:~/project/terraform$ JOB_NAME=de-c4w4a1-rds-extract-job
+coder@fa3806c8f57f:~/project/terraform$ aws glue start-job-run --job-name $JOB_NAME | jq -r '.JobRunId' || echo "$?"
+jr_30714dc24d804efb702c597192bb0c0b4141d4873acb7db45040ad1764eee631
+```

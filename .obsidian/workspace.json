@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "C4/W4/C4_W4_Capstone-Lab.md",
+                "file": "README.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "C4_W4_Capstone-Lab"
+              "title": "README"
             }
           },
           {
@@ -35,8 +35,7 @@
               "title": "C4_W4_class-notes"
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "vertical"
@@ -184,11 +183,16 @@
       "bases:Create new base": false
     }
   },
-  "active": "448121727599ecc2",
+  "active": "8a451d7021434abe",
   "lastOpenFiles": [
-    "assets/Screenshot 2026-02-17 at 21.05.28.png",
-    "C4/W4/C4_W4_class-notes.md",
+    "Data Engineering Professional Certificate Program.md",
+    "Coursera 9G5ZWH3AA8XU.pdf",
     "C4/W4/C4_W4_Capstone-Lab.md",
+    "C4/Coursera N6XAIKMW10VT.pdf",
+    "assets/Screenshot 2026-02-21 at 11.12.06.png",
+    "assets/Screenshot 2026-02-21 at 10.59.58.png",
+    "C4/W4/C4_W4_class-notes.md",
+    "assets/Screenshot 2026-02-17 at 21.05.28.png",
     "assets/Screenshot 2026-02-17 at 21.31.21.png",
     "assets/Screenshot 2026-02-17 at 21.30.14.png",
     "assets/Screenshot 2026-02-17 at 21.29.37.png",
@@ -196,9 +200,6 @@
     "assets/Screenshot 2026-02-17 at 21.27.04.png",
     "assets/Screenshot 2026-02-17 at 21.25.40.png",
     "assets/Screenshot 2026-02-17 at 21.24.55.png",
-    "assets/Screenshot 2026-02-17 at 21.24.19.png",
-    "assets/Screenshot 2026-02-17 at 21.22.54.png",
-    "assets/Screenshot 2026-02-17 at 21.22.35.png",
     "C4/W4/C4_W4_Lab-1.md",
     "C4/W3/C4_W3_class-notes.md",
     "C4/W3/C4_W3_Lab.md",
@@ -224,13 +225,10 @@
     "C4/W4",
     "C4/W3",
     "C4/W2",
-    "C4/W1",
-    "C4",
     "Tools-Training/Apache Flink.md",
     "C3/W3/C3_W3_Lab-1.md",
     "Tools-Training/Postrade SQL.md",
     "Tools-Training/SQL.md",
-    "C3/W2/C3_Ass-1_SQL.md",
-    "C3/W2/C3_W2_Ass.md"
+    "C3/W2/C3_Ass-1_SQL.md"
   ]
 }
