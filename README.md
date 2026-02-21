@@ -1,22 +1,25 @@
 # Data Engineering Professional Certificate Program
 
+Official Certification: 
+https://www.coursera.org/account/accomplishments/professional-cert/9G5ZWH3AA8XU
+
+![[professional_certification.png]]
 
 These are my notes from DeepLearning.AI's and AWS's official **Data Engineering Certificate Program**, comprising 4 courses:
 
 * Course 1: Introduction to Data Engineering ✅
-	* See certification [here](https://github.com/jimmygian/data-engineering-program-notes/blob/main/C1/Coursera%20A25I8TW0YTAN.pdf).
+	* See certification [here](https://coursera.org/verify/A25I8TW0YTAN).
 * Course 2: Source Systems, Data Ingestion, and Pipelines ✅
-	- See certification [here](https://github.com/jimmygian/data-engineering-program-notes/blob/main/C2/Coursera%20E7TKQ4UOJ5XR.pdf).
+	- See certification [here](https://www.coursera.org/verify/E7TKQ4UOJ5XR).
 * Course 3: Data Storage and Queries  ✅
-	* See certification [here](https://github.com/jimmygian/data-engineering-program-notes/blob/main/C3/Coursera%20VH1Z1LY6YF5O.pdf).
-* Course 4: Data Modeling, Transformation, and Serving 
-	*   --*IN PROGRESS*--
+	* See certification [here](https://coursera.org/verify/20VH1Z1LY6YF5O).
+* Course 4: Data Modeling, Transformation, and Serving ✅
+	*   See certification [here](https://www.coursera.org/verify/N6XAIKMW10VT).
 
 
-The notes have been taken while watching the Course's lectures, videos, and Labs. They are meant to track my progress and help me refresh my knowledge when needed. 
+The notes have been taken while watching the Course's lectures, videos, and completing Labs and Assignments. They are meant to track my progress and help me refresh my knowledge when needed. 
 
-They are best viewed using [Obsidian](https://obsidian.md/). 
-
+>	*These notes are best viewed using [Obsidian](https://obsidian.md/).* 
 
 ---
 
